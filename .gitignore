@@ -1,0 +1,36 @@
+## .NET / build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+*.user
+*.suo
+*.userprefs
+
+## Rider / VS
+.idea/
+.vs/
+*.sln.DotSettings.user
+
+## test / coverage
+[Tt]est[Rr]esults/
+*.trx
+coverage*.json
+*.coverage
+
+## rendered output from the sample
+flame.png
+treemap.png
+out/
+
+## traces people drop in while poking around
+*.nettrace
+*.speedscope.json
+!samples/sample-trace.speedscope.json
+
+## OS noise
+.DS_Store
+Thumbs.db
