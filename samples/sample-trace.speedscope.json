@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.speedscope.app/file-format-schema.json",
+  "name": "sample-trace",
+  "exporter": "dotnet-trace 8.0",
+  "shared": {
+    "frames": [
+      { "name": "Program.Main", "file": "Program.cs", "line": 12 },
+      { "name": "WebHost.Run", "file": "Hosting.cs", "line": 88 },
+      { "name": "RequestPipeline.Invoke", "file": "Pipeline.cs", "line": 41 },
+      { "name": "OrdersController.Get", "file": "OrdersController.cs", "line": 33 },
+      { "name": "OrderService.Load", "file": "OrderService.cs", "line": 57 },
+      { "name": "EfCore.Query", "file": "DbContext.cs", "line": 210 },
+      { "name": "Npgsql.Execute", "file": "Npgsql.cs", "line": 640 },
+      { "name": "Socket.Receive", "file": "Socket.cs", "line": 1200 },
+      { "name": "JsonSerializer.Serialize", "file": "Json.cs", "line": 15 },
+      { "name": "PricingEngine.Compute", "file": "Pricing.cs", "line": 74 },
+      { "name": "Math.Pow", "file": "Math.cs", "line": 9 },
+      { "name": "GC.Collect", "file": "GC.cs", "line": 400 }
+    ]
+  },
+  "profiles": [
+    {
+      "type": "sampled",
+      "name": "Thread 1 (main)",
+      "unit": "milliseconds",
+      "startValue": 0,
+      "endValue": 100,
+      "samples": [
+        [0, 1, 2, 3, 4, 5, 6, 7],
+        [0, 1, 2, 3, 4, 5, 6, 7],
+        [0, 1, 2, 3, 4, 5, 6, 7],
+        [0, 1, 2, 3, 4, 5, 6],
+        [0, 1, 2, 3, 4, 5],
+        [0, 1, 2, 3, 9, 10],
+        [0, 1, 2, 3, 9, 10],
+        [0, 1, 2, 3, 9],
+        [0, 1, 2, 3, 8],
+        [0, 1, 2, 3, 8],
+        [0, 1, 11],
+        [0, 1]
+      ],
+      "weights": [8, 7, 9, 6, 4, 12, 10, 3, 5, 4, 6, 2]
+    }
+  ]
+}
