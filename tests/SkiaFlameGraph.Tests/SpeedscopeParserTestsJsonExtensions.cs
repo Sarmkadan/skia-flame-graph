@@ -6,8 +6,12 @@ using SkiaFlameGraph.Core.Parsing;
 namespace SkiaFlameGraph.Tests;
 
 /// <summary>
-/// Provides JSON serialization and deserialization extension methods for <see cref="SpeedscopeParserTests"/>.
+/// Provides JSON serialization and deserialization extension methods for <see cref="SpeedscopeParserTests"/> test data.
 /// </summary>
+/// <remarks>
+/// This class offers utility methods to convert between <see cref="SpeedscopeParserTests"/> objects and JSON strings,
+/// enabling easier testing of speedscope file parsing and serialization scenarios.
+/// </remarks>
 public static class SpeedscopeParserTestsJsonExtensions
 {
 	private static readonly JsonSerializerOptions _jsonSerializerOptions = new(JsonSerializerDefaults.Web)
