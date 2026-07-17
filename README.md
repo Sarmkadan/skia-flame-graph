@@ -296,6 +296,58 @@ float[] padding2D = options.GetPadding();
 float[] padding4D = options.GetPaddingAllSides();
 ```
 
+## FlameNode
+
+Represents a node in the aggregated call tree used by both the flame graph and treemap renderers. Each node tracks a frame's name, source location, accumulated time across the subtree, and its position in the call hierarchy. The tree is built by recursively merging identical frames so recursive calls collapse into wider boxes rather than tall stacks.
+
+Example usage when constructing a call tree programmatically:
+
+```csharp
+using SkiaFlameGraph.Core.Models;
+
+// Create a root node for the main thread
+var root = new FlameNode("Main")
+{
+    File = "Program.cs",
+    Line = 10,
+    Value = 1000.0,
+    Depth = 0
+};
+
+// Add child frames with timing information
+var processRequest = root.AddChild("ProcessRequest", "ApiController.cs", 45)
+{
+    Value = 800.0
+};
+
+var dbQuery = processRequest.AddChild("QueryDatabase", "UserRepository.cs", 120)
+{
+    Value = 600.0
+};
+
+var renderView = processRequest.AddChild("RenderView", "HomeController.cs", 50)
+{
+    Value = 200.0
+};
+
+// Add another branch
+var apiCall = root.AddChild("ExternalApiCall", "HttpClient.cs", 200)
+{
+    Value = 150.0
+};
+
+// Calculate metrics
+Console.WriteLine($"Total tree depth: {root.MaxDepth()}");
+Console.WriteLine($"Node count: {root.Children.Count + 1}");
+Console.WriteLine($"Self value of ProcessRequest: {processRequest.SelfValue:F2}");
+
+// Traverse the tree
+foreach (var child in root.Children)
+{
+    Console.WriteLine($"Frame: {child.Name}, Value: {child.Value:F2}ms, Depth: {child.Depth}");
+}
+```
+
 ## FlameNodeExtensions
 
 Provides utility methods for querying and analyzing the flame graph node tree structure. These methods allow you to search for specific nodes, calculate metrics, traverse the tree, and extract information about the call stack hierarchy.
