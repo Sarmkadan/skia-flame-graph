@@ -14,9 +14,11 @@ public static class SpeedscopeFileExtensions
 {
     /// <summary>
     /// Gets the total duration of all profiles in the speedscope file.
+    /// For evented profiles, this calculates the duration from startValue to endValue.
+    /// For sampled profiles, this also uses the duration between startValue and endValue.
     /// </summary>
     /// <param name="speedscopeFile">The speedscope file instance.</param>
-    /// <returns>The total duration across all profiles, or 0 if no profiles exist.</returns>
+    /// <returns>The total duration across all profiles, or 0 if no profiles exist or durations are invalid.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="speedscopeFile"/> is null.</exception>
     public static double GetTotalDuration(this SpeedscopeFile speedscopeFile)
     {
@@ -24,7 +26,8 @@ public static class SpeedscopeFileExtensions
 
         return speedscopeFile.Profiles
             .Where(p => p.StartValue >= 0 && p.EndValue >= p.StartValue)
-            .Sum(p => p.EndValue - p.StartValue);
+            .Select(p => Math.Max(0, p.EndValue - p.StartValue))
+            .Sum();
     }
 
     /// <summary>
@@ -39,7 +42,7 @@ public static class SpeedscopeFileExtensions
         ArgumentNullException.ThrowIfNull(speedscopeFile);
 
         return speedscopeFile.Profiles
-            .Sum(p => p.Events?.Count ?? p.Samples?.Count ?? 0);
+            .Sum(p => (p.Events?.Count ?? 0) + (p.Samples?.Count ?? 0));
     }
 
     /// <summary>
@@ -53,9 +56,8 @@ public static class SpeedscopeFileExtensions
         ArgumentNullException.ThrowIfNull(speedscopeFile);
 
         return speedscopeFile.Profiles
-            .SelectMany(p => p.Events?.Select(e => e.Frame) ??
-                           p.Samples?.SelectMany(s => s) ??
-                           Array.Empty<int>())
+            .SelectMany(p => p.Events?.Select(e => e.Frame) ?? Enumerable.Empty<int>())
+            .Concat(speedscopeFile.Profiles.SelectMany(p => p.Samples?.SelectMany(s => s) ?? Enumerable.Empty<int>()))
             .Distinct()
             .Count();
     }
@@ -139,6 +141,8 @@ public static class SpeedscopeFileExtensions
 
     /// <summary>
     /// Gets the frame with the highest cumulative time across all profiles.
+    /// For evented profiles, this calculates the total time spent in each frame by summing
+    /// the duration between open and close events. For sampled profiles, each sample counts as 1.0.
     /// </summary>
     /// <param name="speedscopeFile">The speedscope file instance.</param>
     /// <returns>A tuple containing the frame index and its cumulative time, or null if no frames exist.</returns>
@@ -158,9 +162,26 @@ public static class SpeedscopeFileExtensions
         {
             if (profile.Events is not null)
             {
+                // For evented profiles, calculate duration between open and close events
+                var frameStack = new Stack<int>();
+                var frameStartTimes = new Dictionary<int, double>();
+
                 foreach (var evt in profile.Events)
                 {
-                    frameTimes[evt.Frame] += evt.At;
+                    if (evt.Type == "O") // Open event
+                    {
+                        frameStack.Push(evt.Frame);
+                        frameStartTimes[evt.Frame] = evt.At;
+                    }
+                    else if (evt.Type == "C" && frameStack.Count > 0) // Close event
+                    {
+                        var frameIndex = frameStack.Pop();
+                        if (frameStartTimes.TryGetValue(frameIndex, out var startTime))
+                        {
+                            frameTimes[frameIndex] += evt.At - startTime;
+                            frameStartTimes.Remove(frameIndex);
+                        }
+                    }
                 }
             }
 
@@ -176,6 +197,11 @@ public static class SpeedscopeFileExtensions
             }
         }
 
+        if (frameTimes.Length == 0)
+        {
+            return null;
+        }
+
         var maxIndex = 0;
         var maxTime = frameTimes[0];
 
@@ -188,14 +214,14 @@ public static class SpeedscopeFileExtensions
             }
         }
 
-        return (maxIndex, maxTime);
+        return maxTime > 0 ? (maxIndex, maxTime) : null;
     }
 
     /// <summary>
     /// Gets the duration of the longest profile in the speedscope file.
     /// </summary>
     /// <param name="speedscopeFile">The speedscope file instance.</param>
-    /// <returns>The duration of the longest profile, or 0 if no profiles exist.</returns>
+    /// <returns>The duration of the longest profile, or 0 if no profiles exist or durations are invalid.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="speedscopeFile"/> is null.</exception>
     public static double GetMaxProfileDuration(this SpeedscopeFile speedscopeFile)
     {
@@ -203,6 +229,8 @@ public static class SpeedscopeFileExtensions
 
         return speedscopeFile.Profiles
             .Where(p => p.StartValue >= 0 && p.EndValue >= p.StartValue)
-            .Max(p => p.EndValue - p.StartValue);
+            .Select(p => Math.Max(0, p.EndValue - p.StartValue))
+            .DefaultIfEmpty()
+            .Max();
     }
 }
