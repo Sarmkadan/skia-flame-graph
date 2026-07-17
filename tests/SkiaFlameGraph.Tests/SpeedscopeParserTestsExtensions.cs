@@ -19,7 +19,7 @@ public static class SpeedscopeParserTestsExtensions
     /// <param name="samples">Sample indices for each stack frame</param>
     /// <param name="weights">Weights for each sample</param>
     /// <returns>JSON string representing a sampled profile</returns>
-    /// <exception cref="ArgumentNullException">Thrown if frameNames or samples is null</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="frameNames"/> or <paramref name="samples"/> or <paramref name="weights"/> is null.</exception>
     public static string CreateSampledProfileJson(
         this SpeedscopeParserTests _,
         IReadOnlyList<string> frameNames,
@@ -66,7 +66,7 @@ public static class SpeedscopeParserTestsExtensions
     /// <param name="frameNames">Names of frames in order</param>
     /// <param name="events">List of event tuples (type, frameIndex, timestamp)</param>
     /// <returns>JSON string representing an evented profile</returns>
-    /// <exception cref="ArgumentNullException">Thrown if frameNames or events is null</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="frameNames"/> or <paramref name="events"/> is null.</exception>
     public static string CreateEventedProfileJson(
         this SpeedscopeParserTests _,
         IReadOnlyList<string> frameNames,
@@ -113,7 +113,7 @@ public static class SpeedscopeParserTestsExtensions
     /// </summary>
     /// <param name="node">The node to check</param>
     /// <param name="expectedChildNames">Expected names of children in order</param>
-    /// <exception cref="ArgumentNullException">Thrown if node or expectedChildNames is null</exception>
+    /// <exception cref="ArgumentNullException"><paramref name="node"/> or <paramref name="expectedChildNames"/> is null.</exception>
     public static void ShouldHaveChildren(
         this SpeedscopeParserTests _,
         FlameNode node,
@@ -144,8 +144,8 @@ public static class SpeedscopeParserTestsExtensions
     /// <summary>
     /// Finds a child node by name and returns it, or null if not found.
     /// </summary>
-    /// <param name="node">The parent node</param>
-    /// <param name="name">Name of the child to find</param>
+    /// <param name="node">The parent node.</param>
+    /// <param name="name">Name of the child to find.</param>
     /// <returns>The child node with the matching name, or null if not found</returns>
     /// <exception cref="ArgumentNullException">Thrown if node or name is null</exception>
     public static FlameNode? FindChildByName(
