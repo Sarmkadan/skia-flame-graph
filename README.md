@@ -295,3 +295,57 @@ bool shouldRender = options.ShouldRenderFrame(2f);
 float[] padding2D = options.GetPadding();
 float[] padding4D = options.GetPaddingAllSides();
 ```
+
+## FlameNodeExtensions
+
+Provides utility methods for querying and analyzing the flame graph node tree structure. These methods allow you to search for specific nodes, calculate metrics, traverse the tree, and extract information about the call stack hierarchy.
+
+Example usage when analyzing call stacks:
+
+```csharp
+using SkiaFlameGraph.Core.Models;
+using System;
+using System.Linq;
+
+// Parse a speedscope file to get the flame graph root node
+var root = SpeedscopeParser.ParseFile("app.speedscope.json");
+
+// Find a specific node by name in the call tree
+var mainNode = root.FindByName("Main");
+if (mainNode != null)
+{
+    Console.WriteLine($"Found Main node with value: {mainNode.Value}");
+}
+
+// Get all nodes at a specific depth level (0 = root)
+var nodesAtDepth2 = root.GetNodesAtDepth(2);
+Console.WriteLine($"Nodes at depth 2: {nodesAtDepth2.Count()}");
+
+// Calculate the sum of values for nodes matching a condition
+var totalLibraryTime = root.SumValuesWhere(node => node.Name.Contains("Library"));
+Console.WriteLine($"Total time in library code: {totalLibraryTime:F2}ms");
+
+// Get all leaf nodes (nodes without children)
+var leafNodes = root.GetLeafNodes();
+Console.WriteLine($"Leaf nodes count: {leafNodes.Count()}");
+
+// Calculate what percentage a specific node contributes to the total
+var mainPercentage = root.CalculatePercentageOfTotal(mainNode);
+Console.WriteLine($"Main contributes {mainPercentage:P2} of total time");
+
+// Get the path from root to a specific node
+var pathToNode = root.GetPathToNode(mainNode);
+Console.WriteLine($"Path to Main: {string.Join(" → ", pathToNode)}");
+
+// Find the deepest node in the tree
+var deepestNode = root.GetDeepestNode();
+Console.WriteLine($"Deepest node: {deepestNode.Name} at depth {deepestNode.GetDepth()}");
+
+// Calculate cumulative value from a node up to the root
+var cumulativeValue = mainNode.GetCumulativeValueToRoot();
+Console.WriteLine($"Cumulative value to root: {cumulativeValue:F2}ms");
+
+// Get the value of a node
+var nodeValue = mainNode.Value;
+Console.WriteLine($"Node value: {nodeValue:F2}ms");
+```
