@@ -98,3 +98,27 @@ container.
 Active. Parser and both renderers work end to end; the sample produces images.
 Next up: per-thread profile selection, a search/highlight overlay, and SVG
 output alongside PNG.
+
+## RenderOptions
+
+Configuration class that controls the appearance of flame graphs and treemaps. Set
+public properties to change canvas size, spacing, colours, and minimum sizing
+thresholds before rendering. All values are in pixels except colours which use
+SkiaSharp's `SKColor`.
+
+Example usage:
+
+```csharp
+var options = new RenderOptions
+{
+    Width = 1920,
+    RowHeight = 24f,
+    MinLabelWidth = 32f,
+    MinBoxWidth = 1f,
+    Padding = 20f,
+    FontSize = 14f,
+    Background = new SKColor(0x28, 0x28, 0x2e),
+    TextColor = new SKColor(0xff, 0xff, 0xff),
+    Inverted = false
+};
+```
