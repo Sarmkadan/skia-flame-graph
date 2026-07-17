@@ -123,6 +123,102 @@ var options = new RenderOptions
 };
 ```
 
+## SpeedscopeFile
+
+Represents the root object model for a speedscope file format, which is the standard JSON format produced by `dotnet-trace convert --format speedscope`. This class contains all the metadata and profile data needed to render flame graphs and treemaps.
+
+
+
+
+
+The `SpeedscopeFile` class includes:
+- **Schema**: Optional JSON schema reference
+- **Shared**: Shared frame data across all profiles
+- **Profiles**: List of profile data (evented or sampled)
+- **Name**: Optional name for the trace
+- **Exporter**: Optional exporter information
+
+
+
+
+
+
+Example usage when working with the raw model directly:
+
+```csharp
+using System.Text.Json;
+using SkiaFlameGraph.Core.Models;
+
+// Load a speedscope file
+var json = await File.ReadAllTextAsync("app.speedscope.json");
+var speedscopeFile = JsonSerializer.Deserialize<SpeedscopeFile>(json);
+
+// Access shared frame data
+var frame = speedscopeFile.Shared.Frames[0];
+Console.WriteLine($"Frame: {frame.Name}, File: {frame.File}, Line: {frame.Line}");
+
+// Access profile data
+foreach (var profile in speedscopeFile.Profiles)
+{
+    Console.WriteLine($"Profile: {profile.Name}, Type: {profile.Type}, Unit: {profile.Unit}");
+    
+    if (profile.Events != null)
+    {
+        // Evented profile - stream of open/close frame events
+        foreach (var ev in profile.Events)
+        {
+            Console.WriteLine($"  Event at {ev.At}: {ev.Type} frame {ev.Frame}");
+        }
+    }
+    else if (profile.Samples != null)
+    {
+        // Sampled profile - stacks with weights
+        Console.WriteLine($"  First sample: [{string.Join(", ", profile.Samples[0])}]");
+        if (profile.Weights != null)
+        {
+            Console.WriteLine($"  Weight: {profile.Weights[0]}");
+        }
+    }
+}
+
+// Create a minimal speedscope file programmatically
+var newFile = new SpeedscopeFile
+{
+    Name = "My Application Trace",
+    Exporter = "SkiaFlameGraph",
+    Shared = new SharedData
+    {
+        Frames = new List<Frame>
+        {
+            new Frame { Name = "Main", File = "Program.cs", Line = 10 },
+            new Frame { Name = "ProcessRequest", File = "ApiController.cs", Line = 45 }
+        }
+    },
+    Profiles = new List<Profile>
+    {
+        new Profile
+        {
+            Type = "evented",
+            Name = "CPU Profile",
+            Unit = "milliseconds",
+            StartValue = 0,
+            EndValue = 1000,
+            Events = new List<ProfileEvent>
+            {
+                new ProfileEvent { Type = "O", Frame = 0, At = 0 },
+                new ProfileEvent { Type = "O", Frame = 1, At = 100 },
+                new ProfileEvent { Type = "C", Frame = 1, At = 200 },
+                new ProfileEvent { Type = "C", Frame = 0, At = 1000 }
+            }
+        }
+    }
+};
+
+// Serialize back to JSON
+var jsonOutput = JsonSerializer.Serialize(newFile, new JsonSerializerOptions { WriteIndented = true });
+await File.WriteAllTextAsync("output.speedscope.json", jsonOutput);
+```
+
 ## RenderOptionsExtensions
 
 Provides extension methods for fluently configuring `RenderOptions` and performing
