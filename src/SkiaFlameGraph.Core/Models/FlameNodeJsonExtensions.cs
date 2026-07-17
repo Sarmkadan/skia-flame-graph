@@ -40,14 +40,9 @@ public static class FlameNodeJsonExtensions
     /// <returns>The deserialized node, or <see langword="null"/> if the JSON is empty or whitespace.</returns>
     /// <exception cref="JsonException">Thrown when the JSON is invalid or cannot be deserialized.</exception>
     public static FlameNode? FromJson(string json)
-    {
-        if (string.IsNullOrWhiteSpace(json))
-        {
-            return null;
-        }
-
-        return JsonSerializer.Deserialize<FlameNode>(json, _jsonOptions);
-    }
+        => string.IsNullOrWhiteSpace(json)
+            ? null
+            : JsonSerializer.Deserialize<FlameNode>(json, _jsonOptions);
 
     /// <summary>
     /// Attempts to deserialize a <see cref="FlameNode"/> from a JSON string.
@@ -66,7 +61,7 @@ public static class FlameNodeJsonExtensions
 
         try
         {
-            value = JsonSerializer.Deserialize<FlameNode>(json, _jsonOptions)!;
+            value = JsonSerializer.Deserialize<FlameNode>(json, _jsonOptions);
             return true;
         }
         catch (JsonException)
