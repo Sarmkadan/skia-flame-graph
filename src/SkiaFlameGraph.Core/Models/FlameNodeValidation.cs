@@ -73,10 +73,8 @@ public static class FlameNodeValidation
     /// </summary>
     /// <param name="value">The node to check.</param>
     /// <returns>True if the node is valid; otherwise, false.</returns>
-    public static bool IsValid(this FlameNode value)
-    {
-        return value.Validate().Count == 0;
-    }
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
+    public static bool IsValid(this FlameNode? value) => value?.Validate().Count == 0;
 
     /// <summary>
     /// Ensures that a <see cref="FlameNode"/> instance is valid, throwing an <see cref="ArgumentException"/>
@@ -85,7 +83,7 @@ public static class FlameNodeValidation
     /// <param name="value">The node to validate.</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
     /// <exception cref="ArgumentException">Thrown if <paramref name="value"/> is not valid.</exception>
-    public static void EnsureValid(this FlameNode value)
+    public static void EnsureValid(this FlameNode? value)
     {
         ArgumentNullException.ThrowIfNull(value);
 
