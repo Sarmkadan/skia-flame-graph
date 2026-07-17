@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
 
 namespace SkiaFlameGraph.Core.Rendering;
 
@@ -12,7 +11,6 @@ public static class FlameGraphRendererJsonExtensions
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = false,
-        TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
     };
 
     /// <summary>
@@ -26,16 +24,12 @@ public static class FlameGraphRendererJsonExtensions
     {
         ArgumentNullException.ThrowIfNull(value);
 
-        var options = _jsonOptions;
-        if (indented)
-        {
-            options = new JsonSerializerOptions(_jsonOptions)
+        var options = indented
+            ? new JsonSerializerOptions(_jsonOptions)
             {
-                PropertyNamingPolicy = _jsonOptions.PropertyNamingPolicy,
                 WriteIndented = true,
-                TypeInfoResolver = _jsonOptions.TypeInfoResolver,
-            };
-        }
+            }
+            : _jsonOptions;
 
         return JsonSerializer.Serialize(value, options);
     }
@@ -44,14 +38,14 @@ public static class FlameGraphRendererJsonExtensions
     /// Deserializes a <see cref="FlameGraphRenderer"/> instance from a JSON string.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <returns>The deserialized renderer, or <see langword="null"/> if the JSON is empty.</returns>
+    /// <returns>The deserialized renderer, or <see langword="null"/> if the JSON is empty or whitespace.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is <see langword="null"/>.</exception>
     /// <exception cref="JsonException">Thrown when the JSON is invalid or cannot be deserialized.</exception>
     public static FlameGraphRenderer? FromJson(string json)
     {
         ArgumentNullException.ThrowIfNull(json);
 
-        return JsonSerializer.Deserialize<FlameGraphRenderer>(json, _jsonOptions);
+        return JsonSerializer.Deserialize<FlameGraphRenderer>(json.Trim(), _jsonOptions);
     }
 
     /// <summary>
@@ -67,7 +61,7 @@ public static class FlameGraphRendererJsonExtensions
 
         try
         {
-            value = JsonSerializer.Deserialize<FlameGraphRenderer>(json, _jsonOptions);
+            value = JsonSerializer.Deserialize<FlameGraphRenderer>(json.Trim(), _jsonOptions);
             return true;
         }
         catch (JsonException)
