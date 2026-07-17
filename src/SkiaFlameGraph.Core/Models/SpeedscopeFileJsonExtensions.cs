@@ -26,16 +26,14 @@ public static class SpeedscopeFileJsonExtensions
     {
         ArgumentNullException.ThrowIfNull(value);
 
-        var options = _jsonOptions;
-        if (indented)
-        {
-            options = new JsonSerializerOptions(_jsonOptions)
+        var options = indented
+            ? new JsonSerializerOptions(_jsonOptions)
             {
                 PropertyNamingPolicy = _jsonOptions.PropertyNamingPolicy,
                 WriteIndented = true,
                 TypeInfoResolver = _jsonOptions.TypeInfoResolver,
-            };
-        }
+            }
+            : _jsonOptions;
 
         return JsonSerializer.Serialize(value, options);
     }
@@ -44,9 +42,9 @@ public static class SpeedscopeFileJsonExtensions
     /// Deserializes a <see cref="SpeedscopeFile"/> instance from a JSON string.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <returns>The deserialized SpeedscopeFile, or <see langword="null"/> if the JSON is empty.</returns>
+    /// <returns>The deserialized SpeedscopeFile instance, or <see langword="null"/> if the JSON represents a null value.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is <see langword="null"/>.</exception>
-    /// <exception cref="JsonException">Thrown when the JSON is invalid or cannot be deserialized.</exception>
+    /// <exception cref="JsonException">Thrown when the JSON is invalid or cannot be deserialized into a <see cref="SpeedscopeFile"/> instance.</exception>
     public static SpeedscopeFile? FromJson(string json)
     {
         ArgumentNullException.ThrowIfNull(json);
@@ -58,7 +56,7 @@ public static class SpeedscopeFileJsonExtensions
     /// Attempts to deserialize a <see cref="SpeedscopeFile"/> instance from a JSON string.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <param name="value">Receives the deserialized SpeedscopeFile if successful.</param>
+    /// <param name="value">Receives the deserialized SpeedscopeFile if deserialization succeeds; otherwise, <see langword="null"/>.</param>
     /// <returns><see langword="true"/> if deserialization succeeded; otherwise, <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is <see langword="null"/>.</exception>
     public static bool TryFromJson(string json, out SpeedscopeFile? value)
