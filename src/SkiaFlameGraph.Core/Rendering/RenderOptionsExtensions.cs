@@ -31,17 +31,17 @@ public static class RenderOptionsExtensions
     public static int CalculateContentWidth(this RenderOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-
         return options.Width - (int)(2 * options.Padding);
     }
 
     /// <summary>
-    /// Determines whether a frame with the specified width should be labeled based on <see cref="MinLabelWidth"/>.
+    /// Determines whether a frame with the specified width should be labeled based on <see cref="RenderOptions.MinLabelWidth"/>.
     /// </summary>
     /// <param name="options">The render options.</param>
     /// <param name="frameWidth">The width of the frame in pixels.</param>
     /// <returns><see langword="true"/> if the frame should be labeled; otherwise, <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="frameWidth"/> is negative.</exception>
     public static bool ShouldLabelFrame(this RenderOptions options, float frameWidth)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -51,12 +51,13 @@ public static class RenderOptionsExtensions
     }
 
     /// <summary>
-    /// Determines whether a frame with the specified width should be rendered based on <see cref="MinBoxWidth"/>.
+    /// Determines whether a frame with the specified width should be rendered based on <see cref="RenderOptions.MinBoxWidth"/>.
     /// </summary>
     /// <param name="options">The render options.</param>
     /// <param name="frameWidth">The width of the frame in pixels.</param>
     /// <returns><see langword="true"/> if the frame should be rendered; otherwise, <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="frameWidth"/> is negative.</exception>
     public static bool ShouldRenderFrame(this RenderOptions options, float frameWidth)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -72,6 +73,7 @@ public static class RenderOptionsExtensions
     /// <param name="width">The new width value.</param>
     /// <returns>A new <see cref="RenderOptions"/> instance with the updated width.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="width"/> is not positive.</exception>
     public static RenderOptions WithWidth(this RenderOptions options, int width)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -98,6 +100,7 @@ public static class RenderOptionsExtensions
     /// <param name="rowHeight">The new row height value.</param>
     /// <returns>A new <see cref="RenderOptions"/> instance with the updated row height.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="rowHeight"/> is not positive.</exception>
     public static RenderOptions WithRowHeight(this RenderOptions options, float rowHeight)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -151,7 +154,6 @@ public static class RenderOptionsExtensions
     public static float[] GetPadding(this RenderOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-
         return [options.Padding, options.Padding];
     }
 
@@ -164,7 +166,6 @@ public static class RenderOptionsExtensions
     public static float[] GetPaddingAllSides(this RenderOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-
         return [options.Padding, options.Padding, options.Padding, options.Padding];
     }
 }
