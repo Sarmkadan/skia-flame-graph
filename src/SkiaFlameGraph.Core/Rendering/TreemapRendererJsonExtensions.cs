@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 
@@ -15,6 +16,13 @@ public static class TreemapRendererJsonExtensions
         TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
     };
 
+    private static readonly JsonSerializerOptions _jsonOptionsIndented = new(JsonSerializerDefaults.Web)
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = true,
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
+    };
+
     /// <summary>
     /// Serializes the <see cref="TreemapRenderer"/> instance to a JSON string.
     /// </summary>
@@ -23,28 +31,13 @@ public static class TreemapRendererJsonExtensions
     /// <returns>A JSON string representation of the renderer.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is <see langword="null"/>.</exception>
     public static string ToJson(this TreemapRenderer value, bool indented = false)
-    {
-        ArgumentNullException.ThrowIfNull(value);
-
-        var options = _jsonOptions;
-        if (indented)
-        {
-            options = new JsonSerializerOptions(_jsonOptions)
-            {
-                PropertyNamingPolicy = _jsonOptions.PropertyNamingPolicy,
-                WriteIndented = true,
-                TypeInfoResolver = _jsonOptions.TypeInfoResolver,
-            };
-        }
-
-        return JsonSerializer.Serialize(value, options);
-    }
+        => JsonSerializer.Serialize(value, indented ? _jsonOptionsIndented : _jsonOptions);
 
     /// <summary>
     /// Deserializes a <see cref="TreemapRenderer"/> instance from a JSON string.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
-    /// <returns>The deserialized renderer, or <see langword="null"/> if the JSON is empty.</returns>
+    /// <returns>The deserialized renderer instance.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is <see langword="null"/>.</exception>
     /// <exception cref="JsonException">Thrown when the JSON is invalid or cannot be deserialized.</exception>
     public static TreemapRenderer? FromJson(string json)
@@ -61,19 +54,6 @@ public static class TreemapRendererJsonExtensions
     /// <param name="value">Receives the deserialized renderer if successful.</param>
     /// <returns><see langword="true"/> if deserialization succeeded; otherwise, <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is <see langword="null"/>.</exception>
-    public static bool TryFromJson(string json, out TreemapRenderer? value)
-    {
-        ArgumentNullException.ThrowIfNull(json);
-
-        try
-        {
-            value = JsonSerializer.Deserialize<TreemapRenderer>(json, _jsonOptions);
-            return true;
-        }
-        catch (JsonException)
-        {
-            value = null;
-            return false;
-        }
-    }
+    public static bool TryFromJson(string json, [NotNullWhen(true)] out TreemapRenderer? value)
+        => (value = JsonSerializer.Deserialize<TreemapRenderer>(json, _jsonOptions)) is not null;
 }
