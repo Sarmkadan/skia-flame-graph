@@ -123,6 +123,53 @@ var options = new RenderOptions
 };
 ```
 
+## SpeedscopeFileExtensions
+
+Provides a set of practical extension methods for analyzing, transforming, and querying speedscope profile data. These methods offer utilities for calculating metrics, retrieving frames, checking profile types, and identifying performance hotspots within your traces.
+
+Example usage when analyzing profile data:
+
+```csharp
+using SkiaFlameGraph.Core.Models;
+using System;
+
+// Load a speedscope file
+var speedscopeFile = SpeedscopeParser.ParseFile("app.speedscope.json");
+
+// Calculate metrics about the trace
+Console.WriteLine($"Total duration: {speedscopeFile.GetTotalDuration():F2}ms");
+Console.WriteLine($"Total events: {speedscopeFile.GetTotalEventCount()}");
+Console.WriteLine($"Unique frames: {speedscopeFile.GetUniqueFrameCount()}");
+Console.WriteLine($"Average duration per event: {speedscopeFile.GetAverageDurationPerEvent():F2}ms");
+Console.WriteLine($"Max profile duration: {speedscopeFile.GetMaxProfileDuration():F2}ms");
+
+// Check profile types
+Console.WriteLine($"Has evented profiles: {speedscopeFile.HasEventedProfiles()}");
+Console.WriteLine($"Has sampled profiles: {speedscopeFile.HasSampledProfiles()}");
+
+// Get all profile names
+foreach (var profileName in speedscopeFile.GetProfileNames())
+{
+    Console.WriteLine($"Profile: {profileName}");
+}
+
+// Find the hottest frame (most time spent)
+var hottestFrame = speedscopeFile.GetHottestFrame();
+if (hottestFrame.HasValue)
+{
+    var (frameIndex, cumulativeTime) = hottestFrame.Value;
+    var frame = speedscopeFile.GetFrame(frameIndex);
+    Console.WriteLine($"Hottest frame: {frame?.Name ?? "Unknown"} ({cumulativeTime:F2}ms cumulative time)");
+}
+
+// Access individual frames
+var mainFrame = speedscopeFile.GetFrame(0);
+if (mainFrame != null)
+{
+    Console.WriteLine($"Frame 0: {mainFrame.Name} at {mainFrame.File}:{mainFrame.Line}");
+}
+```
+
 ## SpeedscopeFile
 
 Represents the root object model for a speedscope file format, which is the standard JSON format produced by `dotnet-trace convert --format speedscope`. This class contains all the metadata and profile data needed to render flame graphs and treemaps.
