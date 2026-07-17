@@ -122,3 +122,33 @@ var options = new RenderOptions
     Inverted = false
 };
 ```
+
+## RenderOptionsExtensions
+
+Provides extension methods for fluently configuring `RenderOptions` and performing
+common calculations needed during rendering. These methods allow you to chain
+configuration calls and compute layout dimensions based on your rendering requirements.
+
+Example usage:
+
+```csharp
+using SkiaFlameGraph.Core.Rendering;
+
+// Fluent configuration with extension methods
+var options = new RenderOptions { Width = 1200, RowHeight = 20f }
+    .WithWidth(1920)
+    .WithRowHeight(24f)
+    .WithBackground(new SKColor(0x28, 0x28, 0x2e));
+
+// Calculate dimensions for rendering
+int totalHeight = options.CalculateTotalHeight(45);
+int contentWidth = options.CalculateContentWidth();
+
+// Check rendering conditions
+bool shouldLabel = options.ShouldLabelFrame(40f);
+bool shouldRender = options.ShouldRenderFrame(2f);
+
+// Get padding values
+float[] padding2D = options.GetPadding();
+float[] padding4D = options.GetPaddingAllSides();
+```
