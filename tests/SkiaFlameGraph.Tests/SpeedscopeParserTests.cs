@@ -3,6 +3,11 @@ using Xunit;
 
 namespace SkiaFlameGraph.Tests;
 
+/// <summary>
+/// Contains unit tests for the <see cref="SpeedscopeParser"/> class.
+/// These tests verify the correct parsing and tree construction behavior
+/// for different types of speedscope profiles (sampled and evented).
+/// </summary>
 public class SpeedscopeParserTests
 {
     private const string SampledJson = """
@@ -20,6 +25,11 @@ public class SpeedscopeParserTests
     }
     """;
 
+    /// <summary>
+    /// Tests that sampled profiles correctly aggregate weights up the call stack.
+    /// When multiple frames are on the stack, their weights should be summed
+    /// to determine the total weight for each node in the flame graph tree.
+    /// </summary>
     [Fact]
     public void SampledProfile_AggregatesWeightsUpTheStack()
     {
@@ -39,6 +49,11 @@ public class SpeedscopeParserTests
         Assert.Equal(5, c.Value);
     }
 
+    /// <summary>
+    /// Tests that recursive frames are merged into a single box in the flame graph.
+    /// When the same frame appears consecutively in a call stack, it should be
+    /// collapsed into a single box rather than creating multiple sibling boxes.
+    /// </summary>
     [Fact]
     public void RecursiveFrames_AreMergedIntoOneBox()
     {
@@ -60,6 +75,11 @@ public class SpeedscopeParserTests
         Assert.Single(root.Children);
     }
 
+    /// <summary>
+    /// Tests that evented profiles correctly attribute elapsed time to call frames.
+    /// For evented profiles, the time between open and close events should be
+    /// calculated and assigned to the corresponding frame in the flame graph.
+    /// </summary>
     [Fact]
     public void EventedProfile_AttributesElapsedTime()
     {
@@ -86,6 +106,11 @@ public class SpeedscopeParserTests
         Assert.Equal(6, work.Value); // 8 - 2
     }
 
+    /// <summary>
+    /// Tests that an empty document throws an exception during deserialization.
+    /// When both shared frames and profiles are empty, the parser should throw
+    /// an exception as this represents an invalid speedscope file.
+    /// </summary>
     [Fact]
     public void EmptyDocument_Throws()
     {
