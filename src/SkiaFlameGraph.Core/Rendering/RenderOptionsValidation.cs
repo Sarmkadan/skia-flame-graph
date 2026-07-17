@@ -64,8 +64,10 @@ public static class RenderOptionsValidation
     /// </summary>
     /// <param name="value">The render options to validate.</param>
     /// <returns>True if valid; otherwise, false.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is null.</exception>
     public static bool IsValid(this RenderOptions value)
     {
+        ArgumentNullException.ThrowIfNull(value);
         return value.Validate().Count == 0;
     }
 
@@ -86,8 +88,7 @@ public static class RenderOptionsValidation
         }
 
         throw new ArgumentException(
-            "RenderOptions is invalid. " +
-            string.Join(" ", errors),
+            $"RenderOptions is invalid. {string.Join(" ", errors)}",
             nameof(value));
     }
 }
