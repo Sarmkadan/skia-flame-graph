@@ -1,0 +1,9 @@
+
+## Notes
+
+* **Missing optional members** – Several properties (`Schema`, `Name`, `Exporter`, `File`, `Line`, `Col`, `Events`, `Samples`, `Weights`) are nullable. Consumers must guard against `null` before accessing them.
+* **Profile type distinction** – The `Type` property on `Profile` determines whether `Events` or `Samples`/`Weights` are populated. Mixing both in a single profile is not supported by the speedscope specification.
+* **Frame indexing** – All indices (`Frame` in `ProfileEvent` and the inner lists of `Samples`) refer to positions in the `SpeedscopeFile.Frames` list. Out‑of‑range indices will cause `ArgumentOutOfRangeException` when accessed via helper methods.
+* **Thread safety** – Instances of `SpeedscopeFile` and its nested collections are **not** thread‑safe. If a document is shared across threads, callers must provide their own synchronization (e.g., `lock` statements) or work with immutable copies.
+* **Serialization round‑trip** – The repository includes JSON extension methods (`SpeedscopeFileJsonExtensions`) that preserve all public members during serialization and deserialization. Custom modifications to the object graph after deserialization may break round‑trip fidelity if members are added or removed.
+* **Performance considerations** – Large profiles can contain millions of samples. Traversing `Samples` or `Events` should be done lazily or with streaming techniques when possible to avoid high memory pressure.
