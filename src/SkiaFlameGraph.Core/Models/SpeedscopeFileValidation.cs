@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 
 namespace SkiaFlameGraph.Core.Models;
 
@@ -24,7 +22,7 @@ public static class SpeedscopeFileValidation
         var problems = new List<string>();
 
         // Validate Schema (optional)
-        if (value.Schema is { Length: 0 })
+        if (value.Schema is not null && value.Schema.Length == 0)
         {
             problems.Add("SpeedscopeFile.Schema must not be an empty string.");
         }
@@ -50,13 +48,13 @@ public static class SpeedscopeFileValidation
         }
 
         // Validate Name (optional)
-        if (value.Name is { Length: 0 })
+        if (value.Name is not null && value.Name.Length == 0)
         {
             problems.Add("SpeedscopeFile.Name must not be an empty string.");
         }
 
         // Validate Exporter (optional)
-        if (value.Exporter is { Length: 0 })
+        if (value.Exporter is not null && value.Exporter.Length == 0)
         {
             problems.Add("SpeedscopeFile.Exporter must not be an empty string.");
         }
@@ -72,6 +70,7 @@ public static class SpeedscopeFileValidation
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is null.</exception>
     public static bool IsValid(this SpeedscopeFile value)
     {
+        ArgumentNullException.ThrowIfNull(value);
         return value.Validate().Count == 0;
     }
 
@@ -126,17 +125,19 @@ public static class SpeedscopeFileValidation
                 continue;
             }
 
-            if (frame.Name is { Length: 0 })
+            if (frame.Name is not null)
             {
-                yield return $"Frame at index {i}.Name must not be an empty string.";
+                if (frame.Name.Length == 0)
+                {
+                    yield return $"Frame at index {i}.Name must not be an empty string.";
+                }
             }
-
-            if (frame.Name is null)
+            else
             {
                 yield return $"Frame at index {i}.Name is required and cannot be null.";
             }
 
-            if (frame.File is { Length: 0 })
+            if (frame.File is not null && frame.File.Length == 0)
             {
                 yield return $"Frame at index {i}.File must not be an empty string.";
             }
@@ -170,26 +171,30 @@ public static class SpeedscopeFileValidation
                 continue;
             }
 
-            if (profile.Type is { Length: 0 })
+            if (profile.Type is not null)
             {
-                yield return $"Profile at index {i}.Type must not be an empty string.";
+                if (profile.Type.Length == 0)
+                {
+                    yield return $"Profile at index {i}.Type must not be an empty string.";
+                }
+                else if (profile.Type != "evented" && profile.Type != "sampled")
+                {
+                    yield return $"Profile at index {i}.Type must be either 'evented' or 'sampled', but was '{profile.Type}'.";
+                }
             }
-
-            if (profile.Type is null)
+            else
             {
                 yield return $"Profile at index {i}.Type is required and cannot be null.";
             }
-            else if (profile.Type != "evented" && profile.Type != "sampled")
-            {
-                yield return $"Profile at index {i}.Type must be either 'evented' or 'sampled', but was '{profile.Type}'.";
-            }
 
-            if (profile.Unit is { Length: 0 })
+            if (profile.Unit is not null)
             {
-                yield return $"Profile at index {i}.Unit must not be an empty string.";
+                if (profile.Unit.Length == 0)
+                {
+                    yield return $"Profile at index {i}.Unit must not be an empty string.";
+                }
             }
-
-            if (profile.Unit is null)
+            else
             {
                 yield return $"Profile at index {i}.Unit is required and cannot be null.";
             }
@@ -247,18 +252,20 @@ public static class SpeedscopeFileValidation
                 continue;
             }
 
-            if (evt.Type is { Length: 0 })
+            if (evt.Type is not null)
             {
-                yield return $"ProfileEvent at index {i}.Type must not be an empty string.";
+                if (evt.Type.Length == 0)
+                {
+                    yield return $"ProfileEvent at index {i}.Type must not be an empty string.";
+                }
+                else if (evt.Type != "O" && evt.Type != "C")
+                {
+                    yield return $"ProfileEvent at index {i}.Type must be either 'O' or 'C', but was '{evt.Type}'.";
+                }
             }
-
-            if (evt.Type is null)
+            else
             {
                 yield return $"ProfileEvent at index {i}.Type is required and cannot be null.";
-            }
-            else if (evt.Type != "O" && evt.Type != "C")
-            {
-                yield return $"ProfileEvent at index {i}.Type must be either 'O' or 'C', but was '{evt.Type}'.";
             }
 
             if (evt.Frame < 0)
