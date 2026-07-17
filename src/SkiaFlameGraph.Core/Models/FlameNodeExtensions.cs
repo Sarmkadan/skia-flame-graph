@@ -11,27 +11,16 @@ public static class FlameNodeExtensions
     /// <param name="node">The root node to search from.</param>
     /// <param name="name">The exact name to match.</param>
     /// <returns>The first matching descendant, or null if not found.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="node"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is null or empty.</exception>
     public static FlameNode? FindByName(this FlameNode? node, string name)
     {
-        ArgumentNullException.ThrowIfNull(node);
         ArgumentException.ThrowIfNullOrEmpty(name);
 
-        if (node.Name == name)
-        {
-            return node;
-        }
-
-        foreach (var child in node.Children)
-        {
-            var found = FindByName(child, name);
-            if (found is not null)
-            {
-                return found;
-            }
-        }
-
-        return null;
+        return node is null
+            ? null
+            : node.Name == name
+                ? node
+                : node.Children.Select(child => FindByName(child, name)).FirstOrDefault(found => found is not null);
     }
 
     /// <summary>
@@ -50,12 +39,9 @@ public static class FlameNodeExtensions
             throw new ArgumentOutOfRangeException(nameof(depth), "Depth cannot be negative.");
         }
 
-        if (depth == 0)
-        {
-            return node.Children;
-        }
-
-        return node.Children.SelectMany(child => GetNodesAtDepth(child, depth - 1));
+        return depth == 0
+            ? node.Children
+            : node.Children.SelectMany(child => GetNodesAtDepth(child, depth - 1));
     }
 
     /// <summary>
@@ -71,18 +57,8 @@ public static class FlameNodeExtensions
         ArgumentNullException.ThrowIfNull(node);
         ArgumentNullException.ThrowIfNull(predicate);
 
-        var sum = 0.0;
-        if (predicate(node))
-        {
-            sum += node.Value;
-        }
-
-        foreach (var child in node.Children)
-        {
-            sum += SumValuesWhere(child, predicate);
-        }
-
-        return sum;
+        var sum = predicate(node) ? node.Value : 0.0;
+        return sum + node.Children.Sum(child => SumValuesWhere(child, predicate));
     }
 
     /// <summary>
