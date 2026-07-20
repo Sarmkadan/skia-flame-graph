@@ -25,4 +25,10 @@ public sealed class RenderOptions
 
     /// <summary>Draw deepest frames at the top (icicle) instead of bottom (flame).</summary>
     public bool Inverted { get; set; }
+
+/// <summary>
+/// Regex pattern for frame names to highlight. Frames matching this pattern will be drawn
+/// with a distinct highlight color. If null or empty, no frames are highlighted.
+/// </summary>
+public string? HighlightPattern { get; set; }
 }

@@ -4,7 +4,7 @@ using SkiaSharp;
 namespace SkiaFlameGraph.Core.Rendering;
 
 /// <summary>
-/// Renders a call tree as a flame graph: every frame is a box whose width is
+/// Renders a call tree as a flame graph: every frame is a box whose width is 8
 /// proportional to its total time, stacked by call depth.
 /// </summary>
 public sealed class FlameGraphRenderer
@@ -14,6 +14,7 @@ public sealed class FlameGraphRenderer
     public FlameGraphRenderer(RenderOptions? options = null)
     {
         _options = options ?? new RenderOptions();
+        _options.EnsureValid();
     }
 
     /// <summary>Render to an encoded PNG written to <paramref name="path"/>.</summary>
@@ -72,7 +73,7 @@ public sealed class FlameGraphRenderer
         // The synthetic root gets a flat bar; real frames get palette colours.
         fill.Color = node.Depth == 0
             ? new SKColor(0x3a, 0x3a, 0x44)
-            : FramePalette.ForFrame(node.Name);
+            : FramePalette.ForFrame(node.Name, _options.HighlightPattern);
         canvas.DrawRect(rect, fill);
         canvas.DrawRect(rect, stroke);
 
