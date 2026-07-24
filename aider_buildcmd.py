@@ -1,66 +1,73 @@
 #!/usr/bin/env python3
 """
-Simple build helper for the SkiaFlameGraph repository.
+Utility script for the SkiaFlameGraph repository.
 
-Running this script will invoke `dotnet test` on the repository,
-printing the test results to stdout. It is intended to be used
-as a quick way to verify that the project builds and all unit
-tests pass.
+- Finds the repository root (the directory containing a .git folder).
+- Executes `dotnet test` from the repository root.
+- Returns the exit code from the test runner.
 
-The script searches upward from its own location for a `.git`
-directory to locate the repository root. If the `.git` folder
-cannot be found, it assumes the current directory is the root.
+This script is intended to be invoked directly:
+    python3 /home/redrocket/task-factory/aider_buildcmd.py
 """
 
+import pathlib
 import subprocess
 import sys
-import pathlib
+from typing import Optional
 
 
 def find_repo_root(start_path: pathlib.Path) -> pathlib.Path:
     """
-    Walk up the directory tree until a `.git` folder is found.
-    If none is found, return the original start_path.
+    Walks up the directory tree from ``start_path`` until a directory containing a
+    ``.git`` folder is found. Returns that directory as the repository root.
+
+    Raises:
+        FileNotFoundError: If no ``.git`` folder is found up to the filesystem root.
     """
     current = start_path.resolve()
-    while current != current.parent:
+    for _ in range(100):  # safeguard against infinite loops
         if (current / ".git").is_dir():
             return current
+        if current.parent == current:
+            break
         current = current.parent
-    return start_path.resolve()
+    raise FileNotFoundError("Could not locate repository root (missing .git folder).")
 
 
 def run_dotnet_test(repo_root: pathlib.Path) -> int:
     """
-    Execute `dotnet test` in the given repository root.
-    Returns the process exit code.
+    Executes ``dotnet test`` in the given repository root.
+
+    Returns:
+        The exit code from the ``dotnet test`` process.
     """
-    try:
-        result = subprocess.run(
-            ["dotnet", "test", "--no-build", "--verbosity", "minimal"],
-            cwd=repo_root,
-            check=False,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-        )
-        # Print the combined output so the caller sees the test results.
-        print(result.stdout)
-        return result.returncode
-    except FileNotFoundError:
-        print(
-            "Error: 'dotnet' executable not found. Please install the .NET SDK.",
-            file=sys.stderr,
-        )
-        return 1
+    result = subprocess.run(
+        ["dotnet", "test"],
+        cwd=repo_root,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    # Echo the test output to the console for visibility
+    print(result.stdout)
+    return result.returncode
 
 
 def main() -> int:
-    # Determine the repository root relative to this script.
-    script_dir = pathlib.Path(__file__).parent
-    repo_root = find_repo_root(script_dir)
+    """
+    Entry point for the script.
 
-    # Run the tests.
+    Returns:
+        Exit code: 0 on success, non‑zero on failure.
+    """
+    try:
+        # Use the directory containing this script as the starting point for locating the repo root.
+        script_dir = pathlib.Path(__file__).parent
+        repo_root = find_repo_root(script_dir)
+    except FileNotFoundError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+
     return run_dotnet_test(repo_root)
 
 
