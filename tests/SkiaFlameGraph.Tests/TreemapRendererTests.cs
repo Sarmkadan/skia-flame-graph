@@ -261,7 +261,7 @@ namespace SkiaFlameGraph.Tests
             try
             {
                 // Act
-                _renderer.RenderToPng(root, tempPath, height: 400);
+                _renderer.RenderToPng(root, tempPath);
 
                 // Assert
                 Assert.True(File.Exists(tempPath));
