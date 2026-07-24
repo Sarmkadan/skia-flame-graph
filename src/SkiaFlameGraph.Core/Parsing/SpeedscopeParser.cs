@@ -7,7 +7,7 @@ namespace SkiaFlameGraph.Core.Parsing;
 /// Turns a speedscope JSON document into an aggregated <see cref="FlameNode"/>
 /// tree ready for rendering. Both evented and sampled profiles are supported.
 /// </summary>
-public static class SpeedscopeParser
+public static partial class SpeedscopeParser
 {
     private static readonly JsonSerializerOptions Options = new()
     {

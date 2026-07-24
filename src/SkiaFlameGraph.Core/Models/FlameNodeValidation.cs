@@ -3,7 +3,7 @@ namespace SkiaFlameGraph.Core.Models;
 /// <summary>
 /// Provides validation helpers for <see cref="FlameNode"/> instances.
 /// </summary>
-public static class FlameNodeValidation
+public static partial class FlameNodeValidation
 {
     /// <summary>
     /// Validates a <see cref="FlameNode"/> instance and returns a list of human-readable problems.
