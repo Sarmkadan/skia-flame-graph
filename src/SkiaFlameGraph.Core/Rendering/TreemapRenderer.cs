@@ -8,26 +8,28 @@ namespace SkiaFlameGraph.Core.Rendering;
 /// are packed into its rectangle; the treemap view is handy when you care more
 /// about aggregate cost than call ordering.
 /// </summary>
-public sealed class TreemapRenderer : IDisposable
+public sealed class TreemapRenderer : BaseFlameNodeRenderer
 {
-    private readonly RenderOptions _options;
-    private readonly Dictionary<SKColor, SKPaint> _paintCache = new();
-    private bool _disposed;
-
+    /// <summary>
+    /// Initializes a new instance of the <see cref="TreemapRenderer"/> class.
+    /// </summary>
+    /// <param name="options">The render options to use. If null, a default RenderOptions is created.</param>
     public TreemapRenderer(RenderOptions? options = null)
+        : base(options)
     {
-        _options = options ?? new RenderOptions();
     }
 
-    public void RenderToPng(FlameNode root, string path, int? height = null)
+    public override void RenderToPng(FlameNode root, string path)
     {
-        using var image = Render(root, height);
-        using var data = image.Encode(SKEncodedImageFormat.Png, 100);
-        using var fs = File.OpenWrite(path);
-        data.SaveTo(fs);
+        base.RenderToPng(root, path);
     }
 
-    public SKImage Render(FlameNode root, int? height = null)
+    public override SKImage Render(FlameNode root)
+    {
+        return Render(root, null);
+    }
+
+    public override SKImage Render(FlameNode root, int? height)
     {
         var h = height ?? (int)(_options.Width * 0.62f);
         var info = new SKImageInfo(_options.Width, h, SKColorType.Rgba8888, SKAlphaType.Premul);
@@ -51,54 +53,6 @@ public sealed class TreemapRenderer : IDisposable
 
         Layout(canvas, root, area, stroke, font, textPaint, 0);
         return surface.Snapshot();
-    }
-
-    /// <summary>
-    /// Gets or creates a cached SKPaint for the specified color.
-    /// </summary>
-    /// <param name="color">The color to get or create a paint for.</param>
-    /// <returns>A cached SKPaint instance with the specified color.</returns>
-    private SKPaint GetPaintForColor(SKColor color)
-    {
-        if (_paintCache.TryGetValue(color, out var cachedPaint))
-        {
-            return cachedPaint;
-        }
-
-        var paint = new SKPaint
-        {
-            IsAntialias = false,
-            Style = SKPaintStyle.Fill,
-            Color = color
-        };
-        _paintCache[color] = paint;
-        return paint;
-    }
-
-    /// <summary>
-    /// Disposes of all cached paint objects.
-    /// </summary>
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    private void Dispose(bool disposing)
-    {
-        if (_disposed)
-            return;
-
-        if (disposing)
-        {
-            foreach (var paint in _paintCache.Values)
-            {
-                paint.Dispose();
-            }
-            _paintCache.Clear();
-        }
-
-        _disposed = true;
     }
 
     private void Layout(
@@ -136,8 +90,7 @@ public sealed class TreemapRenderer : IDisposable
         var total = 0.0;
         foreach (var c in children)
             total += c.Value;
-        if (total <= 0)
-            return;
+        if (total <= 0) return;
 
         var remaining = rect;
         var index = 0;
@@ -178,8 +131,7 @@ public sealed class TreemapRenderer : IDisposable
         var side = shorter;
         var rowArea = newRowValue * areaPerValue;
         var rowLength = rowArea / side;
-        if (rowLength <= 0)
-            return double.MaxValue;
+        if (rowLength <= 0) return double.MaxValue;
 
         var worst = 0.0;
         void Consider(double value)
@@ -191,8 +143,7 @@ public sealed class TreemapRenderer : IDisposable
             worst = Math.Max(worst, ratio);
         }
 
-        foreach (var n in row)
-            Consider(n.Value);
+        foreach (var n in row) Consider(n.Value);
         Consider(candidateValue);
         return worst;
     }

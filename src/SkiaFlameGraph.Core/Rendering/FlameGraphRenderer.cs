@@ -7,28 +7,24 @@ namespace SkiaFlameGraph.Core.Rendering;
 /// Renders a call tree as a flame graph: every frame is a box whose width is 8
 /// proportional to its total time, stacked by call depth.
 /// </summary>
-public sealed class FlameGraphRenderer : IDisposable
+public sealed class FlameGraphRenderer : BaseFlameNodeRenderer
 {
-    private readonly RenderOptions _options;
-    private readonly Dictionary<SKColor, SKPaint> _paintCache = new();
-    private bool _disposed;
-
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FlameGraphRenderer"/> class.
+    /// </summary>
+    /// <param name="options">The render options to use. If null, a default RenderOptions is created.</param>
     public FlameGraphRenderer(RenderOptions? options = null)
+        : base(options)
     {
-        _options = options ?? new RenderOptions();
-        _options.EnsureValid();
     }
 
     /// <summary>Render to an encoded PNG written to <paramref name="path"/>.</summary>
-    public void RenderToPng(FlameNode root, string path)
+    public override void RenderToPng(FlameNode root, string path)
     {
-        using var image = Render(root);
-        using var data = image.Encode(SKEncodedImageFormat.Png, 100);
-        using var fs = File.OpenWrite(path);
-        data.SaveTo(fs);
+        base.RenderToPng(root, path);
     }
 
-    public SKImage Render(FlameNode root)
+    public override SKImage Render(FlameNode root)
     {
         var depth = root.MaxDepth();
         var rows = depth + 1;
@@ -58,54 +54,6 @@ public sealed class FlameGraphRenderer : IDisposable
         return surface.Snapshot();
     }
 
-    /// <summary>
-    /// Gets or creates a cached SKPaint for the specified color.
-    /// </summary>
-    /// <param name="color">The color to get or create a paint for.</param>
-    /// <returns>A cached SKPaint instance with the specified color.</returns>
-    private SKPaint GetPaintForColor(SKColor color)
-    {
-        if (_paintCache.TryGetValue(color, out var cachedPaint))
-        {
-            return cachedPaint;
-        }
-
-        var paint = new SKPaint
-        {
-            IsAntialias = true,
-            Style = SKPaintStyle.Fill,
-            Color = color
-        };
-        _paintCache[color] = paint;
-        return paint;
-    }
-
-    /// <summary>
-    /// Disposes of all cached paint objects.
-    /// </summary>
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    private void Dispose(bool disposing)
-    {
-        if (_disposed)
-            return;
-
-        if (disposing)
-        {
-            foreach (var paint in _paintCache.Values)
-            {
-                paint.Dispose();
-            }
-            _paintCache.Clear();
-        }
-
-        _disposed = true;
-    }
-
     private void DrawNode(
         SKCanvas canvas, FlameNode node, float x, float width, double total, int rows,
         SKFont font, SKPaint stroke, SKPaint textPaint)
@@ -114,8 +62,8 @@ public sealed class FlameGraphRenderer : IDisposable
             return;
 
         float y = _options.Inverted
-        ? _options.Padding + node.Depth * _options.RowHeight
-        : _options.Padding + (rows - 1 - node.Depth) * _options.RowHeight;
+            ? _options.Padding + node.Depth * _options.RowHeight
+            : _options.Padding + (rows - 1 - node.Depth) * _options.RowHeight;
 
         var rect = new SKRect(x, y, x + width, y + _options.RowHeight - 1);
 
