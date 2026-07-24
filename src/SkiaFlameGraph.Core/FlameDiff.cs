@@ -8,23 +8,17 @@ namespace SkiaFlameGraph.Core;
 public static class FlameDiff
 {
     /// <summary>
-    /// Computes the delta between two flame graphs by matching nodes by name and calculating (current - baseline).
+    /// Computes the delta between two flame graphs by matching nodes by frame identity (name, file, line) and calculating (current - baseline).
     /// Nodes present in only one tree are included with their full value.
     /// </summary>
     /// <param name="baseline">The baseline flame graph node (typically the older/previous profile).</param>
     /// <param name="current">The current flame graph node (typically the newer/current profile).</param>
     /// <returns>A new FlameNode tree representing the delta values.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="baseline"/> or <paramref name="current"/> is null.</exception>
     public static FlameNode Diff(FlameNode baseline, FlameNode current)
     {
-        if (baseline == null)
-        {
-            throw new ArgumentNullException(nameof(baseline));
-        }
-
-        if (current == null)
-        {
-            throw new ArgumentNullException(nameof(current));
-        }
+        ArgumentNullException.ThrowIfNull(baseline);
+        ArgumentNullException.ThrowIfNull(current);
 
         // Create the root delta node
         var deltaRoot = new FlameNode(current.Name)
