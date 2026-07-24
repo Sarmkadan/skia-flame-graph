@@ -184,4 +184,16 @@ public static class RenderOptionsExtensions
         ArgumentNullException.ThrowIfNull(options);
         return [options.Padding, options.Padding, options.Padding, options.Padding];
     }
+
+    /// <summary>
+    /// Creates a new <see cref="DifferentialFlameGraphRenderer"/> instance with the specified render options.
+    /// </summary>
+    /// <param name="options">The render options to use.</param>
+    /// <returns>A new DifferentialFlameGraphRenderer instance.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is null.</exception>
+    public static DifferentialFlameGraphRenderer WithDifferentialRenderer(this RenderOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        return new DifferentialFlameGraphRenderer(options);
+    }
 }
