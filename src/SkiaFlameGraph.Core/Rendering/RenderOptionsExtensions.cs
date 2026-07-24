@@ -67,6 +67,22 @@ public static class RenderOptionsExtensions
     }
 
     /// <summary>
+    /// Determines whether a subtree with the specified width should be rendered based on <see cref="RenderOptions.MinSubtreeWidthPx"/>.
+    /// </summary>
+    /// <param name="options">The render options.</param>
+    /// <param name="subtreeWidth">The width of the subtree in pixels.</param>
+    /// <returns><see langword="true"/> if the subtree should be rendered; otherwise, <see langword="false"/>.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="subtreeWidth"/> is negative.</exception>
+    public static bool ShouldRenderSubtree(this RenderOptions options, float subtreeWidth)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentOutOfRangeException.ThrowIfNegative(subtreeWidth);
+
+        return subtreeWidth >= options.MinSubtreeWidthPx;
+    }
+
+    /// <summary>
     /// Creates a new <see cref="RenderOptions"/> instance with the specified width, copying all other properties from the original.
     /// </summary>
     /// <param name="options">The original render options.</param>

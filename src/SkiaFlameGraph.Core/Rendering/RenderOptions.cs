@@ -15,6 +15,18 @@ public sealed class RenderOptions
     /// <summary>Frames narrower than this are skipped entirely.</summary>
     public float MinBoxWidth { get; set; } = 0.4f;
 
+        /// <summary>
+        /// Subtrees whose scaled width falls below this threshold are culled entirely during layout.
+        /// This prevents drawing thousands of sub-pixel nodes that would render as &lt;1px boxes.
+        /// Set to 0 to disable subtree culling and render all nodes individually.
+        /// </summary>
+        /// <remarks>
+        /// When a frame's width is below this threshold, its entire subtree is skipped and a single
+        /// aggregated sliver is rendered instead. This bounds the number of draw calls roughly by
+        /// image width × depth instead of node count, significantly improving performance for deep traces.
+        /// </remarks>
+        public float MinSubtreeWidthPx { get; set; } = 0.5f;
+
     public float Padding { get; set; } = 16f;
 
     public float FontSize { get; set; } = 12f;

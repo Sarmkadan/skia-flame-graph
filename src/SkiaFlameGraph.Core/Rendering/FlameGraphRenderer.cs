@@ -80,11 +80,31 @@ public sealed class FlameGraphRenderer
         if (width >= _options.MinLabelWidth)
             DrawLabel(canvas, node.Name, rect, font, textPaint);
 
+        // Apply subtree culling: if the parent frame itself is below the threshold, skip rendering children entirely
+        // and render a single aggregated elided sliver instead
+        if (node.Children.Count > 0 && !_options.ShouldRenderSubtree(width))
+        {
+            // Render a single aggregated sliver representing all culled children
+            if (_options.ShouldRenderFrame(width))
+            {
+                float yElided = _options.Inverted
+                    ? _options.Padding + node.Depth * _options.RowHeight
+                    : _options.Padding + (rows - 1 - node.Depth) * _options.RowHeight;
+
+                var rectElided = new SKRect(x, yElided, x + width, yElided + _options.RowHeight - 1);
+                fill.Color = FramePalette.ForFrame("[...]", _options.HighlightPattern);
+                canvas.DrawRect(rectElided, fill);
+                canvas.DrawRect(rectElided, stroke);
+            }
+            return;
+        }
+
         // Lay children left-to-right, each scaled to its share of the parent.
         // Clamp each child's width to ensure it doesn't exceed the parent's remaining width,
         // which prevents drawing past the parent's right edge when child weights exceed parent weight.
         var childX = x;
         var parentRightEdge = x + width;
+
         foreach (var child in node.Children)
         {
             var childWidth = (float)(child.Value / total * (_options.Width - _options.Padding * 2));
