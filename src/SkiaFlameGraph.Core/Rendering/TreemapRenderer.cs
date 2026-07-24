@@ -8,9 +8,11 @@ namespace SkiaFlameGraph.Core.Rendering;
 /// are packed into its rectangle; the treemap view is handy when you care more
 /// about aggregate cost than call ordering.
 /// </summary>
-public sealed class TreemapRenderer
+public sealed class TreemapRenderer : IDisposable
 {
     private readonly RenderOptions _options;
+    private readonly Dictionary<SKColor, SKPaint> _paintCache = new();
+    private bool _disposed;
 
     public TreemapRenderer(RenderOptions? options = null)
     {
@@ -33,7 +35,6 @@ public sealed class TreemapRenderer
         var canvas = surface.Canvas;
         canvas.Clear(_options.Background);
 
-        using var fill = new SKPaint { IsAntialias = false, Style = SKPaintStyle.Fill };
         using var stroke = new SKPaint
         {
             IsAntialias = true,
@@ -48,20 +49,69 @@ public sealed class TreemapRenderer
             _options.Padding, _options.Padding,
             _options.Width - _options.Padding, h - _options.Padding);
 
-        Layout(canvas, root, area, fill, stroke, font, textPaint, 0);
+        Layout(canvas, root, area, stroke, font, textPaint, 0);
         return surface.Snapshot();
+    }
+
+    /// <summary>
+    /// Gets or creates a cached SKPaint for the specified color.
+    /// </summary>
+    /// <param name="color">The color to get or create a paint for.</param>
+    /// <returns>A cached SKPaint instance with the specified color.</returns>
+    private SKPaint GetPaintForColor(SKColor color)
+    {
+        if (_paintCache.TryGetValue(color, out var cachedPaint))
+        {
+            return cachedPaint;
+        }
+
+        var paint = new SKPaint
+        {
+            IsAntialias = false,
+            Style = SKPaintStyle.Fill,
+            Color = color
+        };
+        _paintCache[color] = paint;
+        return paint;
+    }
+
+    /// <summary>
+    /// Disposes of all cached paint objects.
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (_disposed)
+            return;
+
+        if (disposing)
+        {
+            foreach (var paint in _paintCache.Values)
+            {
+                paint.Dispose();
+            }
+            _paintCache.Clear();
+        }
+
+        _disposed = true;
     }
 
     private void Layout(
         SKCanvas canvas, FlameNode node, SKRect rect,
-        SKPaint fill, SKPaint stroke, SKFont font, SKPaint textPaint, int depth)
+        SKPaint stroke, SKFont font, SKPaint textPaint, int depth)
     {
         if (rect.Width < 2 || rect.Height < 2)
             return;
 
         if (node.Children.Count == 0 || depth >= 12)
         {
-            fill.Color = FramePalette.ForFrame(node.Name);
+            var fillColor = FramePalette.ForFrame(node.Name);
+            using var fill = GetPaintForColor(fillColor);
             canvas.DrawRect(rect, fill);
             canvas.DrawRect(rect, stroke);
             DrawLabel(canvas, node.Name, rect, font, textPaint);
@@ -72,7 +122,7 @@ public sealed class TreemapRenderer
         var children = new List<FlameNode>(node.Children);
         children.Sort((a, b) => b.Value.CompareTo(a.Value));
 
-        Squarify(canvas, children, rect, fill, stroke, font, textPaint, depth);
+        Squarify(canvas, children, rect, stroke, font, textPaint, depth);
     }
 
     /// <summary>
@@ -81,7 +131,7 @@ public sealed class TreemapRenderer
     /// </summary>
     private void Squarify(
         SKCanvas canvas, List<FlameNode> children, SKRect rect,
-        SKPaint fill, SKPaint stroke, SKFont font, SKPaint textPaint, int depth)
+        SKPaint stroke, SKFont font, SKPaint textPaint, int depth)
     {
         var total = 0.0;
         foreach (var c in children)
@@ -116,7 +166,7 @@ public sealed class TreemapRenderer
             }
 
             remaining = PlaceRow(canvas, row, rowValue, remaining, areaPerValue,
-                fill, stroke, font, textPaint, depth);
+                stroke, font, textPaint, depth);
             index += row.Count;
         }
     }
@@ -149,7 +199,7 @@ public sealed class TreemapRenderer
 
     private SKRect PlaceRow(
         SKCanvas canvas, List<FlameNode> row, double rowValue, SKRect remaining, float areaPerValue,
-        SKPaint fill, SKPaint stroke, SKFont font, SKPaint textPaint, int depth)
+        SKPaint stroke, SKFont font, SKPaint textPaint, int depth)
     {
         var rowArea = (float)(rowValue * areaPerValue);
         var horizontal = remaining.Width >= remaining.Height;
@@ -162,7 +212,7 @@ public sealed class TreemapRenderer
             {
                 var boxHeight = (float)(n.Value / rowValue) * remaining.Height;
                 var cell = new SKRect(remaining.Left, y, remaining.Left + rowWidth, y + boxHeight);
-                Layout(canvas, n, Deflate(cell), fill, stroke, font, textPaint, depth + 1);
+                Layout(canvas, n, Deflate(cell), stroke, font, textPaint, depth + 1);
                 y += boxHeight;
             }
             return new SKRect(remaining.Left + rowWidth, remaining.Top, remaining.Right, remaining.Bottom);
@@ -175,7 +225,7 @@ public sealed class TreemapRenderer
             {
                 var boxWidth = (float)(n.Value / rowValue) * remaining.Width;
                 var cell = new SKRect(x, remaining.Top, x + boxWidth, remaining.Top + rowHeight);
-                Layout(canvas, n, Deflate(cell), fill, stroke, font, textPaint, depth + 1);
+                Layout(canvas, n, Deflate(cell), stroke, font, textPaint, depth + 1);
                 x += boxWidth;
             }
             return new SKRect(remaining.Left, remaining.Top + rowHeight, remaining.Right, remaining.Bottom);
