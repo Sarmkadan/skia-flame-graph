@@ -7,9 +7,11 @@ namespace SkiaFlameGraph.Core.Rendering;
 /// Renders a call tree as a flame graph: every frame is a box whose width is 8
 /// proportional to its total time, stacked by call depth.
 /// </summary>
-public sealed class FlameGraphRenderer
+public sealed class FlameGraphRenderer : IDisposable
 {
     private readonly RenderOptions _options;
+    private readonly Dictionary<SKColor, SKPaint> _paintCache = new();
+    private bool _disposed;
 
     public FlameGraphRenderer(RenderOptions? options = null)
     {
@@ -39,7 +41,6 @@ public sealed class FlameGraphRenderer
         canvas.Clear(_options.Background);
 
         using var font = new SKFont(SKTypeface.Default, _options.FontSize);
-        using var fill = new SKPaint { IsAntialias = true, Style = SKPaintStyle.Fill };
         using var stroke = new SKPaint
         {
             IsAntialias = true,
@@ -52,28 +53,77 @@ public sealed class FlameGraphRenderer
         var total = root.Value;
         if (total <= 0) total = 1;
 
-        DrawNode(canvas, root, _options.Padding, plotWidth, total, rows, font, fill, stroke, textPaint);
+        DrawNode(canvas, root, _options.Padding, plotWidth, total, rows, font, stroke, textPaint);
 
         return surface.Snapshot();
     }
 
+    /// <summary>
+    /// Gets or creates a cached SKPaint for the specified color.
+    /// </summary>
+    /// <param name="color">The color to get or create a paint for.</param>
+    /// <returns>A cached SKPaint instance with the specified color.</returns>
+    private SKPaint GetPaintForColor(SKColor color)
+    {
+        if (_paintCache.TryGetValue(color, out var cachedPaint))
+        {
+            return cachedPaint;
+        }
+
+        var paint = new SKPaint
+        {
+            IsAntialias = true,
+            Style = SKPaintStyle.Fill,
+            Color = color
+        };
+        _paintCache[color] = paint;
+        return paint;
+    }
+
+    /// <summary>
+    /// Disposes of all cached paint objects.
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (_disposed)
+            return;
+
+        if (disposing)
+        {
+            foreach (var paint in _paintCache.Values)
+            {
+                paint.Dispose();
+            }
+            _paintCache.Clear();
+        }
+
+        _disposed = true;
+    }
+
     private void DrawNode(
         SKCanvas canvas, FlameNode node, float x, float width, double total, int rows,
-        SKFont font, SKPaint fill, SKPaint stroke, SKPaint textPaint)
+        SKFont font, SKPaint stroke, SKPaint textPaint)
     {
         if (width < _options.MinBoxWidth)
             return;
 
         float y = _options.Inverted
-            ? _options.Padding + node.Depth * _options.RowHeight
-            : _options.Padding + (rows - 1 - node.Depth) * _options.RowHeight;
+        ? _options.Padding + node.Depth * _options.RowHeight
+        : _options.Padding + (rows - 1 - node.Depth) * _options.RowHeight;
 
         var rect = new SKRect(x, y, x + width, y + _options.RowHeight - 1);
 
         // The synthetic root gets a flat bar; real frames get palette colours.
-        fill.Color = node.Depth == 0
+        var fillColor = node.Depth == 0
             ? new SKColor(0x3a, 0x3a, 0x44)
             : FramePalette.ForFrame(node.Name, _options.HighlightPattern);
+        using var fill = GetPaintForColor(fillColor);
         canvas.DrawRect(rect, fill);
         canvas.DrawRect(rect, stroke);
 
@@ -92,8 +142,9 @@ public sealed class FlameGraphRenderer
                     : _options.Padding + (rows - 1 - node.Depth) * _options.RowHeight;
 
                 var rectElided = new SKRect(x, yElided, x + width, yElided + _options.RowHeight - 1);
-                fill.Color = FramePalette.ForFrame("[...]", _options.HighlightPattern);
-                canvas.DrawRect(rectElided, fill);
+                var elidedFillColor = FramePalette.ForFrame("[...]", _options.HighlightPattern);
+                using var elidedFill = GetPaintForColor(elidedFillColor);
+                canvas.DrawRect(rectElided, elidedFill);
                 canvas.DrawRect(rectElided, stroke);
             }
             return;
@@ -110,7 +161,7 @@ public sealed class FlameGraphRenderer
             var childWidth = (float)(child.Value / total * (_options.Width - _options.Padding * 2));
             // Clamp child width to parent's bounds to prevent overflow
             var clampedChildWidth = Math.Min(childWidth, parentRightEdge - childX);
-            DrawNode(canvas, child, childX, clampedChildWidth, total, rows, font, fill, stroke, textPaint);
+            DrawNode(canvas, child, childX, clampedChildWidth, total, rows, font, stroke, textPaint);
             childX += clampedChildWidth;
         }
     }
