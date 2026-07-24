@@ -4,8 +4,8 @@ using SkiaFlameGraph.Core.Models;
 namespace SkiaFlameGraph.Core.Parsing;
 
 /// <summary>
-/// Turns a speedscope JSON document into an aggregated <see cref="FlameNode"/>
-/// tree ready for rendering. Both evented and sampled profiles are supported.
+/// Parses a speedscope JSON document into an aggregated <see cref="FlameNode"/> tree ready for rendering.
+/// Supports both evented and sampled profiles.
 /// </summary>
 public static partial class SpeedscopeParser
 {
@@ -14,8 +14,19 @@ public static partial class SpeedscopeParser
         PropertyNameCaseInsensitive = true,
     };
 
+    /// <summary>
+    /// Deserializes a JSON string into a <see cref="SpeedscopeFile"/> instance.
+    /// </summary>
+    /// <param name="json">The JSON document to deserialize.</param>
+    /// <returns>The deserialized <see cref="SpeedscopeFile"/>.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="json"/> is an empty string.</exception>
+    /// <exception cref="FormatException">Thrown when the document deserializes to null or contains no profiles.</exception>
     public static SpeedscopeFile Deserialize(string json)
     {
+        ArgumentNullException.ThrowIfNull(json);
+        ArgumentException.ThrowIfNullOrEmpty(json);
+
         var file = JsonSerializer.Deserialize<SpeedscopeFile>(json, Options)
                    ?? throw new FormatException("speedscope document deserialized to null");
         if (file.Profiles.Count == 0)
@@ -23,8 +34,17 @@ public static partial class SpeedscopeParser
         return file;
     }
 
+    /// <summary>
+    /// Parses a speedscope file from disk and builds a <see cref="FlameNode"/> tree.
+    /// </summary>
+    /// <param name="path">The path to the speedscope JSON file.</param>
+    /// <returns>The root <see cref="FlameNode"/> of the aggregated call tree.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="path"/> is null.</exception>
+    /// <exception cref="FormatException">Thrown when the document deserializes to null or contains no profiles.</exception>
     public static FlameNode ParseFile(string path)
     {
+        ArgumentNullException.ThrowIfNull(path);
+
         using var stream = File.OpenRead(path);
         var file = JsonSerializer.Deserialize<SpeedscopeFile>(stream, Options)
                    ?? throw new FormatException("speedscope document deserialized to null");
@@ -34,11 +54,18 @@ public static partial class SpeedscopeParser
     }
 
     /// <summary>
-    /// Aggregate one profile into a call tree. The returned node is a synthetic
-    /// "root" whose value equals the sum of all top-level samples.
+    /// Aggregates one profile into a call tree. The returned node is a synthetic
+    /// "root" whose value equals the sum of all top‑level samples.
     /// </summary>
+    /// <param name="file">The speedscope file containing the profiles.</param>
+    /// <param name="profileIndex">The zero‑based index of the profile to aggregate.</param>
+    /// <returns>The root <see cref="FlameNode"/> of the aggregated tree.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="file"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="profileIndex"/> is outside the valid range.</exception>
+    /// <exception cref="FormatException">Thrown when the profile type is unsupported.</exception>
     public static FlameNode BuildTree(SpeedscopeFile file, int profileIndex = 0)
     {
+        ArgumentNullException.ThrowIfNull(file);
         if (profileIndex < 0 || profileIndex >= file.Profiles.Count)
             throw new ArgumentOutOfRangeException(nameof(profileIndex));
 
@@ -110,7 +137,11 @@ public static partial class SpeedscopeParser
         return root;
     }
 
-    /// <summary>Add <paramref name="value"/> to a node and every ancestor.</summary>
+    /// <summary>
+    /// Adds <paramref name="value"/> to a node and every ancestor.
+    /// </summary>
+    /// <param name="leaf">The leaf node to start from.</param>
+    /// <param name="value">The value to add.</param>
     private static void AddValueToPath(FlameNode leaf, double value)
     {
         var n = leaf;
@@ -121,6 +152,13 @@ public static partial class SpeedscopeParser
         }
     }
 
+    /// <summary>
+    /// Retrieves a <see cref="Frame"/> from <paramref name="frames"/> at the given <paramref name="index"/>.
+    /// If the index is out of range, a placeholder frame with a descriptive name is returned.
+    /// </summary>
+    /// <param name="frames">The list of frames.</param>
+    /// <param name="index">The zero‑based index of the frame.</param>
+    /// <returns>The resolved <see cref="Frame"/> or a placeholder for an invalid index.</returns>
     private static Frame FrameAt(List<Frame> frames, int index)
     {
         if (index < 0 || index >= frames.Count)
