@@ -65,7 +65,40 @@ public static partial class FlameNodeValidation
             problems.Add("File, if specified, cannot be empty or whitespace.");
         }
 
+        // Validate child weight invariant: sum of children <= parent value
+        var path = string.Join(" → ", value.GetPathToNode());
+        var childWeightProblem = value.ValidateChildWeightInvariant(path);
+        if (childWeightProblem is not null)
+        {
+            problems.Add(childWeightProblem);
+        }
+
         return problems.AsReadOnly();
+    }
+
+    /// <summary>
+    /// Validates that the sum of children values does not exceed the parent value.
+    /// This ensures the flame graph invariant is maintained.
+    /// </summary>
+    /// <param name="value">The node to validate.</param>
+    /// <param name="path">The path to the node for error reporting.</param>
+    /// <returns>A validation problem if the invariant is violated; otherwise, null.</returns>
+    private static string? ValidateChildWeightInvariant(this FlameNode value, string path)
+    {
+        if (value.Children.Count == 0 || value.Value <= 0)
+        {
+            return null;
+        }
+
+        // Skip null children in the sum calculation
+        var childSum = value.Children.Where(c => c is not null).Sum(c => c.Value);
+        if (childSum > value.Value)
+        {
+            var overage = childSum - value.Value;
+            return $"Child weight invariant violated at {path}: sum of children ({childSum}) exceeds parent value ({value.Value}) by {overage}.";
+        }
+
+        return null;
     }
 
     /// <summary>

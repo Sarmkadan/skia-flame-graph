@@ -81,12 +81,17 @@ public sealed class FlameGraphRenderer
             DrawLabel(canvas, node.Name, rect, font, textPaint);
 
         // Lay children left-to-right, each scaled to its share of the parent.
+        // Clamp each child's width to ensure it doesn't exceed the parent's remaining width,
+        // which prevents drawing past the parent's right edge when child weights exceed parent weight.
         var childX = x;
+        var parentRightEdge = x + width;
         foreach (var child in node.Children)
         {
             var childWidth = (float)(child.Value / total * (_options.Width - _options.Padding * 2));
-            DrawNode(canvas, child, childX, childWidth, total, rows, font, fill, stroke, textPaint);
-            childX += childWidth;
+            // Clamp child width to parent's bounds to prevent overflow
+            var clampedChildWidth = Math.Min(childWidth, parentRightEdge - childX);
+            DrawNode(canvas, child, childX, clampedChildWidth, total, rows, font, fill, stroke, textPaint);
+            childX += clampedChildWidth;
         }
     }
 
