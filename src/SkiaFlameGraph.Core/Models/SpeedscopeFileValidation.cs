@@ -9,8 +9,27 @@ namespace SkiaFlameGraph.Core.Models;
 /// </summary>
 public static class SpeedscopeFileValidation
 {
+    // -----------------------------------------------------------------
+    // Limits to protect against DoS attacks when parsing untrusted data.
+    // -----------------------------------------------------------------
+
     /// <summary>
-    /// Validates a <see cref="SpeedscopeFile"/> instance and returns a list of human-readable problems.
+    /// Maximum number of frames allowed in <see cref="SharedData.Frames"/>.
+    /// </summary>
+    private const int MaxFrames = 100_000;
+
+    /// <summary>
+    /// Maximum number of events allowed in any <see cref="Profile.Events"/> collection.
+    /// </summary>
+    private const int MaxEvents = 1_000_000;
+
+    /// <summary>
+    /// Maximum allowed nesting depth of open/close <see cref="ProfileEvent"/> pairs.
+    /// </summary>
+    private const int MaxStackDepth = 10_000;
+
+    /// <summary>
+    /// Validates a <see cref="SpeedscopeFile"/> instance and returns a list of human‑readable problems.
     /// </summary>
     /// <param name="value">The speedscope file to validate.</param>
     /// <returns>An enumerable of validation problems; empty if the file is valid.</returns>
@@ -101,6 +120,11 @@ public static class SpeedscopeFileValidation
         }
         else
         {
+            if (shared.Frames.Count > MaxFrames)
+            {
+                yield return $"SharedData.Frames contains {shared.Frames.Count} frames, which exceeds the allowed maximum of {MaxFrames}.";
+            }
+
             foreach (var frameProblem in ValidateFrames(shared.Frames))
             {
                 yield return frameProblem;
@@ -211,6 +235,11 @@ public static class SpeedscopeFileValidation
 
             if (profile.Events is not null)
             {
+                if (profile.Events.Count > MaxEvents)
+                {
+                    yield return $"Profile at index {i}.Events contains {profile.Events.Count} events, which exceeds the allowed maximum of {MaxEvents}.";
+                }
+
                 foreach (var evtProblem in ValidateProfileEvents(profile.Events))
                 {
                     yield return evtProblem;
@@ -242,6 +271,8 @@ public static class SpeedscopeFileValidation
             yield return "Profile.Events must contain at least one event when not null.";
         }
 
+        int depth = 0;
+
         for (var i = 0; i < events.Count; i++)
         {
             var evt = events[i];
@@ -262,6 +293,25 @@ public static class SpeedscopeFileValidation
                 {
                     yield return $"ProfileEvent at index {i}.Type must be either 'O' or 'C', but was '{evt.Type}'.";
                 }
+                else
+                {
+                    // Track nesting depth for open/close events.
+                    depth = evt.Type switch
+                    {
+                        "O" => depth + 1,
+                        "C" => depth - 1,
+                        _ => depth
+                    };
+
+                    if (depth < 0)
+                    {
+                        yield return $"ProfileEvent at index {i} closes more frames than opened (negative stack depth).";
+                    }
+                    else if (depth > MaxStackDepth)
+                    {
+                        yield return $"ProfileEvent at index {i} exceeds maximum allowed stack depth of {MaxStackDepth}. Current depth: {depth}.";
+                    }
+                }
             }
             else
             {
@@ -277,6 +327,11 @@ public static class SpeedscopeFileValidation
             {
                 yield return $"ProfileEvent at index {i}.At must be non-negative, but was {evt.At}.";
             }
+        }
+
+        if (depth != 0)
+        {
+            yield return $"Profile.Events ends with a non‑zero stack depth ({depth}); open events were not properly closed.";
         }
     }
 
