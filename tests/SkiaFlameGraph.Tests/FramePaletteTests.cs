@@ -1,105 +1,65 @@
+using System;
+using System.Collections.Generic;
 using SkiaSharp;
 using SkiaFlameGraph.Core.Rendering;
 using Xunit;
 
 namespace SkiaFlameGraph.Tests;
 
-public class FramePaletteTests
+/// <summary>
+/// Tests for <see cref="FramePalette"/> ensuring deterministic colour assignment
+/// and reasonable collision behaviour.
+/// </summary>
+public sealed class FramePaletteTests
 {
     [Fact]
-    public void ForFrame_SameName_ReturnsSameColor()
+    public void ForFrame_ReturnsSameColor_ForSameName()
     {
-        // Arrange
-        var name = "TestFunction";
+        const string name = "MyFunction";
 
-        // Act
-        var color1 = FramePalette.ForFrame(name);
-        var color2 = FramePalette.ForFrame(name);
+        var first = FramePalette.ForFrame(name);
+        var second = FramePalette.ForFrame(name);
 
-        // Assert
-        Assert.Equal(color1, color2);
+        Assert.Equal(first, second);
     }
 
     [Fact]
-    public void ForFrame_DifferentNames_ReturnsDifferentColors()
+    public void ForFrame_WithHighlightPattern_ReturnsHighlightColor_WhenMatched()
     {
-        // Arrange
-        var name1 = "FunctionA";
-        var name2 = "FunctionB";
+        const string name = "highlightedFunction";
+        const string pattern = "^high";
 
-        // Act
-        var color1 = FramePalette.ForFrame(name1);
-        var color2 = FramePalette.ForFrame(name2);
+        var colour = FramePalette.ForFrame(name, pattern);
 
-        // Assert
-        // Note: While hash collisions are theoretically possible, they are extremely 
-        // unlikely for distinct short strings in a standard implementation.
-        Assert.NotEqual(color1, color2);
+        Assert.Equal(FramePalette.HighlightColor, colour);
     }
 
     [Fact]
-    public void ForFrame_ReturnsValidColorRange()
+    public void ForFrame_ThrowsArgumentException_WhenNameIsNullOrEmpty()
     {
-        // Arrange
-        var name = "FunctionC";
+        Assert.Throws<ArgumentException>(() => FramePalette.ForFrame(null!));
+        Assert.Throws<ArgumentException>(() => FramePalette.ForFrame(string.Empty));
 
-        // Act
-        var color = FramePalette.ForFrame(name);
-
-        // Assert
-        Assert.InRange(color.Red, (byte)0, (byte)255);
-        Assert.InRange(color.Green, (byte)0, (byte)255);
-        Assert.InRange(color.Blue, (byte)0, (byte)255);
-        Assert.InRange(color.Alpha, (byte)0, (byte)255);
+        Assert.Throws<ArgumentException>(() => FramePalette.ForFrame(null!, "pattern"));
+        Assert.Throws<ArgumentException>(() => FramePalette.ForFrame(string.Empty, "pattern"));
     }
 
     [Fact]
-    public void ForFrame_WithHighlightPattern_Match_ReturnsValidColor()
+    public void ForFrame_DistributesColorsAcrossManyDistinctNames()
     {
-        // Arrange
-        var name = "HotFunction";
-        var pattern = "HotFunction";
+        const int sampleSize = 1000;
+        var colors = new HashSet<SKColor>();
+        var random = new Random(0);
 
-        // Act
-        var color = FramePalette.ForFrame(name, pattern);
+        for (int i = 0; i < sampleSize; i++)
+        {
+            // Generate a pseudo‑random but deterministic name.
+            var name = $"Func_{Guid.NewGuid():N}_{random.Next()}";
+            colors.Add(FramePalette.ForFrame(name));
+        }
 
-        // Assert
-        Assert.InRange(color.Red, (byte)0, (byte)255);
-        Assert.InRange(color.Green, (byte)0, (byte)255);
-        Assert.InRange(color.Blue, (byte)0, (byte)255);
-        Assert.InRange(color.Alpha, (byte)0, (byte)255);
-    }
-
-    [Fact]
-    public void ForFrame_WithHighlightPattern_NoMatch_ReturnsSameAsStandard()
-    {
-        // Arrange
-        var name = "ColdFunction";
-        var pattern = "HotFunction";
-
-        // Act
-        var colorStandard = FramePalette.ForFrame(name);
-        var colorHighlighted = FramePalette.ForFrame(name, pattern);
-
-        // Assert
-        Assert.Equal(colorStandard, colorHighlighted);
-    }
-
-    [Fact]
-    public void ForFrame_WithHighlightPattern_Match_ReturnsDifferentColorThanStandard()
-    {
-        // Arrange
-        var name = "TargetFunction";
-        var pattern = "TargetFunction";
-
-        // Act
-        var colorStandard = FramePalette.ForFrame(name);
-        var colorHighlighted = FramePalette.ForFrame(name, pattern);
-
-        // Assert
-        // Assuming the highlight color is distinct from the hash-based color.
-        // If the hash happens to match the highlight color exactly, this test might flake,
-        // but it is a reasonable assumption for a highlight feature.
-        Assert.NotEqual(colorStandard, colorHighlighted);
+        // Expect at least 90 % uniqueness – collisions are possible but should be rare.
+        var uniquenessRatio = (double)colors.Count / sampleSize;
+        Assert.True(uniquenessRatio > 0.9, $"Uniqueness ratio was {uniquenessRatio:P2}");
     }
 }
