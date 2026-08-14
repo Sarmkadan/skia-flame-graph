@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SkiaFlameGraph.Core.Models;
 
@@ -63,7 +64,7 @@ public static class SpeedscopeFileValidation
         }
         else
         {
-            problems.AddRange(ValidateProfiles(value.Profiles));
+            problems.AddRange(ValidateProfiles(value.Profiles, value.Shared));
         }
 
         // Validate Name (optional)
@@ -178,12 +179,15 @@ public static class SpeedscopeFileValidation
         }
     }
 
-    private static IEnumerable<string> ValidateProfiles(IReadOnlyList<Profile> profiles)
+    private static IEnumerable<string> ValidateProfiles(IReadOnlyList<Profile> profiles, SharedData? shared)
     {
         if (profiles.Count == 0)
         {
             yield return "SpeedscopeFile.Profiles must contain at least one profile.";
         }
+
+        // Determine the number of frames for range checks (0 if shared is null)
+        var frameCount = shared?.Frames?.Count ?? 0;
 
         for (var i = 0; i < profiles.Count; i++)
         {
@@ -233,6 +237,22 @@ public static class SpeedscopeFileValidation
                 yield return $"Profile at index {i}.EndValue ({profile.EndValue}) must be greater than or equal to StartValue ({profile.StartValue}).";
             }
 
+            // Evented profiles must have events; sampled profiles must have samples
+            if (profile.Type == "evented")
+            {
+                if (profile.Events is null)
+                {
+                    yield return $"Profile at index {i} of type 'evented' must have an Events collection.";
+                }
+            }
+            else if (profile.Type == "sampled")
+            {
+                if (profile.Samples is null)
+                {
+                    yield return $"Profile at index {i} of type 'sampled' must have a Samples collection.";
+                }
+            }
+
             if (profile.Events is not null)
             {
                 if (profile.Events.Count > MaxEvents)
@@ -240,7 +260,7 @@ public static class SpeedscopeFileValidation
                     yield return $"Profile at index {i}.Events contains {profile.Events.Count} events, which exceeds the allowed maximum of {MaxEvents}.";
                 }
 
-                foreach (var evtProblem in ValidateProfileEvents(profile.Events))
+                foreach (var evtProblem in ValidateProfileEvents(profile.Events, frameCount))
                 {
                     yield return evtProblem;
                 }
@@ -248,7 +268,7 @@ public static class SpeedscopeFileValidation
 
             if (profile.Samples is not null)
             {
-                foreach (var sampleProblem in ValidateProfileSamples(profile.Samples))
+                foreach (var sampleProblem in ValidateProfileSamples(profile.Samples, frameCount))
                 {
                     yield return sampleProblem;
                 }
@@ -264,7 +284,7 @@ public static class SpeedscopeFileValidation
         }
     }
 
-    private static IEnumerable<string> ValidateProfileEvents(IReadOnlyList<ProfileEvent> events)
+    private static IEnumerable<string> ValidateProfileEvents(IReadOnlyList<ProfileEvent> events, int maxFrames)
     {
         if (events.Count == 0)
         {
@@ -322,6 +342,10 @@ public static class SpeedscopeFileValidation
             {
                 yield return $"ProfileEvent at index {i}.Frame must be non-negative, but was {evt.Frame}.";
             }
+            else if (evt.Frame >= maxFrames)
+            {
+                yield return $"ProfileEvent at index {i}.Frame references out‑of‑range frame index {evt.Frame} (max {maxFrames - 1}).";
+            }
 
             if (evt.At < 0)
             {
@@ -335,7 +359,7 @@ public static class SpeedscopeFileValidation
         }
     }
 
-    private static IEnumerable<string> ValidateProfileSamples(IReadOnlyList<List<int>> samples)
+    private static IEnumerable<string> ValidateProfileSamples(IReadOnlyList<List<int>> samples, int maxFrames)
     {
         if (samples.Count == 0)
         {
@@ -364,6 +388,10 @@ public static class SpeedscopeFileValidation
                 if (frameIndex < 0)
                 {
                     yield return $"Profile.Samples[{i}][{j}] contains a negative frame index ({frameIndex}).";
+                }
+                else if (frameIndex >= maxFrames)
+                {
+                    yield return $"Profile.Samples[{i}][{j}] references out‑of‑range frame index {frameIndex} (max {maxFrames - 1}).";
                 }
             }
         }

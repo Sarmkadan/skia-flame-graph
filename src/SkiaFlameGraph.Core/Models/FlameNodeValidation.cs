@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace SkiaFlameGraph.Core.Models;
 
 /// <summary>
@@ -6,7 +10,7 @@ namespace SkiaFlameGraph.Core.Models;
 public static partial class FlameNodeValidation
 {
     /// <summary>
-    /// Validates a <see cref="FlameNode"/> instance and returns a list of human-readable problems.
+    /// Validates a <see cref="FlameNode"/> instance and returns a list of human‑readable problems.
     /// </summary>
     /// <param name="value">The node to validate.</param>
     /// <returns>A list of validation problems; empty if the node is valid.</returns>
@@ -23,19 +27,19 @@ public static partial class FlameNodeValidation
             problems.Add("Name cannot be null or whitespace.");
         }
 
-        // Validate Value (should be non-negative)
-        if (value.Value < 0)
+        // Validate Value (must be positive)
+        if (value.Value <= 0)
         {
-            problems.Add("Value cannot be negative.");
+            problems.Add("Value must be positive.");
         }
 
-        // Validate Depth (should be non-negative)
+        // Validate Depth (should be non‑negative)
         if (value.Depth < 0)
         {
             problems.Add("Depth cannot be negative.");
         }
 
-        // Validate Children
+        // Validate Children collection
         if (value.Children is null)
         {
             problems.Add("Children collection cannot be null.");
@@ -73,6 +77,12 @@ public static partial class FlameNodeValidation
             problems.Add(childWeightProblem);
         }
 
+        // Detect cycles in the node graph
+        if (HasCycle(value, new HashSet<FlameNode>()))
+        {
+            problems.Add("FlameNode graph contains a cycle.");
+        }
+
         return problems.AsReadOnly();
     }
 
@@ -82,7 +92,7 @@ public static partial class FlameNodeValidation
     /// </summary>
     /// <param name="value">The node to validate.</param>
     /// <param name="path">The path to the node for error reporting.</param>
-    /// <returns>A validation problem if the invariant is violated; otherwise, null.</returns>
+    /// <returns>A validation problem if the invariant is violated; otherwise, <c>null</c>.</returns>
     private static string? ValidateChildWeightInvariant(this FlameNode value, string path)
     {
         if (value.Children.Count == 0 || value.Value <= 0)
@@ -102,11 +112,40 @@ public static partial class FlameNodeValidation
     }
 
     /// <summary>
+    /// Detects a cycle in the <see cref="FlameNode"/> graph.
+    /// </summary>
+    /// <param name="node">The node to start the detection from.</param>
+    /// <param name="visited">A set of nodes visited on the current path.</param>
+    /// <returns><c>true</c> if a cycle is found; otherwise, <c>false</c>.</returns>
+    private static bool HasCycle(FlameNode node, HashSet<FlameNode> visited)
+    {
+        if (!visited.Add(node))
+        {
+            // Node already on the current path → cycle
+            return true;
+        }
+
+        if (node.Children is not null)
+        {
+            foreach (var child in node.Children)
+            {
+                if (child is not null && HasCycle(child, visited))
+                {
+                    return true;
+                }
+            }
+        }
+
+        // Remove node when backtracking
+        visited.Remove(node);
+        return false;
+    }
+
+    /// <summary>
     /// Determines whether a <see cref="FlameNode"/> instance is valid.
     /// </summary>
     /// <param name="value">The node to check.</param>
-    /// <returns>True if the node is valid; otherwise, false.</returns>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
+    /// <returns><c>true</c> if the node is valid; otherwise, <c>false</c>.</returns>
     public static bool IsValid(this FlameNode? value) => value?.Validate().Count == 0;
 
     /// <summary>
