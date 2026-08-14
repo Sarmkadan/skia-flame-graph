@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
+using SkiaFlameGraph.Core;
 
 namespace SkiaFlameGraph.Core.Rendering;
 
@@ -9,20 +9,6 @@ namespace SkiaFlameGraph.Core.Rendering;
 /// </summary>
 public static class TreemapRendererJsonExtensions
 {
-    private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web)
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = false,
-        TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
-    };
-
-    private static readonly JsonSerializerOptions _jsonOptionsIndented = new(JsonSerializerDefaults.Web)
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = true,
-        TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
-    };
-
     /// <summary>
     /// Serializes the <see cref="TreemapRenderer"/> instance to a JSON string.
     /// </summary>
@@ -31,7 +17,16 @@ public static class TreemapRendererJsonExtensions
     /// <returns>A JSON string representation of the renderer.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is <see langword="null"/>.</exception>
     public static string ToJson(this TreemapRenderer value, bool indented = false)
-        => JsonSerializer.Serialize(value, indented ? _jsonOptionsIndented : _jsonOptions);
+    {
+        ArgumentNullException.ThrowIfNull(value);
+
+        var options = new JsonSerializerOptions(JsonDefaults.Options)
+        {
+            WriteIndented = indented,
+        };
+
+        return JsonSerializer.Serialize(value, options);
+    }
 
     /// <summary>
     /// Deserializes a <see cref="TreemapRenderer"/> instance from a JSON string.
@@ -44,7 +39,9 @@ public static class TreemapRendererJsonExtensions
     {
         ArgumentNullException.ThrowIfNull(json);
 
-        return JsonSerializer.Deserialize<TreemapRenderer>(json, _jsonOptions);
+        return string.IsNullOrWhiteSpace(json)
+            ? null
+            : JsonSerializer.Deserialize<TreemapRenderer>(json, JsonDefaults.Options);
     }
 
     /// <summary>
@@ -54,6 +51,25 @@ public static class TreemapRendererJsonExtensions
     /// <param name="value">Receives the deserialized renderer if successful.</param>
     /// <returns><see langword="true"/> if deserialization succeeded; otherwise, <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is <see langword="null"/>.</exception>
-    public static bool TryFromJson(string json, [NotNullWhen(true)] out TreemapRenderer? value)
-        => (value = JsonSerializer.Deserialize<TreemapRenderer>(json, _jsonOptions)) is not null;
+    public static bool TryFromJson(string json, out TreemapRenderer? value)
+    {
+        ArgumentNullException.ThrowIfNull(json);
+
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            value = null;
+            return true;
+        }
+
+        try
+        {
+            value = JsonSerializer.Deserialize<TreemapRenderer>(json, JsonDefaults.Options);
+            return true;
+        }
+        catch (JsonException)
+        {
+            value = null;
+            return false;
+        }
+    }
 }

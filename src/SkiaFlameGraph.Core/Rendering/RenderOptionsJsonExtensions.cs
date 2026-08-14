@@ -1,17 +1,10 @@
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
+using SkiaFlameGraph.Core;
 
 namespace SkiaFlameGraph.Core.Rendering;
 
 public static class RenderOptionsJsonExtensions
 {
-    private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web)
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = false,
-        TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
-    };
-
     /// <summary>
     /// Serializes the <see cref="RenderOptions"/> instance to a JSON string using camelCase property naming.
     /// </summary>
@@ -23,14 +16,10 @@ public static class RenderOptionsJsonExtensions
     {
         ArgumentNullException.ThrowIfNull(value);
 
-        var options = indented
-            ? new JsonSerializerOptions(_jsonOptions)
-            {
-                PropertyNamingPolicy = _jsonOptions.PropertyNamingPolicy,
-                WriteIndented = true,
-                TypeInfoResolver = _jsonOptions.TypeInfoResolver,
-            }
-            : _jsonOptions;
+        var options = new JsonSerializerOptions(JsonDefaults.Options)
+        {
+            WriteIndented = indented,
+        };
 
         return JsonSerializer.Serialize(value, options);
     }
@@ -38,10 +27,9 @@ public static class RenderOptionsJsonExtensions
     /// <summary>
     /// Deserializes a <see cref="RenderOptions"/> instance from a JSON string.
     /// </summary>
-    /// <param name="json">The JSON string to deserialize. Must not be <see langword="null"/> or whitespace.</param>
+    /// <param name="json">The JSON string to deserialize. Must not be <see langword="null"/>.</param>
     /// <returns>The deserialized options, or <see langword="null"/> if the JSON is empty or whitespace.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="json"/> is empty or consists only of whitespace.</exception>
     /// <exception cref="JsonException">Thrown when the JSON is invalid or cannot be deserialized.</exception>
     public static RenderOptions? FromJson(string json)
     {
@@ -49,13 +37,13 @@ public static class RenderOptionsJsonExtensions
 
         return string.IsNullOrWhiteSpace(json)
             ? null
-            : JsonSerializer.Deserialize<RenderOptions>(json, _jsonOptions);
+            : JsonSerializer.Deserialize<RenderOptions>(json, JsonDefaults.Options);
     }
 
     /// <summary>
     /// Attempts to deserialize a <see cref="RenderOptions"/> instance from a JSON string.
     /// </summary>
-    /// <param name="json">The JSON string to deserialize. Must not be <see langword="null"/> or whitespace.</param>
+    /// <param name="json">The JSON string to deserialize. Must not be <see langword="null"/>.</param>
     /// <param name="value">Receives the deserialized options if successful.</param>
     /// <returns><see langword="true"/> if deserialization succeeded; otherwise, <see langword="false"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is <see langword="null"/>.</exception>
@@ -71,7 +59,7 @@ public static class RenderOptionsJsonExtensions
 
         try
         {
-            value = JsonSerializer.Deserialize<RenderOptions>(json, _jsonOptions);
+            value = JsonSerializer.Deserialize<RenderOptions>(json, JsonDefaults.Options);
             return true;
         }
         catch (JsonException)

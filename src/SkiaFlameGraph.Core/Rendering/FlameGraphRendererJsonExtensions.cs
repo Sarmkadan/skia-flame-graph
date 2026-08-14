@@ -1,4 +1,5 @@
 using System.Text.Json;
+using SkiaFlameGraph.Core;
 
 namespace SkiaFlameGraph.Core.Rendering;
 
@@ -7,12 +8,6 @@ namespace SkiaFlameGraph.Core.Rendering;
 /// </summary>
 public static class FlameGraphRendererJsonExtensions
 {
-    private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web)
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = false,
-    };
-
     /// <summary>
     /// Serializes the <see cref="FlameGraphRenderer"/> instance to a JSON string.
     /// </summary>
@@ -24,12 +19,10 @@ public static class FlameGraphRendererJsonExtensions
     {
         ArgumentNullException.ThrowIfNull(value);
 
-        var options = indented
-            ? new JsonSerializerOptions(_jsonOptions)
-            {
-                WriteIndented = true,
-            }
-            : _jsonOptions;
+        var options = new JsonSerializerOptions(JsonDefaults.Options)
+        {
+            WriteIndented = indented,
+        };
 
         return JsonSerializer.Serialize(value, options);
     }
@@ -45,7 +38,9 @@ public static class FlameGraphRendererJsonExtensions
     {
         ArgumentNullException.ThrowIfNull(json);
 
-        return JsonSerializer.Deserialize<FlameGraphRenderer>(json.Trim(), _jsonOptions);
+        return string.IsNullOrWhiteSpace(json)
+            ? null
+            : JsonSerializer.Deserialize<FlameGraphRenderer>(json, JsonDefaults.Options);
     }
 
     /// <summary>
@@ -59,9 +54,15 @@ public static class FlameGraphRendererJsonExtensions
     {
         ArgumentNullException.ThrowIfNull(json);
 
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            value = null;
+            return true;
+        }
+
         try
         {
-            value = JsonSerializer.Deserialize<FlameGraphRenderer>(json.Trim(), _jsonOptions);
+            value = JsonSerializer.Deserialize<FlameGraphRenderer>(json, JsonDefaults.Options);
             return true;
         }
         catch (JsonException)
