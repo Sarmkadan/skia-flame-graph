@@ -15,7 +15,7 @@ public static class CollapsedStacksParser
     /// </summary>
     /// <param name="path">Path to the collapsed stacks file.</param>
     /// <returns>A FlameNode tree with "root" as the root node.</returns>
-    public static FlameNode ParseFile(string path)
+    public static FlameNode ParseFile(string path, CancellationToken cancellationToken = default)
     {
         if (!File.Exists(path))
         {
@@ -31,7 +31,7 @@ public static class CollapsedStacksParser
     /// </summary>
     /// <param name="lines">Lines of text in Brendan Gregg collapsed stack format.</param>
     /// <returns>A FlameNode tree with "root" as the root node.</returns>
-    public static FlameNode Parse(IEnumerable<string> lines)
+    public static FlameNode Parse(IEnumerable<string> lines, CancellationToken cancellationToken = default)
     {
         var root = new FlameNode("root");
 

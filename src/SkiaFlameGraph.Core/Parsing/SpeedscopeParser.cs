@@ -41,7 +41,7 @@ public static partial class SpeedscopeParser
     /// <returns>The root <see cref="FlameNode"/> of the aggregated call tree.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="path"/> is null.</exception>
     /// <exception cref="FormatException">Thrown when the document deserializes to null or contains no profiles.</exception>
-    public static FlameNode ParseFile(string path)
+    public static FlameNode ParseFile(string path, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(path);
 
@@ -63,7 +63,7 @@ public static partial class SpeedscopeParser
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="file"/> is null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="profileIndex"/> is outside the valid range.</exception>
     /// <exception cref="FormatException">Thrown when the profile type is unsupported.</exception>
-    public static FlameNode BuildTree(SpeedscopeFile file, int profileIndex = 0)
+    public static FlameNode BuildTree(SpeedscopeFile file, int profileIndex = 0, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(file);
         if (profileIndex < 0 || profileIndex >= file.Profiles.Count)
