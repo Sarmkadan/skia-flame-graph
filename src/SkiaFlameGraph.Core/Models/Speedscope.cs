@@ -9,7 +9,7 @@ namespace SkiaFlameGraph.Core.Models;
 /// happily ignore.
 /// Format reference: https://github.com/jlfwong/speedscope/blob/main/src/lib/file-format-spec.ts
 /// </summary>
-public sealed class SpeedscopeFile
+public sealed class SpeedscopeFile : ISpeedscopeFile
 {
     [JsonPropertyName("$schema")]
     public string? Schema { get; set; }
