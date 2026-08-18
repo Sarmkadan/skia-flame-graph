@@ -5,7 +5,7 @@ namespace SkiaFlameGraph.Core.Models;
 /// the flame graph and treemap renderers draw from. <see cref="Value"/> is the
 /// total time (in the profile's unit) spent in this frame and all its children.
 /// </summary>
-public sealed class FlameNode
+public sealed class FlameNode : IFlameNode
 {
     public FlameNode(string name)
     {
