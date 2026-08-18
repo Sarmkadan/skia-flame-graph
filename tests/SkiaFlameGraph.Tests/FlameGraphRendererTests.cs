@@ -7,7 +7,7 @@ using Xunit;
 
 namespace SkiaFlameGraph.Tests
 {
-    public class FlameGraphRendererTests
+    public class FlameGraphRendererTests : IFlameGraphRendererTests
     {
         private readonly FlameGraphRenderer _renderer;
         private readonly RenderOptions _defaultOptions;
