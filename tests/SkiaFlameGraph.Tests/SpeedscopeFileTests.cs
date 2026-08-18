@@ -8,7 +8,7 @@ namespace SkiaFlameGraph.Tests;
 /// Contains unit tests for the <see cref="SpeedscopeFile"/> class.
 /// These tests verify the correct behavior of SpeedscopeFile properties and serialization.
 /// </summary>
-public class SpeedscopeFileTests
+public class SpeedscopeFileTests : ISpeedscopeFileTests
 {
     /// <summary>
     /// Tests that SpeedscopeFile can be deserialized from a valid JSON string.
