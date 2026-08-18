@@ -6,7 +6,7 @@ namespace SkiaFlameGraph.Core.Reporting;
 /// <summary>
 /// Aggregates FlameNode self-time by frame name across the tree and produces a top-N list.
 /// </summary>
-public sealed class HotFunctionsReport
+public sealed class HotFunctionsReport : IHotFunctionsReport
 {
     private readonly List<HotFunction> _functions = new();
     private double _totalSelfTime;
