@@ -5,7 +5,7 @@ using Xunit;
 
 namespace SkiaFlameGraph.Tests;
 
-public class RenderOptionsValidationTests
+public class RenderOptionsValidationTests : IRenderOptionsValidationTests
 {
     private RenderOptions CreateValidOptions()
     {
