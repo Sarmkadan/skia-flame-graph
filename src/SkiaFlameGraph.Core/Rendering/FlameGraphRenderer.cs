@@ -7,7 +7,7 @@ namespace SkiaFlameGraph.Core.Rendering;
 /// Renders a call tree as a flame graph: every frame is a box whose width is 8
 /// proportional to its total time, stacked by call depth.
 /// </summary>
-public sealed class FlameGraphRenderer : BaseFlameNodeRenderer
+public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRenderer
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="FlameGraphRenderer"/> class.
