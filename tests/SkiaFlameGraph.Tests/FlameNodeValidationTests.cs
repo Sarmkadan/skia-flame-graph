@@ -2,7 +2,7 @@ using SkiaFlameGraph.Core.Models;
 
 namespace SkiaFlameGraph.Tests;
 
-public class FlameNodeValidationTests
+public class FlameNodeValidationTests : IFlameNodeValidationTests
 {
     [Fact]
     public void Validate_ValidNode_ReturnsEmptyList()
