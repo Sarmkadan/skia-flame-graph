@@ -5,7 +5,7 @@ using Xunit;
 
 namespace SkiaFlameGraph.Tests
 {
-    public class RenderOptionsTests
+    public class RenderOptionsTests : IRenderOptionsTests
     {
         [Fact]
         public void DefaultValues_ShouldMatchExpected()
