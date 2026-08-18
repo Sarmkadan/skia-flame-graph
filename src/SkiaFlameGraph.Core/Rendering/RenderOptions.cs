@@ -2,7 +2,7 @@ using SkiaSharp;
 
 namespace SkiaFlameGraph.Core.Rendering;
 
-public sealed class RenderOptions
+public sealed class RenderOptions : IRenderOptions
 {
     public int Width { get; set; } = 1600;
 
