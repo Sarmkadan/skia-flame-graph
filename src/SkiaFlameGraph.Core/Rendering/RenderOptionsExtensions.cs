@@ -137,6 +137,142 @@ public static class RenderOptionsExtensions
     }
 
     /// <summary>
+    /// Creates a new <see cref="RenderOptions"/> instance with the specified minimum label width, copying all other properties from the original.
+    /// </summary>
+    /// <param name="options">The original render options.</param>
+    /// <param name="minLabelWidth">The new minimum label width value.</param>
+    /// <returns>A new <see cref="RenderOptions"/> instance with the updated minimum label width.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="minLabelWidth"/> is negative.</exception>
+    public static RenderOptions WithMinLabelWidth(this RenderOptions options, float minLabelWidth)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentOutOfRangeException.ThrowIfNegative(minLabelWidth);
+
+        return new RenderOptions
+        {
+            Width = options.Width,
+            RowHeight = options.RowHeight,
+            MinBoxWidth = options.MinBoxWidth,
+            Padding = options.Padding,
+            FontSize = options.FontSize,
+            Background = options.Background,
+            TextColor = options.TextColor,
+            Inverted = options.Inverted,
+            MinLabelWidth = minLabelWidth
+        };
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="RenderOptions"/> instance with the specified minimum box width, copying all other properties from the original.
+    /// </summary>
+    /// <param name="options">The original render options.</param>
+    /// <param name="minBoxWidth">The new minimum box width value.</param>
+    /// <returns>A new <see cref="RenderOptions"/> instance with the updated minimum box width.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="minBoxWidth"/> is negative.</exception>
+    public static RenderOptions WithMinBoxWidth(this RenderOptions options, float minBoxWidth)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentOutOfRangeException.ThrowIfNegative(minBoxWidth);
+
+        return new RenderOptions
+        {
+            Width = options.Width,
+            RowHeight = options.RowHeight,
+            MinLabelWidth = options.MinLabelWidth,
+            Padding = options.Padding,
+            FontSize = options.FontSize,
+            Background = options.Background,
+            TextColor = options.TextColor,
+            Inverted = options.Inverted,
+            MinBoxWidth = minBoxWidth
+        };
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="RenderOptions"/> instance with the specified minimum subtree width, copying all other properties from the original.
+    /// </summary>
+    /// <param name="options">The original render options.</param>
+    /// <param name="minSubtreeWidthPx">The new minimum subtree width value.</param>
+    /// <returns>A new <see cref="RenderOptions"/> instance with the updated minimum subtree width.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="minSubtreeWidthPx"/> is negative.</exception>
+    public static RenderOptions WithMinSubtreeWidthPx(this RenderOptions options, float minSubtreeWidthPx)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentOutOfRangeException.ThrowIfNegative(minSubtreeWidthPx);
+
+        return new RenderOptions
+        {
+            Width = options.Width,
+            RowHeight = options.RowHeight,
+            MinLabelWidth = options.MinLabelWidth,
+            MinBoxWidth = options.MinBoxWidth,
+            Padding = options.Padding,
+            FontSize = options.FontSize,
+            Background = options.Background,
+            TextColor = options.TextColor,
+            Inverted = options.Inverted,
+            MinSubtreeWidthPx = minSubtreeWidthPx
+        };
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="RenderOptions"/> instance with the specified padding, copying all other properties from the original.
+    /// </summary>
+    /// <param name="options">The original render options.</param>
+    /// <param name="padding">The new padding value.</param>
+    /// <returns>A new <see cref="RenderOptions"/> instance with the updated padding.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="padding"/> is negative.</exception>
+    public static RenderOptions WithPadding(this RenderOptions options, float padding)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentOutOfRangeException.ThrowIfNegative(padding);
+
+        return new RenderOptions
+        {
+            Width = options.Width,
+            RowHeight = options.RowHeight,
+            MinLabelWidth = options.MinLabelWidth,
+            MinBoxWidth = options.MinBoxWidth,
+            FontSize = options.FontSize,
+            Background = options.Background,
+            TextColor = options.TextColor,
+            Inverted = options.Inverted,
+            Padding = padding
+        };
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="RenderOptions"/> instance with the specified font size, copying all other properties from the original.
+    /// </summary>
+    /// <param name="options">The original render options.</param>
+    /// <param name="fontSize">The new font size value.</param>
+    /// <returns>A new <see cref="RenderOptions"/> instance with the updated font size.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="fontSize"/> is not positive.</exception>
+    public static RenderOptions WithFontSize(this RenderOptions options, float fontSize)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(fontSize, 0);
+
+        return new RenderOptions
+        {
+            Width = options.Width,
+            RowHeight = options.RowHeight,
+            MinLabelWidth = options.MinLabelWidth,
+            MinBoxWidth = options.MinBoxWidth,
+            Padding = options.Padding,
+            Background = options.Background,
+            TextColor = options.TextColor,
+            Inverted = options.Inverted,
+            FontSize = fontSize
+        };
+    }
+
+    /// <summary>
     /// Creates a new <see cref="RenderOptions"/> instance with the specified background color, copying all other properties from the original.
     /// </summary>
     /// <param name="options">The original render options.</param>
@@ -158,6 +294,82 @@ public static class RenderOptionsExtensions
             TextColor = options.TextColor,
             Inverted = options.Inverted,
             Background = background
+        };
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="RenderOptions"/> instance with the specified text color, copying all other properties from the original.
+    /// </summary>
+    /// <param name="options">The original render options.</param>
+    /// <param name="textColor">The new text color.</param>
+    /// <returns>A new <see cref="RenderOptions"/> instance with the updated text color.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
+    public static RenderOptions WithTextColor(this RenderOptions options, SKColor textColor)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+
+        return new RenderOptions
+        {
+            Width = options.Width,
+            RowHeight = options.RowHeight,
+            MinLabelWidth = options.MinLabelWidth,
+            MinBoxWidth = options.MinBoxWidth,
+            Padding = options.Padding,
+            FontSize = options.FontSize,
+            Background = options.Background,
+            Inverted = options.Inverted,
+            TextColor = textColor
+        };
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="RenderOptions"/> instance with the specified inverted flag, copying all other properties from the original.
+    /// </summary>
+    /// <param name="options">The original render options.</param>
+    /// <param name="inverted">The new inverted value.</param>
+    /// <returns>A new <see cref="RenderOptions"/> instance with the updated inverted flag.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
+    public static RenderOptions WithInverted(this RenderOptions options, bool inverted)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+
+        return new RenderOptions
+        {
+            Width = options.Width,
+            RowHeight = options.RowHeight,
+            MinLabelWidth = options.MinLabelWidth,
+            MinBoxWidth = options.MinBoxWidth,
+            Padding = options.Padding,
+            FontSize = options.FontSize,
+            Background = options.Background,
+            TextColor = options.TextColor,
+            Inverted = inverted
+        };
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="RenderOptions"/> instance with the specified highlight pattern, copying all other properties from the original.
+    /// </summary>
+    /// <param name="options">The original render options.</param>
+    /// <param name="highlightPattern">The new highlight pattern.</param>
+    /// <returns>A new <see cref="RenderOptions"/> instance with the updated highlight pattern.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
+    public static RenderOptions WithHighlightPattern(this RenderOptions options, string? highlightPattern)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+
+        return new RenderOptions
+        {
+            Width = options.Width,
+            RowHeight = options.RowHeight,
+            MinLabelWidth = options.MinLabelWidth,
+            MinBoxWidth = options.MinBoxWidth,
+            Padding = options.Padding,
+            FontSize = options.FontSize,
+            Background = options.Background,
+            TextColor = options.TextColor,
+            Inverted = options.Inverted,
+            HighlightPattern = highlightPattern
         };
     }
 
