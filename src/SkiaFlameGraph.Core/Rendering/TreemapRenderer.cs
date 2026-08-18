@@ -8,7 +8,7 @@ namespace SkiaFlameGraph.Core.Rendering;
 /// are packed into its rectangle; the treemap view is handy when you care more
 /// about aggregate cost than call ordering.
 /// </summary>
-public sealed class TreemapRenderer : BaseFlameNodeRenderer
+public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="TreemapRenderer"/> class.
