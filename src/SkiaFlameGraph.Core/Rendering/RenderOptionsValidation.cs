@@ -23,48 +23,48 @@ public static class RenderOptionsValidation
 
         if (value.Width <= 0)
         {
-            errors.Add($"Width must be positive, but was {value.Width}.");
+            errors.Add(string.Format(CultureInfo.InvariantCulture, RenderOptionsValidationConstants.WidthMustBePositive, value.Width));
         }
 
         if (value.RowHeight <= 0f)
         {
-            errors.Add(string.Format(CultureInfo.InvariantCulture, "RowHeight must be positive, but was {0}.", value.RowHeight));
+            errors.Add(string.Format(CultureInfo.InvariantCulture, RenderOptionsValidationConstants.RowHeightMustBePositive, value.RowHeight));
         }
 
         if (value.MinLabelWidth < 0f)
         {
-            errors.Add(string.Format(CultureInfo.InvariantCulture, "MinLabelWidth must be non-negative, but was {0}.", value.MinLabelWidth));
+            errors.Add(string.Format(CultureInfo.InvariantCulture, RenderOptionsValidationConstants.MinLabelWidthMustBeNonNegative, value.MinLabelWidth));
         }
 
         if (value.MinBoxWidth < 0f)
         {
-            errors.Add(string.Format(CultureInfo.InvariantCulture, "MinBoxWidth must be non-negative, but was {0}.", value.MinBoxWidth));
+            errors.Add(string.Format(CultureInfo.InvariantCulture, RenderOptionsValidationConstants.MinBoxWidthMustBeNonNegative, value.MinBoxWidth));
         }
 
         if (value.MinSubtreeWidthPx < 0f)
         {
-            errors.Add(string.Format(CultureInfo.InvariantCulture, "MinSubtreeWidthPx must be non-negative, but was {0}.", value.MinSubtreeWidthPx));
+            errors.Add(string.Format(CultureInfo.InvariantCulture, RenderOptionsValidationConstants.MinSubtreeWidthPxMustBeNonNegative, value.MinSubtreeWidthPx));
         }
 
         if (value.Padding < 0f)
         {
-            errors.Add(string.Format(CultureInfo.InvariantCulture, "Padding must be non-negative, but was {0}.", value.Padding));
+            errors.Add(string.Format(CultureInfo.InvariantCulture, RenderOptionsValidationConstants.PaddingMustBeNonNegative, value.Padding));
         }
 
         if (value.FontSize <= 0f)
         {
-            errors.Add(string.Format(CultureInfo.InvariantCulture, "FontSize must be positive, but was {0}.", value.FontSize));
+            errors.Add(string.Format(CultureInfo.InvariantCulture, RenderOptionsValidationConstants.FontSizeMustBePositive, value.FontSize));
         }
 
         if (value.HighlightPattern is not null && value.HighlightPattern.Length > 0)
         {
             try
             {
-                _ = System.Text.RegularExpressions.Regex.IsMatch("test", value.HighlightPattern);
+                _ = System.Text.RegularExpressions.Regex.IsMatch(RenderOptionsValidationConstants.RegexTestString, value.HighlightPattern);
             }
             catch (System.Text.RegularExpressions.RegexParseException ex)
             {
-                errors.Add(string.Format(CultureInfo.InvariantCulture, "HighlightPattern must be a valid regular expression, but was invalid: {0}", ex.Message));
+                errors.Add(string.Format(CultureInfo.InvariantCulture, RenderOptionsValidationConstants.HighlightPatternMustBeValidRegex, ex.Message));
             }
         }
 
@@ -100,7 +100,7 @@ public static class RenderOptionsValidation
         }
 
         throw new ArgumentException(
-            $"RenderOptions is invalid. {string.Join(" ", errors)}",
+            $"{RenderOptionsValidationConstants.RenderOptionsIsInvalid}{string.Join(" ", errors)}",
             nameof(value));
     }
 }
