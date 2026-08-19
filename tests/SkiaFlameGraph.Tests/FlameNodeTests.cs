@@ -8,7 +8,7 @@ namespace SkiaFlameGraph.Tests;
 /// These tests exercise the node construction logic, child linkage,
 /// depth calculation, and metadata handling.
 /// </summary>
-public class FlameNodeTests
+public class FlameNodeTests : IFlameNodeTests
 {
     /// <summary>
     /// Verifies that <see cref="FlameNode.AddChild"/> creates a child node
