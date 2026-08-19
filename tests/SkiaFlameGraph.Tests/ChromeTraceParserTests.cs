@@ -8,7 +8,7 @@ namespace SkiaFlameGraph.Tests;
 /// These tests verify the correct parsing and tree construction behavior
 /// for Chrome trace event format.
 /// </summary>
-public class ChromeTraceParserTests
+public class ChromeTraceParserTests : IChromeTraceParserTests
 {
     private const string SimpleCompleteEventsJson = """
     [
