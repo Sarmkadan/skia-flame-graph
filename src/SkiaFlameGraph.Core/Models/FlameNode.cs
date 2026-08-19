@@ -5,7 +5,7 @@ namespace SkiaFlameGraph.Core.Models;
 /// the flame graph and treemap renderers draw from. <see cref="Value"/> is the
 /// total time (in the profile's unit) spent in this frame and all its children.
 /// </summary>
-public sealed class FlameNode : IFlameNode
+public sealed class FlameNode : IFlameNode, IEquatable<FlameNode>
 {
     public FlameNode(string name)
     {
@@ -28,6 +28,38 @@ public sealed class FlameNode : IFlameNode
     public List<FlameNode> Children { get; } = new();
 
     public FlameNode? Parent { get; set; }
+
+    public bool Equals(FlameNode? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Name == other.Name &&
+               File == other.File &&
+               Line == other.Line &&
+               Value.Equals(other.Value) &&
+               Depth == other.Depth &&
+               (Parent == null ? other.Parent == null : Parent.Equals(other.Parent));
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as FlameNode);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Name, File, Line, Value, Depth, Parent);
+    }
+
+    public static bool operator ==(FlameNode? left, FlameNode? right)
+    {
+        return Equals(left, right);
+    }
+
+    public static bool operator !=(FlameNode? left, FlameNode? right)
+    {
+        return !Equals(left, right);
+    }
 
     /// <summary>Weight attributed to this frame alone, excluding children.</summary>
     public double SelfValue
