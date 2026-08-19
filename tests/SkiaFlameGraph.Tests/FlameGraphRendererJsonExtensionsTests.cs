@@ -8,7 +8,7 @@ namespace SkiaFlameGraph.Tests;
 /// <summary>
 /// Unit tests for <see cref="FlameGraphRendererJsonExtensions"/>.
 /// </summary>
-public class FlameGraphRendererJsonExtensionsTests
+public class FlameGraphRendererJsonExtensionsTests : IFlameGraphRendererJsonExtensionsTests
 {
     /// <summary>
     /// Creates a minimal <see cref="FlameGraphRenderer"/> instance for testing.
