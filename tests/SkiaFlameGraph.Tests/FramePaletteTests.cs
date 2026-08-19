@@ -10,7 +10,7 @@ namespace SkiaFlameGraph.Tests;
 /// Tests for <see cref="FramePalette"/> ensuring deterministic colour assignment
 /// and reasonable collision behaviour.
 /// </summary>
-public sealed class FramePaletteTests
+public sealed class FramePaletteTests : IFramePaletteTests
 {
     [Fact]
     public void ForFrame_ReturnsSameColor_ForSameName()
