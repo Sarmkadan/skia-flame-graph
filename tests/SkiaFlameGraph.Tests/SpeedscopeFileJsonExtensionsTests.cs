@@ -7,7 +7,7 @@ namespace SkiaFlameGraph.Tests;
 /// <summary>
 /// Unit tests for <see cref="SpeedscopeFileJsonExtensions"/> JSON serialization/deserialization methods.
 /// </summary>
-public class SpeedscopeFileJsonExtensionsTests
+public class SpeedscopeFileJsonExtensionsTests : ISpeedscopeFileJsonExtensionsTests
 {
     [Fact]
     public void ToJson_WithValidSpeedscopeFile_ReturnsJsonString()
