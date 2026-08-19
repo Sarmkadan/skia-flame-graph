@@ -5,7 +5,7 @@ using Xunit;
 
 namespace SkiaFlameGraph.Tests;
 
-public class CollapsedStacksParserTests
+public class CollapsedStacksParserTests : ICollapsedStacksParserTests
 {
     [Fact]
     public void Parse_NormalInput_BuildsCorrectTree()
