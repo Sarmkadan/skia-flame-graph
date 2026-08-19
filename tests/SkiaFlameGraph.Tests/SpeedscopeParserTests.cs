@@ -8,7 +8,7 @@ namespace SkiaFlameGraph.Tests;
 /// These tests verify the correct parsing and tree construction behavior
 /// for different types of speedscope profiles (sampled and evented).
 /// </summary>
-public class SpeedscopeParserTests
+public class SpeedscopeParserTests : ISpeedscopeParserTests
 {
     private const string SampledJson = """
     {
