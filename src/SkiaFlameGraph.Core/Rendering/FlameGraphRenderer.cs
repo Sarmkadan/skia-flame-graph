@@ -1,5 +1,7 @@
 using SkiaFlameGraph.Core.Models;
 using SkiaSharp;
+using System;
+using System;
 
 namespace SkiaFlameGraph.Core.Rendering;
 
