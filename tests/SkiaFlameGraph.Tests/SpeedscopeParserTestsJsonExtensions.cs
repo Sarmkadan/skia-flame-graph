@@ -14,12 +14,7 @@ namespace SkiaFlameGraph.Tests;
 /// </remarks>
 public static class SpeedscopeParserTestsJsonExtensions
 {
-	private static readonly JsonSerializerOptions _jsonSerializerOptions = new(JsonSerializerDefaults.Web)
-	{
-		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-		WriteIndented = true,
-		NumberHandling = JsonNumberHandling.AllowReadingFromString
-	};
+	private static readonly JsonSerializerOptions _jsonSerializerOptions = SpeedscopeParserTestsJsonExtensionsConstants.DefaultJsonSerializerOptions;
 
 	/// <summary>
 	/// Serializes a <see cref="SpeedscopeParserTests"/> instance to a JSON string.
