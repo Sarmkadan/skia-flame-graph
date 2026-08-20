@@ -39,6 +39,34 @@ public static class SpeedscopeFileJsonExtensions
     }
 
     /// <summary>
+    /// Serializes the <see cref="SpeedscopeFile"/> instance to a JSON string asynchronously.
+    /// </summary>
+    /// <param name="value">The SpeedscopeFile to serialize.</param>
+    /// <param name="indented">Whether to format the JSON with indentation for readability.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous serialization operation. The task result contains the JSON string.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="value"/> is <see langword="null"/>.</exception>
+    public static async Task<string> ToJsonAsync(this SpeedscopeFile value, bool indented = false, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(value);
+
+        var options = indented
+            ? new JsonSerializerOptions(_jsonOptions)
+            {
+                PropertyNamingPolicy = _jsonOptions.PropertyNamingPolicy,
+                WriteIndented = true,
+                TypeInfoResolver = _jsonOptions.TypeInfoResolver,
+            }
+            : _jsonOptions;
+
+        await using var stream = new MemoryStream();
+        await JsonSerializer.SerializeAsync(stream, value, options, cancellationToken);
+        stream.Seek(0, SeekOrigin.Begin);
+        using var reader = new StreamReader(stream);
+        return await reader.ReadToEndAsync();
+    }
+
+    /// <summary>
     /// Deserializes a <see cref="SpeedscopeFile"/> instance from a JSON string.
     /// </summary>
     /// <param name="json">The JSON string to deserialize.</param>
