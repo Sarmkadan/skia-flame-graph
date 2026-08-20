@@ -1,7 +1,6 @@
 using SkiaFlameGraph.Core.Models;
 using SkiaSharp;
 using System;
-using System;
 
 namespace SkiaFlameGraph.Core.Rendering;
 
@@ -23,11 +22,16 @@ public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRende
     /// <summary>Render to an encoded PNG written to <paramref name="path"/>.</summary>
     public override void RenderToPng(FlameNode root, string path)
     {
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentException.ThrowIfNullOrEmpty(path);
+
         base.RenderToPng(root, path);
     }
 
     public override SKImage Render(FlameNode root)
     {
+        ArgumentNullException.ThrowIfNull(root);
+
         var depth = root.MaxDepth();
         var rows = depth + 1;
         var height = (int)MathF.Ceiling(rows * _options.RowHeight + _options.Padding * 2);
