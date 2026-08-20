@@ -10,6 +10,8 @@ namespace SkiaFlameGraph.Core.Rendering;
 /// </summary>
 public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRenderer
 {
+    private readonly Dictionary<string, string> _labelCache = new(StringComparer.Ordinal);
+
     /// <summary>
     /// Initializes a new instance of the <see cref="FlameGraphRenderer"/> class.
     /// </summary>
