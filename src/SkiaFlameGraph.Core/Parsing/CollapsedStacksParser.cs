@@ -34,6 +34,7 @@ public static class CollapsedStacksParser
     public static FlameNode Parse(IEnumerable<string> lines, CancellationToken cancellationToken = default)
     {
         var root = new FlameNode("root");
+        var framePool = new Dictionary<string, string>(StringComparer.Ordinal);
 
         foreach (var line in lines)
         {
@@ -44,7 +45,7 @@ public static class CollapsedStacksParser
 
             try
             {
-                var node = ParseLine(line);
+                var node = ParseLine(line, framePool);
                 if (node != null)
                 {
                     root.Value += node.Value;
@@ -100,7 +101,7 @@ public static class CollapsedStacksParser
         }
     }
 
-    private static FlameNode? ParseLine(string line)
+    private static FlameNode? ParseLine(string line, Dictionary<string, string> framePool)
     {
         // Split on the last space to separate frames from the count
         var lastSpaceIndex = line.LastIndexOf(' ');
@@ -145,7 +146,8 @@ public static class CollapsedStacksParser
             if (current == null)
             {
                 // Create leaf node with the count
-                current = new FlameNode(frame)
+                string internedFrame = framePool.TryGetValue(frame, out var existingFrame) ? existingFrame : framePool[frame] = frame;
+                current = new FlameNode(internedFrame)
                 {
                     Value = count
                 };
@@ -153,7 +155,8 @@ public static class CollapsedStacksParser
             else
             {
                 // Create parent node and add current as child
-                var parentNode = new FlameNode(frame);
+                string internedFrame = framePool.TryGetValue(frame, out var existingFrame) ? existingFrame : framePool[frame] = frame;
+                var parentNode = new FlameNode(internedFrame);
                 parentNode.AddChild(current.Name, current.File, current.Line).Value += current.Value;
                 current = parentNode;
             }
