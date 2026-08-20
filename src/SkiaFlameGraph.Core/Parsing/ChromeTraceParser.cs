@@ -32,6 +32,7 @@ public static class ChromeTraceParser
     /// <returns>Array of trace events.</returns>
     public static ChromeTraceEvent[] Deserialize(string json)
     {
+        ArgumentException.ThrowIfNullOrEmpty(json);
         var events = JsonSerializer.Deserialize<ChromeTraceEvent[]>(json, Options)
             ?? throw new FormatException("Chrome trace document deserialized to null");
         if (events.Length == 0)
