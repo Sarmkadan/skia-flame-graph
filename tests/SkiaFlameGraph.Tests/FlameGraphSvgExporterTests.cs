@@ -9,8 +9,8 @@ public class FlameGraphSvgExporterTests
 {
     private readonly RenderOptions _defaultOptions = new()
     {
-        Width = 1600,
-        RowHeight = 22f
+        Width = FlameGraphSvgExporterTestsConstants.DefaultWidth,
+        RowHeight = FlameGraphSvgExporterTestsConstants.DefaultRowHeight
     };
 
     [Fact]
@@ -53,9 +53,9 @@ public class FlameGraphSvgExporterTests
         Assert.True(File.Exists(tempFile));
         var content = File.ReadAllText(tempFile);
 
-        Assert.StartsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", content);
-        Assert.Contains("<svg", content);
-        Assert.True(content.Contains("</svg>"));
+        Assert.StartsWith(FlameGraphSvgExporterTestsConstants.XmlDeclaration, content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.SvgTag, content);
+        Assert.True(content.Contains(FlameGraphSvgExporterTestsConstants.SvgEndTag));
 
         File.Delete(tempFile);
     }
@@ -73,8 +73,8 @@ public class FlameGraphSvgExporterTests
         Assert.True(File.Exists(tempFile));
         var content = File.ReadAllText(tempFile);
 
-        Assert.Contains("<rect", content);
-        Assert.Contains("class=\"frame\"", content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.RectTag, content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.RectClass, content);
         Assert.Contains("data-name=\"main\"", content);
         Assert.Contains("data-value=\"100\"", content);
 
@@ -94,8 +94,8 @@ public class FlameGraphSvgExporterTests
         Assert.True(File.Exists(tempFile));
         var content = File.ReadAllText(tempFile);
 
-        Assert.StartsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", content);
-        Assert.Contains("<!DOCTYPE svg", content);
+        Assert.StartsWith(FlameGraphSvgExporterTestsConstants.XmlDeclaration, content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.DoctypeSvg, content);
 
         File.Delete(tempFile);
     }
@@ -113,10 +113,10 @@ public class FlameGraphSvgExporterTests
         Assert.True(File.Exists(tempFile));
         var content = File.ReadAllText(tempFile);
 
-        Assert.Contains("<style type=\"text/css\"><![CDATA[", content);
-        Assert.Contains(".frame { stroke: #333; stroke-width: 0.5; }", content);
-        Assert.Contains(".frame:hover { stroke-width: 1; stroke: #000; }", content);
-        Assert.Contains(".frame-label { font-family: Arial, sans-serif; font-size: 11px; fill: #fff; text-shadow: 0 0 2px #000; }", content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.StyleSection, content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.FrameStyle, content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.RectHoverClass, content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.FrameLabelStyle, content);
 
         File.Delete(tempFile);
     }
@@ -159,7 +159,7 @@ public class FlameGraphSvgExporterTests
         Assert.True(File.Exists(tempFile));
         var content = File.ReadAllText(tempFile);
 
-        var rectCount = CountOccurrences(content, "<rect");
+        var rectCount = CountOccurrences(content, FlameGraphSvgExporterTestsConstants.RectTag);
         Assert.Equal(3, rectCount);
 
         File.Delete(tempFile);
@@ -178,8 +178,8 @@ public class FlameGraphSvgExporterTests
         Assert.True(File.Exists(tempFile));
         var content = File.ReadAllText(tempFile);
 
-        Assert.Contains("<text", content);
-        Assert.Contains("class=\"frame-label\"", content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.TextTag, content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.FrameLabelClass, content);
         Assert.Contains("main", content);
 
         File.Delete(tempFile);
@@ -198,8 +198,8 @@ public class FlameGraphSvgExporterTests
         Assert.True(File.Exists(tempFile));
         var content = File.ReadAllText(tempFile);
 
-        Assert.Contains("<rect", content);
-        Assert.DoesNotContain("<text class=\"frame-label\"", content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.RectTag, content);
+        Assert.DoesNotContain(FlameGraphSvgExporterTestsConstants.TextTag + " " + FlameGraphSvgExporterTestsConstants.FrameLabelClass, content);
 
         File.Delete(tempFile);
     }
@@ -244,7 +244,7 @@ public class FlameGraphSvgExporterTests
         Assert.True(File.Exists(tempFile));
         var content = File.ReadAllText(tempFile);
 
-        var rectCount = CountOccurrences(content, "<rect");
+        var rectCount = CountOccurrences(content, FlameGraphSvgExporterTestsConstants.RectTag);
         Assert.Equal(1, rectCount);
 
         File.Delete(tempFile);
@@ -266,7 +266,7 @@ public class FlameGraphSvgExporterTests
         Assert.True(File.Exists(tempFile));
         var content = File.ReadAllText(tempFile);
 
-        var rectCount = CountOccurrences(content, "<rect");
+        var rectCount = CountOccurrences(content, FlameGraphSvgExporterTestsConstants.RectTag);
         Assert.Equal(1, rectCount);
 
         File.Delete(tempFile);
@@ -284,8 +284,8 @@ public class FlameGraphSvgExporterTests
 
         Assert.True(File.Exists(tempFile));
         var content = File.ReadAllText(tempFile);
-        Assert.StartsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", content);
-        Assert.Contains("<svg", content);
+        Assert.StartsWith(FlameGraphSvgExporterTestsConstants.XmlDeclaration, content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.SvgTag, content);
 
         File.Delete(tempFile);
     }
@@ -312,12 +312,12 @@ public class FlameGraphSvgExporterTests
         Assert.True(File.Exists(tempFile));
         var content = File.ReadAllText(tempFile);
 
-        Assert.StartsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", content);
-        Assert.Contains("<svg", content);
+        Assert.StartsWith(FlameGraphSvgExporterTestsConstants.XmlDeclaration, content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.SvgTag, content);
         Assert.Contains("data-name=\"main\"", content);
         Assert.Contains("data-value=\"100\"", content);
-        Assert.Contains("<rect", content);
-        Assert.Contains("</svg>", content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.RectTag, content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.SvgEndTag, content);
 
         File.Delete(tempFile);
     }
@@ -335,8 +335,8 @@ public class FlameGraphSvgExporterTests
         Assert.True(File.Exists(tempFile));
         var content = File.ReadAllText(tempFile);
 
-        Assert.StartsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", content);
-        Assert.Contains("<svg", content);
+        Assert.StartsWith(FlameGraphSvgExporterTestsConstants.XmlDeclaration, content);
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.SvgTag, content);
 
         File.Delete(tempFile);
     }
