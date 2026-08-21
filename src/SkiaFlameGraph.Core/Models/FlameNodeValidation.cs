@@ -24,25 +24,25 @@ public static partial class FlameNodeValidation
         // Validate Name
         if (string.IsNullOrWhiteSpace(value.Name))
         {
-            problems.Add("Name cannot be null or whitespace.");
+            problems.Add(FlameNodeValidationConstants.NameCannotBeNullOrWhitespace);
         }
 
         // Validate Value (must be positive)
         if (value.Value <= 0)
         {
-            problems.Add("Value must be positive.");
+            problems.Add(FlameNodeValidationConstants.ValueMustBePositive);
         }
 
         // Validate Depth (should be non‑negative)
         if (value.Depth < 0)
         {
-            problems.Add("Depth cannot be negative.");
+            problems.Add(FlameNodeValidationConstants.DepthCannotBeNegative);
         }
 
         // Validate Children collection
         if (value.Children is null)
         {
-            problems.Add("Children collection cannot be null.");
+            problems.Add(FlameNodeValidationConstants.ChildrenCollectionCannotBeNull);
         }
         else
         {
@@ -51,7 +51,7 @@ public static partial class FlameNodeValidation
             {
                 if (child is null)
                 {
-                    problems.Add("Children collection contains a null element.");
+                    problems.Add(FlameNodeValidationConstants.ChildrenCollectionContainsNullElement);
                     break;
                 }
             }
@@ -60,13 +60,13 @@ public static partial class FlameNodeValidation
         // Validate Line if present (should be positive)
         if (value.Line is int line && line <= 0)
         {
-            problems.Add("Line, if specified, must be a positive integer.");
+            problems.Add(FlameNodeValidationConstants.LineMustBePositiveInteger);
         }
 
         // Validate File if present (should not be empty/whitespace when present)
         if (!string.IsNullOrWhiteSpace(value.File) && string.IsNullOrWhiteSpace(value.File.Trim()))
         {
-            problems.Add("File, if specified, cannot be empty or whitespace.");
+            problems.Add(FlameNodeValidationConstants.FileCannotBeEmptyOrWhitespace);
         }
 
         // Validate child weight invariant: sum of children <= parent value
@@ -80,7 +80,7 @@ public static partial class FlameNodeValidation
         // Detect cycles in the node graph
         if (HasCycle(value, new HashSet<FlameNode>()))
         {
-            problems.Add("FlameNode graph contains a cycle.");
+            problems.Add(FlameNodeValidationConstants.FlameNodeGraphContainsCycle);
         }
 
         return problems.AsReadOnly();
