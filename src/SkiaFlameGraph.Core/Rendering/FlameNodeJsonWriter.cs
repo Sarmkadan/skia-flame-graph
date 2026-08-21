@@ -43,8 +43,8 @@ public static class FlameNodeJsonWriter
     {
         writer.WriteStartObject();
 
-        writer.WriteString("name", node.Name);
-        writer.WriteNumber("value", node.Value);
+        writer.WriteString(FlameNodeJsonWriterConstants.NameKey, node.Name);
+        writer.WriteNumber(FlameNodeJsonWriterConstants.ValueKey, node.Value);
 
         if (node.Children != null && node.Children.Count > 0)
         {
