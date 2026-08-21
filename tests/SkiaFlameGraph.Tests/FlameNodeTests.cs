@@ -17,11 +17,11 @@ public class FlameNodeTests : IFlameNodeTests
     [Fact]
     public void AddChild_CreatesChildWithCorrectDepth()
     {
-        var root = new FlameNode("root");
-        var child = root.AddChild("child");
+        var root = new FlameNode(FlameNodeTestsConstants.RootNodeName);
+        var child = root.AddChild(FlameNodeTestsConstants.ChildNodeName);
 
         Assert.NotNull(child);
-        Assert.Equal("child", child.Name);
+        Assert.Equal(FlameNodeTestsConstants.ChildNodeName, child.Name);
         Assert.Equal(root.Depth + 1, child.Depth);
         Assert.Same(root, child.Parent);
         Assert.Contains(child, root.Children);
@@ -34,12 +34,12 @@ public class FlameNodeTests : IFlameNodeTests
     [Fact]
     public void AddChild_WithSameName_CreatesDistinctNodes()
     {
-        var root = new FlameNode("root");
-        var first = root.AddChild("dup");
-        var second = root.AddChild("dup");
+        var root = new FlameNode(FlameNodeTestsConstants.RootNodeName);
+        var first = root.AddChild(FlameNodeTestsConstants.DuplicateNodeName);
+        var second = root.AddChild(FlameNodeTestsConstants.DuplicateNodeName);
 
         Assert.NotSame(first, second);
-        Assert.Equal(2, root.Children.Count);
+        Assert.Equal(FlameNodeTestsConstants.DuplicateChildCount, root.Children.Count);
         Assert.Contains(first, root.Children);
         Assert.Contains(second, root.Children);
     }
@@ -50,8 +50,8 @@ public class FlameNodeTests : IFlameNodeTests
     [Fact]
     public void MaxDepth_LeafNode_ReturnsZero()
     {
-        var leaf = new FlameNode("leaf");
-        Assert.Equal(0, leaf.MaxDepth());
+        var leaf = new FlameNode(FlameNodeTestsConstants.LeafNodeName);
+        Assert.Equal(FlameNodeTestsConstants.LeafMaxDepth, leaf.MaxDepth());
     }
 
     /// <summary>
@@ -60,13 +60,13 @@ public class FlameNodeTests : IFlameNodeTests
     [Fact]
     public void MaxDepth_ThreeLevelTree_ReturnsTwo()
     {
-        var root = new FlameNode("root");
-        var child = root.AddChild("child");
-        var grandchild = child.AddChild("grandchild");
+        var root = new FlameNode(FlameNodeTestsConstants.RootNodeName);
+        var child = root.AddChild(FlameNodeTestsConstants.ChildNodeName);
+        var grandchild = child.AddChild(FlameNodeTestsConstants.GrandchildNodeName);
 
-        Assert.Equal(2, root.MaxDepth());
-        Assert.Equal(1, child.MaxDepth());
-        Assert.Equal(0, grandchild.MaxDepth());
+        Assert.Equal(FlameNodeTestsConstants.ThreeLevelTreeMaxDepth, root.MaxDepth());
+        Assert.Equal(FlameNodeTestsConstants.ChildMaxDepth, child.MaxDepth());
+        Assert.Equal(FlameNodeTestsConstants.LeafMaxDepth, grandchild.MaxDepth());
     }
 
     /// <summary>
@@ -76,10 +76,10 @@ public class FlameNodeTests : IFlameNodeTests
     [Fact]
     public void AddChild_WithFileAndLine_SetsMetadata()
     {
-        var root = new FlameNode("root");
-        var child = root.AddChild("child", file: "Test.cs", line: 42);
+        var root = new FlameNode(FlameNodeTestsConstants.RootNodeName);
+        var child = root.AddChild(FlameNodeTestsConstants.ChildNodeName, file: FlameNodeTestsConstants.TestFileName, line: FlameNodeTestsConstants.TestFileLine);
 
-        Assert.Equal("Test.cs", child.File);
-        Assert.Equal(42, child.Line);
+        Assert.Equal(FlameNodeTestsConstants.TestFileName, child.File);
+        Assert.Equal(FlameNodeTestsConstants.TestFileLine, child.Line);
     }
 }
