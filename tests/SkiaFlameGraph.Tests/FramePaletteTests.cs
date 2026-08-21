@@ -26,8 +26,8 @@ public sealed class FramePaletteTests : IFramePaletteTests
     [Fact]
     public void ForFrame_WithHighlightPattern_ReturnsHighlightColor_WhenMatched()
     {
-        const string name = "highlightedFunction";
-        const string pattern = "^high";
+        const string name = FramePaletteTestsConstants.HighlightedFunctionName;
+        const string pattern = FramePaletteTestsConstants.HighlightPattern;
 
         var colour = FramePalette.ForFrame(name, pattern);
 
@@ -47,7 +47,7 @@ public sealed class FramePaletteTests : IFramePaletteTests
     [Fact]
     public void ForFrame_DistributesColorsAcrossManyDistinctNames()
     {
-        const int sampleSize = 1000;
+        const int sampleSize = FramePaletteTestsConstants.SampleSize;
         var colors = new HashSet<SKColor>();
         var random = new Random(0);
 
@@ -60,6 +60,6 @@ public sealed class FramePaletteTests : IFramePaletteTests
 
         // Expect at least 90 % uniqueness – collisions are possible but should be rare.
         var uniquenessRatio = (double)colors.Count / sampleSize;
-        Assert.True(uniquenessRatio > 0.9, $"Uniqueness ratio was {uniquenessRatio:P2}");
+        Assert.True(uniquenessRatio > FramePaletteTestsConstants.ExpectedUniquenessRatio, $"Uniqueness ratio was {uniquenessRatio:P2}");
     }
 }
