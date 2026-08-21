@@ -33,30 +33,29 @@ public static class SpeedscopeParserTestsExtensions
         var frames = new List<string>();
         foreach (var name in frameNames)
         {
-            frames.Add(string.Format(CultureInfo.InvariantCulture, "{\"name\": \"{0}\"}", name));
+            frames.Add(string.Format(CultureInfo.InvariantCulture, SpeedscopeParserTestsExtensionsConstants.FrameNameFormat, name));
         }
 
         var samplesJson = new List<string>();
         foreach (var sample in samples)
         {
             var indices = string.Join(", ", sample);
-            samplesJson.Add(string.Format(CultureInfo.InvariantCulture, "[{0}]", indices));
+            samplesJson.Add(string.Format(CultureInfo.InvariantCulture, SpeedscopeParserTestsExtensionsConstants.SampleIndicesFormat, indices));
         }
 
         var weightsJson = string.Join(", ", weights);
 
         return "{" +
-               "\"shared\": {" +
-               "\"frames\": [" + string.Join(", ", frames) + "]" +
+               SpeedscopeParserTestsExtensionsConstants.SharedFramesStart + string.Join(", ", frames) + "]" +
                "}," +
-               "\"profiles\": [{" +
+               SpeedscopeParserTestsExtensionsConstants.ProfilesArrayStart +
                "\"type\": \"sampled\"," +
-               "\"unit\": \"milliseconds\"," +
-               "\"startValue\": 0," +
-               "\"endValue\": " + weights.Count.ToString(CultureInfo.InvariantCulture) + "," +
-               "\"samples\": [" + string.Join(", ", samplesJson) + "]," +
-               "\"weights\": [" + weightsJson + "]" +
-               "}]" +
+               SpeedscopeParserTestsExtensionsConstants.UnitMilliseconds +
+               SpeedscopeParserTestsExtensionsConstants.StartValueZero +
+               SpeedscopeParserTestsExtensionsConstants.EndValuePrefix + weights.Count.ToString(CultureInfo.InvariantCulture) + "," +
+               SpeedscopeParserTestsExtensionsConstants.SamplesArrayStart + string.Join(", ", samplesJson) + "]," +
+               SpeedscopeParserTestsExtensionsConstants.WeightsArrayStart + weightsJson + "]" +
+               SpeedscopeParserTestsExtensionsConstants.ProfilesArrayAndObjectEnd +
                "}";
     }
 
@@ -78,7 +77,7 @@ public static class SpeedscopeParserTestsExtensions
         var frames = new List<string>();
         foreach (var name in frameNames)
         {
-            frames.Add(string.Format(CultureInfo.InvariantCulture, "{\"name\": \"{0}\"}", name));
+            frames.Add(string.Format(CultureInfo.InvariantCulture, SpeedscopeParserTestsExtensionsConstants.FrameNameFormat, name));
         }
 
         var eventsJson = new List<string>();
@@ -86,7 +85,7 @@ public static class SpeedscopeParserTestsExtensions
         {
             eventsJson.Add(string.Format(
                 CultureInfo.InvariantCulture,
-                "{\"type\": \"{0}\", \"frame\": {1}, \"at\": {2}",
+                SpeedscopeParserTestsExtensionsConstants.EventFormat,
                 type,
                 frameIndex,
                 timestamp.ToString(CultureInfo.InvariantCulture)));
