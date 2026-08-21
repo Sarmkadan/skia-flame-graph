@@ -10,7 +10,7 @@ public static class SpeedscopeFileJsonExtensions
 {
     private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web)
     {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNamingPolicy = SpeedscopeFileJsonExtensionsConstants.NamingPolicy,
         WriteIndented = false,
         TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
     };
@@ -29,7 +29,7 @@ public static class SpeedscopeFileJsonExtensions
         var options = indented
             ? new JsonSerializerOptions(_jsonOptions)
             {
-                PropertyNamingPolicy = _jsonOptions.PropertyNamingPolicy,
+                PropertyNamingPolicy = SpeedscopeFileJsonExtensionsConstants.NamingPolicy,
                 WriteIndented = true,
                 TypeInfoResolver = _jsonOptions.TypeInfoResolver,
             }
@@ -53,7 +53,7 @@ public static class SpeedscopeFileJsonExtensions
         var options = indented
             ? new JsonSerializerOptions(_jsonOptions)
             {
-                PropertyNamingPolicy = _jsonOptions.PropertyNamingPolicy,
+                PropertyNamingPolicy = SpeedscopeFileJsonExtensionsConstants.NamingPolicy,
                 WriteIndented = true,
                 TypeInfoResolver = _jsonOptions.TypeInfoResolver,
             }
