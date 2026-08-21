@@ -66,9 +66,8 @@ public static partial class SpeedscopeParser
     public static FlameNode BuildTree(SpeedscopeFile file, int profileIndex = 0, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(file);
-        if (profileIndex < 0 || profileIndex >= file.Profiles.Count)
-            throw new ArgumentOutOfRangeException(nameof(profileIndex));
-
+        if (profileIndex < 0 || profileIndex >= file.Profiles.Count) throw new ArgumentException("profileIndex out of range");
+            
         var profile = file.Profiles[profileIndex];
         var frames = file.Shared.Frames;
 
