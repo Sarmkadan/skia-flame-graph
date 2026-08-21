@@ -55,7 +55,7 @@ public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRende
         using var textPaint = new SKPaint { IsAntialias = true, Color = _options.TextColor };
 
         var total = root.Value;
-        if (total <= 0) total = 1;
+        if (total == 0) total = 1;
 
         DrawNode(canvas, root, _options.Padding, plotWidth, total, rows, font, stroke, textPaint);
 
