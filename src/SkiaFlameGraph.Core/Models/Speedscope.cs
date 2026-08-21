@@ -11,10 +11,10 @@ namespace SkiaFlameGraph.Core.Models;
 /// </summary>
 public sealed class SpeedscopeFile : ISpeedscopeFile, IEquatable<SpeedscopeFile>
 {
-    [JsonPropertyName("$schema")]
+    [JsonPropertyName(SpeedscopeFileConstants.JsonPropertyNameSchema)]
     public string? Schema { get; set; }
 
-    [JsonPropertyName("shared")]
+    [JsonPropertyName(SpeedscopeFileConstants.JsonPropertyNameShared)]
     public SharedData Shared { get; set; } = new();
 
     [JsonPropertyName("profiles")]
