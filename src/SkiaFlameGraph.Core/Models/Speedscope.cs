@@ -9,7 +9,7 @@ namespace SkiaFlameGraph.Core.Models;
 /// happily ignore.
 /// Format reference: https://github.com/jlfwong/speedscope/blob/main/src/lib/file-format-spec.ts
 /// </summary>
-public sealed class SpeedscopeFile : ISpeedscopeFile
+public sealed class SpeedscopeFile : ISpeedscopeFile, IEquatable<SpeedscopeFile>
 {
     [JsonPropertyName("$schema")]
     public string? Schema { get; set; }
@@ -25,6 +25,29 @@ public sealed class SpeedscopeFile : ISpeedscopeFile
 
     [JsonPropertyName("exporter")]
     public string? Exporter { get; set; }
+
+    public bool Equals(SpeedscopeFile? other)
+    {
+        if (other is null) return false;
+        return Schema == other.Schema
+            && EqualityComparer<SharedData>.Default.Equals(Shared, other.Shared)
+            && EqualityComparer<List<Profile>>.Default.Equals(Profiles, other.Profiles)
+            && Name == other.Name
+            && Exporter == other.Exporter;
+    }
+
+    public override bool Equals(object? obj) => Equals(obj as SpeedscopeFile);
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Schema, Shared, Profiles, Name, Exporter);
+    }
+
+    public static bool operator ==(SpeedscopeFile? left, SpeedscopeFile? right) =>
+        EqualityComparer<SpeedscopeFile>.Default.Equals(left, right);
+
+    public static bool operator !=(SpeedscopeFile? left, SpeedscopeFile? right) =>
+        !(EqualityComparer<SpeedscopeFile>.Default.Equals(left, right));
 }
 
 public sealed class SharedData
