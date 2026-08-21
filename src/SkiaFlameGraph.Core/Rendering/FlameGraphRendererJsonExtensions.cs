@@ -40,7 +40,7 @@ public static class FlameGraphRendererJsonExtensions
 
         return string.IsNullOrWhiteSpace(json)
             ? null
-            : JsonSerializer.Deserialize<FlameGraphRenderer>(json, JsonDefaults.Options);
+            : JsonSerializer.Deserialize<FlameGraphRenderer>(json, FlameGraphRendererJsonExtensionsConstants.JsonOptions);
     }
 
     /// <summary>
@@ -62,7 +62,7 @@ public static class FlameGraphRendererJsonExtensions
 
         try
         {
-            value = JsonSerializer.Deserialize<FlameGraphRenderer>(json, JsonDefaults.Options);
+            value = JsonSerializer.Deserialize<FlameGraphRenderer>(json, FlameGraphRendererJsonExtensionsConstants.JsonOptions);
             return true;
         }
         catch (JsonException)
