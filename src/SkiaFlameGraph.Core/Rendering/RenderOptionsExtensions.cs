@@ -19,7 +19,7 @@ public static class RenderOptionsExtensions
         ArgumentNullException.ThrowIfNull(options);
         ArgumentOutOfRangeException.ThrowIfLessThan(rowCount, 0);
 
-        return (int)(rowCount * options.RowHeight) + (int)(2 * options.Padding);
+        return (int)(rowCount * options.RowHeight) + (int)(RenderOptionsExtensionsConstants.PaddingMultiplier * options.Padding);
     }
 
     /// <summary>
@@ -31,7 +31,7 @@ public static class RenderOptionsExtensions
     public static int CalculateContentWidth(this RenderOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
-        return options.Width - (int)(2 * options.Padding);
+        return options.Width - (int)(RenderOptionsExtensionsConstants.PaddingMultiplier * options.Padding);
     }
 
     /// <summary>
