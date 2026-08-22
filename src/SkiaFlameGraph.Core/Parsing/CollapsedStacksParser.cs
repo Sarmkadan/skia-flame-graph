@@ -114,7 +114,7 @@ public static class CollapsedStacksParser
         var countPart = line.AsSpan(lastSpaceIndex + 1);
 
         // Parse the count value
-        if (!double.TryParse(countPart, NumberStyles.Float, CultureInfo.InvariantCulture, out var count))
+        if (!double.TryParse(countPart, NumberStyles.Float, CultureInfo.CurrentCulture, out var count))
         {
             return null; // Invalid count
         }
