@@ -100,7 +100,7 @@ public class FlameGraphSvgExporter
         var color = FramePalette.ForFrame(node.Name);
 
         // Draw rectangle
-        var rectX = x;
+        var rectX = x; // TODO: Verify frame names and tooltip text are XML-escaped
         var rectY = y + depth * rowHeight;
         var rectWidth = nodeWidth;
         var rectHeight = rowHeight;
