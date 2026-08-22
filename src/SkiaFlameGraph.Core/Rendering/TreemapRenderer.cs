@@ -21,16 +21,20 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
 
     public override void RenderToPng(FlameNode root, string path)
     {
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentException.ThrowIfNullOrEmpty(path);
         base.RenderToPng(root, path);
     }
 
     public override SKImage Render(FlameNode root)
     {
+        ArgumentNullException.ThrowIfNull(root);
         return Render(root, null);
     }
 
     public override SKImage Render(FlameNode root, int? height)
     {
+        ArgumentNullException.ThrowIfNull(root);
         var h = height ?? (int)(_options.Width * 0.62f);
         var info = new SKImageInfo(_options.Width, h, SKColorType.Rgba8888, SKAlphaType.Premul);
         using var surface = SKSurface.Create(info);
@@ -185,6 +189,7 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
 
     private static double RemainingValue(List<FlameNode> children, int from, double total)
     {
+        ArgumentNullException.ThrowIfNull(children);
         var consumed = 0.0;
         for (var i = 0; i < from; i++)
             consumed += children[i].Value;
