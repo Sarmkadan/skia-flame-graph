@@ -38,6 +38,7 @@ public static partial class SpeedscopeParser
     /// Parses a speedscope file from disk and builds a <see cref="FlameNode"/> tree.
     /// </summary>
     /// <param name="path">The path to the speedscope JSON file.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
     /// <returns>The root <see cref="FlameNode"/> of the aggregated call tree.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="path"/> is null.</exception>
     /// <exception cref="FormatException">Thrown when the document deserializes to null or contains no profiles.</exception>
@@ -59,6 +60,7 @@ public static partial class SpeedscopeParser
     /// </summary>
     /// <param name="file">The speedscope file containing the profiles.</param>
     /// <param name="profileIndex">The zero‑based index of the profile to aggregate.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
     /// <returns>The root <see cref="FlameNode"/> of the aggregated tree.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="file"/> is null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="profileIndex"/> is outside the valid range.</exception>
