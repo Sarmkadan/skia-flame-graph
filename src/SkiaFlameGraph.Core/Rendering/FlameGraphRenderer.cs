@@ -21,7 +21,13 @@ public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRende
     {
     }
 
-    /// <summary>Render to an encoded PNG written to <paramref name="path"/>.</summary>
+    /// <summary>
+    /// Renders a call tree as a flame graph and saves it as a PNG file.
+    /// </summary>
+    /// <param name="root">The root node of the call tree to render.</param>
+    /// <param name="path">The file path to save the rendered PNG image.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="root"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="path"/> is null or empty.</exception>
     public override void RenderToPng(FlameNode root, string path)
     {
         ArgumentNullException.ThrowIfNull(root);
@@ -30,6 +36,12 @@ public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRende
         base.RenderToPng(root, path);
     }
 
+    /// <summary>
+    /// Renders the call tree as a flame graph.
+    /// </summary>
+    /// <param name="root">The root node of the call tree to render.</param>
+    /// <returns>An <see cref="SKImage"/> representing the rendered flame graph.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="root"/> is null.</exception>
     public override SKImage Render(FlameNode root)
     {
         ArgumentNullException.ThrowIfNull(root);
