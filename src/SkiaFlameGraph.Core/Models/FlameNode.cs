@@ -46,6 +46,8 @@ public sealed class FlameNode : IFlameNode, IEquatable<FlameNode>
         return Equals(obj as FlameNode);
     }
 
+    public override string ToString() => $"FlameNode {{ File = {File}, Line = {Line}, Value = {Value}, Depth = {Depth}, Parent = {Parent?.Name ?? "null"} }}";
+
     public override int GetHashCode()
     {
         return HashCode.Combine(Name, File, Line, Value, Depth, Parent);
