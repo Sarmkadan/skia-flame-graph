@@ -89,6 +89,15 @@ public sealed class SpeedscopeFile : ISpeedscopeFile, IEquatable<SpeedscopeFile>
     /// <returns>true if the objects are not equal; otherwise, false.</returns>
     public static bool operator !=(SpeedscopeFile? left, SpeedscopeFile? right) =>
         !(EqualityComparer<SpeedscopeFile>.Default.Equals(left, right));
+
+    /// <summary>
+    /// Returns a string representation of the SpeedscopeFile.
+    /// </summary>
+    /// <returns>A string representation of the SpeedscopeFile.</returns>
+    public override string ToString()
+    {
+        return $"SpeedscopeFile {{ Schema = {Schema}, Shared = {Shared}, Profiles = {Profiles}, Name = {Name}, Exporter = {Exporter}, Frames = {Shared.Frames} }}";
+    }
 }
 
 /// <summary>
