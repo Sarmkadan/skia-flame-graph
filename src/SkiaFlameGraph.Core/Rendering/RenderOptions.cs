@@ -43,4 +43,7 @@ public sealed class RenderOptions : IRenderOptions
 /// with a distinct highlight color. If null or empty, no frames are highlighted.
 /// </summary>
 public string? HighlightPattern { get; set; }
+
+    public override string ToString() =>
+        $"RenderOptions {{ Width = {Width}, RowHeight = {RowHeight}, MinLabelWidth = {MinLabelWidth}, MinBoxWidth = {MinBoxWidth}, Padding = {Padding}, FontSize = {FontSize} }}";
 }
