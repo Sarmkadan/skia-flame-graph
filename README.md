@@ -430,3 +430,31 @@ Or run just this suite from the CLI:
 ```bash
 dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.FramePaletteTests"
 ```
+
+## FlameNodeTests
+
+xUnit test suite covering `FlameNode`, the aggregated call-tree node used by both the flame graph and treemap renderers. These tests pin down `AddChild` semantics - children land at the correct depth, identically named siblings stay distinct nodes instead of being merged, and source file/line metadata is carried onto the child - as well as `MaxDepth` for both a lone leaf node and a three-level tree.
+
+Example usage when exercising the suite programmatically:
+
+```csharp
+using SkiaFlameGraph.Tests;
+
+// Instantiate the test suite and verify FlameNode behaviour
+var tests = new FlameNodeTests();
+
+// AddChild builds the call tree correctly
+tests.AddChild_CreatesChildWithCorrectDepth();
+tests.AddChild_WithSameName_CreatesDistinctNodes();
+tests.AddChild_WithFileAndLine_SetsMetadata();
+
+// MaxDepth measures tree height
+tests.MaxDepth_LeafNode_ReturnsZero();
+tests.MaxDepth_ThreeLevelTree_ReturnsTwo();
+```
+
+Or run just this suite from the CLI:
+
+```bash
+dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.FlameNodeTests"
+```
