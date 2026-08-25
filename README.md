@@ -401,3 +401,32 @@ Console.WriteLine($"Cumulative value to root: {cumulativeValue:F2}ms");
 var nodeValue = mainNode.Value;
 Console.WriteLine($"Node value: {nodeValue:F2}ms");
 ```
+
+## FramePaletteTests
+
+xUnit test suite covering `FramePalette`, the deterministic frame-name to `SKColor` mapper used by both renderers. These tests pin down the palette's core guarantees: the same frame name always resolves to the same colour, different names resolve to different colours, and every returned colour falls within a valid range. They also cover the optional highlight-pattern behaviour, where a frame whose name matches the pattern gets a distinct colour while non-matching frames keep the standard one.
+
+Example usage when exercising the suite programmatically:
+
+```csharp
+using SkiaFlameGraph.Tests;
+
+// Instantiate the test suite and verify the colour-mapping guarantees
+var tests = new FramePaletteTests();
+
+// Deterministic mapping
+tests.ForFrame_SameName_ReturnsSameColor();
+tests.ForFrame_DifferentNames_ReturnsDifferentColors();
+tests.ForFrame_ReturnsValidColorRange();
+
+// Highlight-pattern behaviour
+tests.ForFrame_WithHighlightPattern_Match_ReturnsValidColor();
+tests.ForFrame_WithHighlightPattern_NoMatch_ReturnsSameAsStandard();
+tests.ForFrame_WithHighlightPattern_Match_ReturnsDifferentColorThanStandard();
+```
+
+Or run just this suite from the CLI:
+
+```bash
+dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.FramePaletteTests"
+```
