@@ -5,8 +5,15 @@ using Xunit;
 
 namespace SkiaFlameGraph.Tests;
 
+/// <summary>
+/// Unit tests for <see cref="CollapsedStacksParser"/> covering tree construction from collapsed-stack text lines.
+/// </summary>
 public class CollapsedStacksParserTests : ICollapsedStacksParserTests
 {
+    /// <summary>
+    /// Verifies that parsing well-formed stacks ("funcA;funcB 5", "funcA;funcC 3") builds a tree whose root totals 8,
+    /// contains a single "funcA" node aggregating both values, and that node holds "funcB" (5) and "funcC" (3) as children.
+    /// </summary>
     [Fact]
     public void Parse_NormalInput_BuildsCorrectTree()
     {
@@ -34,6 +41,9 @@ public class CollapsedStacksParserTests : ICollapsedStacksParserTests
         Assert.Equal(3, c.Value);
     }
 
+    /// <summary>
+    /// Verifies that parsing an empty array of lines produces an empty root node with a value of zero and no children.
+    /// </summary>
     [Fact]
     public void Parse_EmptyInput_ReturnsEmptyRoot()
     {
@@ -48,6 +58,10 @@ public class CollapsedStacksParserTests : ICollapsedStacksParserTests
         Assert.Empty(root.Children);
     }
 
+    /// <summary>
+    /// Verifies that malformed lines are skipped: whitespace-only lines, lines without a count ("badline"),
+    /// and lines with non-positive counts ("-2", "0") are ignored, so only "funcA 5" and "funcD 2" contribute to a root totaling 7.
+    /// </summary>
     [Fact]
     public void Parse_MalformedLines_AreSkipped()
     {
@@ -76,6 +90,10 @@ public class CollapsedStacksParserTests : ICollapsedStacksParserTests
         Assert.Equal(2, d.Value);
     }
 
+    /// <summary>
+    /// Verifies that duplicate stacks are merged: "a;b 2" and "a;b 3" combine into a single "b" node valued 5 under "a",
+    /// while "a 1" adds directly to "a", yielding a root total of 6 with one child chain.
+    /// </summary>
     [Fact]
     public void Parse_DuplicateStacks_MergedCorrectly()
     {
@@ -103,6 +121,10 @@ public class CollapsedStacksParserTests : ICollapsedStacksParserTests
         Assert.Equal(5, b.Value); // 2 + 3
     }
 
+    /// <summary>
+    /// Verifies that surrounding whitespace is tolerated: spaces and tabs around frame names, separators, and counts
+    /// do not affect parsing, producing a "funcX" node valued 6 with children "funcY" (4) and "funcZ" (2).
+    /// </summary>
     [Fact]
     public void Parse_WhitespaceHandling_IgnoresExtraSpaces()
     {
