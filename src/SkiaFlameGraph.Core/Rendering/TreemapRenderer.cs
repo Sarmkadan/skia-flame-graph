@@ -19,6 +19,13 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
     {
     }
 
+    /// <summary>
+    /// Validates the arguments and delegates PNG export to the base renderer implementation.
+    /// </summary>
+    /// <param name="root">Root node of the tree to render.</param>
+    /// <param name="path">Destination file path for the PNG image.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="root"/> is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="path"/> is null or empty.</exception>
     public override void RenderToPng(FlameNode root, string path)
     {
         ArgumentNullException.ThrowIfNull(root);
@@ -26,12 +33,26 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
         base.RenderToPng(root, path);
     }
 
+    /// <summary>
+    /// Renders the treemap using the default height derived from the configured width.
+    /// </summary>
+    /// <param name="root">Root node of the tree to render.</param>
+    /// <returns>The rendered treemap image.</returns>
     public override SKImage Render(FlameNode root)
     {
         ArgumentNullException.ThrowIfNull(root);
         return Render(root, null);
     }
 
+    /// <summary>
+    /// Renders the squarified treemap onto a new surface: clears the background, computes
+    /// the drawing area inset by the configured padding, and recursively lays out the tree.
+    /// </summary>
+    /// <param name="root">Root node of the tree to render.</param>
+    /// <param name="height">
+    /// Explicit image height in pixels; when null, defaults to roughly 62% of the width.
+    /// </param>
+    /// <returns>A snapshot of the rendered treemap surface.</returns>
     public override SKImage Render(FlameNode root, int? height)
     {
         ArgumentNullException.ThrowIfNull(root);
@@ -59,6 +80,18 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
         return surface.Snapshot();
     }
 
+    /// <summary>
+    /// Draws one subtree's cell: leaves (and subtrees past the depth guard of 12) get a
+    /// palette fill, border stroke and clipped label; internal nodes sort their children
+    /// largest-first and pack them via <see cref="Squarify"/>.
+    /// </summary>
+    /// <param name="canvas">Canvas to draw on.</param>
+    /// <param name="node">Subtree whose descendants occupy <paramref name="rect"/>.</param>
+    /// <param name="rect">Rectangle available to this subtree.</param>
+    /// <param name="stroke">Shared stroke paint used for cell borders.</param>
+    /// <param name="font">Font used for labels.</param>
+    /// <param name="textPaint">Paint used for label text.</param>
+    /// <param name="depth">Current recursion depth; recursion stops at depth 12.</param>
     private void Layout(
         SKCanvas canvas, FlameNode node, SKRect rect,
         SKPaint stroke, SKFont font, SKPaint textPaint, int depth)
@@ -128,6 +161,17 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
         }
     }
 
+    /// <summary>
+    /// Computes the worst length-to-width aspect ratio the row would exhibit if the
+    /// candidate joined it; the greedy loop closes the row once this ratio worsens.
+    /// </summary>
+    /// <param name="row">Nodes already placed in the current row.</param>
+    /// <param name="candidateValue">Value of the node being considered for the row.</param>
+    /// <param name="rowValue">Summed value of the nodes already in the row.</param>
+    /// <param name="newRowValue">Row value if the candidate is admitted.</param>
+    /// <param name="shorter">Length of the remaining rectangle's shorter side.</param>
+    /// <param name="areaPerValue">Pixels of area allotted per unit of node value.</param>
+    /// <returns>The worst aspect ratio over all boxes in the hypothetical row.</returns>
     private double WorstRatio(
         List<FlameNode> row, double candidateValue, double rowValue, double newRowValue,
         float shorter, float areaPerValue)
@@ -152,6 +196,20 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
         return worst;
     }
 
+    /// <summary>
+    /// Places a finished row along the shorter side of the remaining rectangle, slicing it
+    /// proportionally to each node's value, then recurses into <see cref="Layout"/> per cell.
+    /// </summary>
+    /// <param name="canvas">Canvas to draw on.</param>
+    /// <param name="row">Nodes belonging to the row being placed.</param>
+    /// <param name="rowValue">Summed value of the row's nodes.</param>
+    /// <param name="remaining">Rectangle still unoccupied by placed rows.</param>
+    /// <param name="areaPerValue">Pixels of area allotted per unit of node value.</param>
+    /// <param name="stroke">Shared stroke paint used for cell borders.</param>
+    /// <param name="font">Font used for labels.</param>
+    /// <param name="textPaint">Paint used for label text.</param>
+    /// <param name="depth">Current recursion depth passed down to child layouts.</param>
+    /// <returns>The remainder of the rectangle left for subsequent rows.</returns>
     private SKRect PlaceRow(
         SKCanvas canvas, List<FlameNode> row, double rowValue, SKRect remaining, float areaPerValue,
         SKPaint stroke, SKFont font, SKPaint textPaint, int depth)
@@ -187,6 +245,14 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
         }
     }
 
+    /// <summary>
+    /// Sums the values of the children not yet packed into rows, falling back to the total
+    /// when rounding would leave a non-positive remainder.
+    /// </summary>
+    /// <param name="children">Children being packed, in placement order.</param>
+    /// <param name="from">Index of the first child not yet placed.</param>
+    /// <param name="total">Total value of all children.</param>
+    /// <returns>Unpacked value remaining, guaranteed to be positive.</returns>
     private static double RemainingValue(List<FlameNode> children, int from, double total)
     {
         ArgumentNullException.ThrowIfNull(children);
@@ -197,12 +263,27 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
         return left <= 0 ? total : left;
     }
 
+    /// <summary>
+    /// Insets a rectangle by one pixel on every side to create a visual gap between cells,
+    /// returning the original rectangle when insetting would collapse it.
+    /// </summary>
+    /// <param name="r">Rectangle to shrink.</param>
+    /// <returns>The deflated rectangle, or <paramref name="r"/> if deflation would invert it.</returns>
     private static SKRect Deflate(SKRect r)
     {
         var d = new SKRect(r.Left + 1, r.Top + 1, r.Right - 1, r.Bottom - 1);
         return d.Width < 0 || d.Height < 0 ? r : d;
     }
 
+    /// <summary>
+    /// Draws a frame's name inside its cell, clipped to the cell bounds; skipped when the
+    /// cell is too small to fit readable text.
+    /// </summary>
+    /// <param name="canvas">Canvas to draw on.</param>
+    /// <param name="text">Frame name to display.</param>
+    /// <param name="rect">Cell rectangle constraining the label.</param>
+    /// <param name="font">Font used for the label.</param>
+    /// <param name="paint">Paint used for the label text.</param>
     private void DrawLabel(SKCanvas canvas, string text, SKRect rect, SKFont font, SKPaint paint)
     {
         if (rect.Width < 34 || rect.Height < _options.FontSize + 2)
