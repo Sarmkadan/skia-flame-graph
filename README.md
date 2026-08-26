@@ -458,3 +458,37 @@ Or run just this suite from the CLI:
 ```bash
 dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.FlameNodeTests"
 ```
+
+## ChromeTraceParserTests
+
+xUnit test suite covering `ChromeTraceParser`, which turns Chrome Trace event JSON (`traceEvents`) into the aggregated call tree consumed by the renderers. These tests pin down how complete ("X") events and nested begin/end ("B"/"E") events become frames - including source file/line metadata, per-thread grouping via `tid`, and ordering by timestamp - and how malformed input behaves: events without a `tid` or without a matching close are ignored or skipped, while an empty events array or null deserialization throws.
+
+Example usage when exercising the suite programmatically:
+
+```csharp
+using SkiaFlameGraph.Tests;
+
+// Instantiate the test suite and verify Chrome Trace parsing behaviour
+var tests = new ChromeTraceParserTests();
+
+// Complete ("X") events
+tests.SimpleCompleteEvents_AreParsedCorrectly();
+tests.CompleteEvents_WithFileAndLine_AreParsedCorrectly();
+
+// Nested begin/end ("B"/"E") events, threads and ordering
+tests.NestedBeginEndEvents_BuildProperCallTree();
+tests.MultipleThreads_AreGroupedCorrectly();
+tests.Events_AreSortedByTimestamp();
+
+// Malformed / ignorable input
+tests.EventsWithoutTid_AreIgnored();
+tests.NonCompleteBeginEndEvents_AreSkipped();
+tests.EmptyEventsArray_Throws();
+tests.NullDeserialization_Throws();
+```
+
+Or run just this suite from the CLI:
+
+```bash
+dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.ChromeTraceParserTests"
+```
