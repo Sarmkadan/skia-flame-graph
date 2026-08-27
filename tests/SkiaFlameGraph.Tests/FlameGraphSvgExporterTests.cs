@@ -5,6 +5,10 @@ using SkiaFlameGraph.Core.Rendering;
 
 namespace SkiaFlameGraph.Core.Tests.Rendering;
 
+/// <summary>
+/// Test class for FlameGraphSvgExporter, verifying SVG generation functionality
+/// including proper handling of edge cases, XML structure, and visual elements.
+/// </summary>
 public class FlameGraphSvgExporterTests
 {
     private readonly RenderOptions _defaultOptions = new()
@@ -13,6 +17,9 @@ public class FlameGraphSvgExporterTests
         RowHeight = FlameGraphSvgExporterTestsConstants.DefaultRowHeight
     };
 
+    /// <summary>
+    /// Verifies that RenderToSvg throws ArgumentNullException when root parameter is null.
+    /// </summary>
     [Fact]
     public void RenderToSvg_WithNullRoot_ThrowsArgumentNullException()
     {
@@ -24,6 +31,9 @@ public class FlameGraphSvgExporterTests
         File.Delete(tempFile);
     }
 
+    /// <summary>
+    /// Verifies that RenderToSvg throws ArgumentException when the file path is empty or consists only of whitespace.
+    /// </summary>
     [Fact]
     public void RenderToSvg_WithEmptyPath_ThrowsArgumentException()
     {
@@ -34,12 +44,19 @@ public class FlameGraphSvgExporterTests
         Assert.Throws<ArgumentException>(() => exporter.RenderToSvg(root, "   "));
     }
 
+    /// <summary>
+    /// Verifies that FlameGraphSvgExporter constructor throws ArgumentNullException when options parameter is null.
+    /// </summary>
     [Fact]
     public void RenderToSvg_WithNullOptions_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() => new FlameGraphSvgExporter(null!));
     }
 
+    /// <summary>
+    /// Verifies that RenderToSvg produces a valid SVG file with proper XML declaration,
+    /// SVG tags, and closing tag when given a single-node tree.
+    /// </summary>
     [Fact]
     public void RenderToSvg_EmptyTree_ProducesValidSvgFile()
     {
@@ -60,6 +77,10 @@ public class FlameGraphSvgExporterTests
         File.Delete(tempFile);
     }
 
+    /// <summary>
+    /// Verifies that RenderToSvg includes a rect element with proper data attributes
+    /// when exporting a single-frame flame graph.
+    /// </summary>
     [Fact]
     public void RenderToSvg_SingleFrame_ContainsRectElement()
     {
@@ -81,6 +102,10 @@ public class FlameGraphSvgExporterTests
         File.Delete(tempFile);
     }
 
+    /// <summary>
+    /// Verifies that RenderToSvg includes XML declaration and DOCTYPE in the output
+    /// when exporting a single-frame flame graph.
+    /// </summary>
     [Fact]
     public void RenderToSvg_SingleFrame_ContainsXmlDeclarationAndDoctype()
     {
@@ -100,6 +125,10 @@ public class FlameGraphSvgExporterTests
         File.Delete(tempFile);
     }
 
+    /// <summary>
+    /// Verifies that RenderToSvg includes CSS style section with frame, rect hover, and label styles
+    /// when exporting a single-frame flame graph.
+    /// </summary>
     [Fact]
     public void RenderToSvg_SingleFrame_ContainsStyleSection()
     {
@@ -121,6 +150,10 @@ public class FlameGraphSvgExporterTests
         File.Delete(tempFile);
     }
 
+    /// <summary>
+    /// Verifies that RenderToSvg properly XML-escapes special characters (<, >, &, ", ') in frame names
+    /// to prevent XML injection and ensure valid SVG output.
+    /// </summary>
     [Fact]
     public void RenderToSvg_SpecialCharactersInFrameName_AreXmlEscaped()
     {
@@ -140,6 +173,10 @@ public class FlameGraphSvgExporterTests
         File.Delete(tempFile);
     }
 
+    /// <summary>
+    /// Verifies that RenderToSvg creates the correct number of rect elements (one per node)
+    /// when exporting a flame graph with multiple frames (root and two children).
+    /// </summary>
     [Fact]
     public void RenderToSvg_MultipleFrames_ContainsMultipleRectElements()
     {
@@ -165,6 +202,10 @@ public class FlameGraphSvgExporterTests
         File.Delete(tempFile);
     }
 
+    /// <summary>
+    /// Verifies that RenderToSvg includes a text element for frame labels when the frame is wide enough
+    /// to accommodate the label text.
+    /// </summary>
     [Fact]
     public void RenderToSvg_FrameWithLabel_ContainsTextElement()
     {
@@ -185,6 +226,10 @@ public class FlameGraphSvgExporterTests
         File.Delete(tempFile);
     }
 
+    /// <summary>
+    /// Verifies that RenderToSvg does not render text labels for frames that are too narrow
+    /// to accommodate the label text, preventing overlapping or clipped labels.
+    /// </summary>
     [Fact]
     public void RenderToSvg_FrameTooNarrow_LabelNotRendered()
     {
@@ -204,6 +249,10 @@ public class FlameGraphSvgExporterTests
         File.Delete(tempFile);
     }
 
+    /// <summary>
+    /// Verifies that RenderToSvg calculates the correct SVG height attribute
+    /// based on the depth of the flame graph tree and row height settings.
+    /// </summary>
     [Fact]
     public void RenderToSvg_DeepTree_CalculatesCorrectHeight()
     {
@@ -228,6 +277,10 @@ public class FlameGraphSvgExporterTests
         File.Delete(tempFile);
     }
 
+    /// <summary>
+    /// Verifies that RenderToSvg does not render rect elements for frames with zero value,
+    /// effectively hiding them from the flame graph visualization.
+    /// </summary>
     [Fact]
     public void RenderToSvg_FrameWithZeroValue_NotRendered()
     {
@@ -250,6 +303,10 @@ public class FlameGraphSvgExporterTests
         File.Delete(tempFile);
     }
 
+    /// <summary>
+    /// Verifies that RenderToSvg does not render rect elements for frames with negative value,
+    /// effectively hiding them from the flame graph visualization.
+    /// </summary>
     [Fact]
     public void RenderToSvg_FrameWithNegativeValue_NotRendered()
     {
@@ -272,6 +329,10 @@ public class FlameGraphSvgExporterTests
         File.Delete(tempFile);
     }
 
+    /// <summary>
+    /// Verifies that RenderToSvg outputs a file with correct content including XML declaration
+    /// and SVG tag when exporting a simple flame graph.
+    /// </summary>
     [Fact]
     public void RenderToSvg_OutputsFileWithCorrectContent()
     {
@@ -290,6 +351,10 @@ public class FlameGraphSvgExporterTests
         File.Delete(tempFile);
     }
 
+    /// <summary>
+    /// Verifies that RenderToSvg produces correct SVG structure for a complex tree
+    /// with multiple levels and branches, including proper data attributes and element nesting.
+    /// </summary>
     [Fact]
     public void RenderToSvg_ComplexTree_ContainsCorrectStructure()
     {
@@ -341,6 +406,12 @@ public class FlameGraphSvgExporterTests
         File.Delete(tempFile);
     }
 
+    /// <summary>
+    /// Counts the number of occurrences of a substring within a string using ordinal comparison.
+    /// </summary>
+    /// <param name="haystack">The string to search within.</param>
+    /// <param name="needle">The substring to search for.</param>
+    /// <returns>The number of times needle appears in haystack.</returns>
     private static int CountOccurrences(string haystack, string needle)
     {
         var count = 0;
