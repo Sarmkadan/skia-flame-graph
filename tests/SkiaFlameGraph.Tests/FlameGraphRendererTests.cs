@@ -7,17 +7,27 @@ using Xunit;
 
 namespace SkiaFlameGraph.Tests
 {
+    /// <summary>
+    /// Contains unit tests for the <see cref="FlameGraphRenderer"/> class.
+    /// </summary>
     public class FlameGraphRendererTests : IFlameGraphRendererTests
     {
         private readonly FlameGraphRenderer _renderer;
         private readonly RenderOptions _defaultOptions;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FlameGraphRendererTests"/> class.
+        /// Sets up the default render options and a new FlameGraphRenderer instance.
+        /// </summary>
         public FlameGraphRendererTests()
         {
             _defaultOptions = new RenderOptions();
             _renderer = new FlameGraphRenderer();
         }
 
+        /// <summary>
+        /// Verifies that when the FlameGraphRenderer is constructed with null options, it uses the default options.
+        /// </summary>
         [Fact]
         public void Constructor_WithNullOptions_UsesDefaultOptions()
         {
@@ -30,6 +40,9 @@ namespace SkiaFlameGraph.Tests
             Assert.True(_defaultOptions.IsValid());
         }
 
+        /// <summary>
+        /// Verifies that when the FlameGraphRenderer is constructed with valid options, it uses the provided options.
+        /// </summary>
         [Fact]
         public void Constructor_WithValidOptions_UsesProvidedOptions()
         {
@@ -49,6 +62,9 @@ namespace SkiaFlameGraph.Tests
             Assert.NotNull(renderer);
         }
 
+        /// <summary>
+        /// Verifies that constructing the FlameGraphRenderer with invalid options (negative width) throws an ArgumentException.
+        /// </summary>
         [Fact]
         public void Constructor_WithInvalidOptions_ThrowsValidationException()
         {
@@ -60,6 +76,9 @@ namespace SkiaFlameGraph.Tests
             Assert.Contains("Width must be positive", exception.Message);
         }
 
+        /// <summary>
+        /// Verifies that calling Render with a root node that has no children (empty) throws an ArgumentNullException.
+        /// </summary>
         [Fact]
         public void Render_WithEmptyRoot_ThrowsArgumentException()
         {
@@ -72,6 +91,9 @@ namespace SkiaFlameGraph.Tests
             Assert.Equal("root", exception.ParamName);
         }
 
+        /// <summary>
+        /// Verifies that rendering a flame graph with a single node produces an image with the expected height.
+        /// </summary>
         [Fact]
         public void Render_WithSingleNode_CalculatesCorrectHeight()
         {
@@ -90,6 +112,9 @@ namespace SkiaFlameGraph.Tests
             Assert.Equal(expectedHeight, image.Height);
         }
 
+        /// <summary>
+        /// Verifies that rendering a flame graph with a deep tree (multiple levels) produces an image with the expected height.
+        /// </summary>
         [Fact]
         public void Render_WithDeepTree_CalculatesCorrectHeight()
         {
@@ -116,6 +141,9 @@ namespace SkiaFlameGraph.Tests
             Assert.Equal(expectedHeight, image.Height);
         }
 
+        /// <summary>
+        /// Verifies that calling RenderToPng with a null root throws an ArgumentNullException.
+        /// </summary>
         [Fact]
         public void RenderToPng_WithNullRoot_ThrowsArgumentNullException()
         {
@@ -139,6 +167,9 @@ namespace SkiaFlameGraph.Tests
             }
         }
 
+        /// <summary>
+        /// Verifies that calling RenderToPng with a null path throws an ArgumentNullException.
+        /// </summary>
         [Fact]
         public void RenderToPng_WithNullPath_ThrowsArgumentNullException()
         {
@@ -152,6 +183,9 @@ namespace SkiaFlameGraph.Tests
             Assert.Equal("path", exception.ParamName);
         }
 
+        /// <summary>
+        /// Verifies that calling RenderToPng with an empty path throws an ArgumentException.
+        /// </summary>
         [Fact]
         public void RenderToPng_WithEmptyPath_ThrowsArgumentException()
         {
@@ -165,6 +199,9 @@ namespace SkiaFlameGraph.Tests
             Assert.Equal("path", exception.ParamName);
         }
 
+        /// <summary>
+        /// Verifies that rendering with the inverted option set produces an image with a positive height.
+        /// </summary>
         [Fact]
         public void Render_WithInvertedOption_CalculatesCorrectHeight()
         {
@@ -186,6 +223,9 @@ namespace SkiaFlameGraph.Tests
             Assert.True(image.Height > 0);
         }
 
+        /// <summary>
+        /// Verifies that constructing the FlameGraphRenderer with a highlight pattern in the options sets the renderer's highlight pattern.
+        /// </summary>
         [Fact]
         public void Render_WithHighlightPattern_CreatesRendererWithHighlightPattern()
         {
@@ -199,6 +239,9 @@ namespace SkiaFlameGraph.Tests
             Assert.NotNull(renderer);
         }
 
+        /// <summary>
+        /// Verifies that constructing the FlameGraphRenderer with custom background and text colors uses those colors.
+        /// </summary>
         [Fact]
         public void Render_WithCustomBackgroundColor_CreatesRendererWithCustomColor()
         {
@@ -216,6 +259,9 @@ namespace SkiaFlameGraph.Tests
             Assert.NotNull(renderer);
         }
 
+        /// <summary>
+        /// Verifies that constructing the FlameGraphRenderer with a custom width uses that width.
+        /// </summary>
         [Fact]
         public void Render_WithCustomDimensions_CreatesRendererWithCustomWidth()
         {
