@@ -240,6 +240,7 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
     /// <summary>
     /// Tests that IsValid returns false for an invalid FlameNode.
     /// </summary>
+    /// <returns>False if the FlameNode is invalid, otherwise true.</returns>
     [Fact]
     public void IsValid_InvalidNode_ReturnsFalse()
     {
