@@ -5,8 +5,14 @@ using Xunit;
 
 namespace SkiaFlameGraph.Tests
 {
+    /// <summary>
+    /// Tests for the <see cref="RenderOptions"/> class.
+    /// </summary>
     public class RenderOptionsTests : IRenderOptionsTests
     {
+        /// <summary>
+        /// Verifies that the default values of a newly created RenderOptions instance match the expected values.
+        /// </summary>
         [Fact]
         public void DefaultValues_ShouldMatchExpected()
         {
@@ -24,6 +30,9 @@ namespace SkiaFlameGraph.Tests
             Assert.Null(options.HighlightPattern);
         }
 
+        /// <summary>
+        /// Verifies that the Width and RowHeight properties can be set to custom values.
+        /// </summary>
         [Fact]
         public void CanSetWidthAndRowHeight()
         {
@@ -37,6 +46,9 @@ namespace SkiaFlameGraph.Tests
             Assert.Equal(30f, options.RowHeight);
         }
 
+        /// <summary>
+        /// Verifies that the MinLabelWidth, MinBoxWidth, and Padding properties can be set to custom values.
+        /// </summary>
         [Fact]
         public void CanSetMinWidthsAndPadding()
         {
@@ -52,6 +64,9 @@ namespace SkiaFlameGraph.Tests
             Assert.Equal(5f, options.Padding);
         }
 
+        /// <summary>
+        /// Verifies that the Background and TextColor properties can be set to custom SKColor values.
+        /// </summary>
         [Fact]
         public void CanSetColors()
         {
@@ -65,6 +80,9 @@ namespace SkiaFlameGraph.Tests
             Assert.Equal(new SKColor(0xff, 0xff, 0xff), options.TextColor);
         }
 
+        /// <summary>
+        /// Verifies that the Inverted property can be set to true and the HighlightPattern property can be set to a custom string.
+        /// </summary>
         [Fact]
         public void CanToggleInvertedAndHighlightPattern()
         {
@@ -78,6 +96,9 @@ namespace SkiaFlameGraph.Tests
             Assert.Equal(".*Critical.*", options.HighlightPattern);
         }
 
+        /// <summary>
+        /// Verifies that setting negative values for numeric properties does not throw an exception and the values are stored as provided.
+        /// </summary>
         [Fact]
         public void SettingNegativeValues_ShouldNotThrow()
         {
