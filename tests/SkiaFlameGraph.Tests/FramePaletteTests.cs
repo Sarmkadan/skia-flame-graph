@@ -12,6 +12,9 @@ namespace SkiaFlameGraph.Tests;
 /// </summary>
 public sealed class FramePaletteTests : IFramePaletteTests
 {
+    /// <summary>
+    /// Verifies that <see cref="FramePalette.ForFrame(string)"/> returns the same color for the same frame name.
+    /// </summary>
     [Fact]
     public void ForFrame_ReturnsSameColor_ForSameName()
     {
@@ -23,6 +26,9 @@ public sealed class FramePaletteTests : IFramePaletteTests
         Assert.Equal(first, second);
     }
 
+    /// <summary>
+    /// Verifies that <see cref="FramePalette.ForFrame(string, string)"/> returns the highlight color when the frame name matches the highlight pattern.
+    /// </summary>
     [Fact]
     public void ForFrame_WithHighlightPattern_ReturnsHighlightColor_WhenMatched()
     {
@@ -34,6 +40,9 @@ public sealed class FramePaletteTests : IFramePaletteTests
         Assert.Equal(FramePalette.HighlightColor, colour);
     }
 
+    /// <summary>
+    /// Verifies that <see cref="FramePalette.ForFrame(string)"/> and <see cref="FramePalette.ForFrame(string, string)"/> throw <see cref="ArgumentException"/> when the frame name is null or empty.
+    /// </summary>
     [Fact]
     public void ForFrame_ThrowsArgumentException_WhenNameIsNullOrEmpty()
     {
@@ -44,6 +53,9 @@ public sealed class FramePaletteTests : IFramePaletteTests
         Assert.Throws<ArgumentException>(() => FramePalette.ForFrame(string.Empty, "pattern"));
     }
 
+    /// <summary>
+        /// Verifies that <see cref="FramePalette.ForFrame(string)"/> distributes colors across many distinct function names with a high uniqueness ratio (at least 90%).
+        /// </summary>
     [Fact]
     public void ForFrame_DistributesColorsAcrossManyDistinctNames()
     {
