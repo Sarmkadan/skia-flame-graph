@@ -296,6 +296,26 @@ float[] padding2D = options.GetPadding();
 float[] padding4D = options.GetPaddingAllSides();
 ```
 
+## HotFunctionsReport
+
+Aggregates FlameNode self-time by frame name across the tree and produces a top-N list of the hottest functions. Call `ToText()` to get a formatted text report showing self-time, total time, and percentage for each function.
+
+Example usage:
+
+```csharp
+using SkiaFlameGraph.Core.Parsing;
+using SkiaFlameGraph.Core.Reporting;
+
+// Parse the trace and build the flame graph
+var root = SpeedscopeParser.ParseFile("app.speedscope.json");
+
+// Generate the hot functions report
+var report = new HotFunctionsReport(root);
+
+// Output the top 10 functions by self-time
+Console.WriteLine(report.ToText(10));
+```
+
 ## FlameNode
 
 Represents a node in the aggregated call tree used by both the flame graph and treemap renderers. Each node tracks a frame's name, source location, accumulated time across the subtree, and its position in the call hierarchy. The tree is built by recursively merging identical frames so recursive calls collapse into wider boxes rather than tall stacks.
