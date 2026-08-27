@@ -2,8 +2,14 @@ using SkiaFlameGraph.Core.Models;
 
 namespace SkiaFlameGraph.Tests;
 
+/// <summary>
+/// Tests for validating FlameNode validation logic.
+/// </summary>
 public class FlameNodeValidationTests : IFlameNodeValidationTests
 {
+    /// <summary>
+    /// Tests that a valid FlameNode returns an empty validation error list.
+    /// </summary>
     [Fact]
     public void Validate_ValidNode_ReturnsEmptyList()
     {
@@ -24,6 +30,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Empty(result);
     }
 
+    /// <summary>
+    /// Tests that a FlameNode with null name returns a validation error.
+    /// </summary>
     [Fact]
     public void Validate_NullName_ReturnsError()
     {
@@ -42,6 +51,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Contains("Name cannot be null or whitespace.", result);
     }
 
+    /// <summary>
+    /// Tests that a FlameNode with whitespace-only name returns a validation error.
+    /// </summary>
     [Fact]
     public void Validate_WhitespaceName_ReturnsError()
     {
@@ -60,6 +72,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Contains("Name cannot be null or whitespace.", result);
     }
 
+    /// <summary>
+    /// Tests that a FlameNode with negative value returns a validation error.
+    /// </summary>
     [Fact]
     public void Validate_NegativeValue_ReturnsError()
     {
@@ -78,6 +93,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Contains("Value cannot be negative.", result);
     }
 
+    /// <summary>
+    /// Tests that a FlameNode with negative depth returns a validation error.
+    /// </summary>
     [Fact]
     public void Validate_NegativeDepth_ReturnsError()
     {
@@ -96,6 +114,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Contains("Depth cannot be negative.", result);
     }
 
+    /// <summary>
+    /// Tests that a FlameNode with null children collection returns a validation error.
+    /// </summary>
     [Fact]
     public void Validate_NullChildren_ReturnsError()
     {
@@ -117,6 +138,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Contains("Children collection contains a null element.", result);
     }
 
+    /// <summary>
+    /// Tests that a FlameNode with a null child in its collection returns a validation error.
+    /// </summary>
     [Fact]
     public void Validate_NullChildInCollection_ReturnsError()
     {
@@ -137,6 +161,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Contains("Children collection contains a null element.", result);
     }
 
+    /// <summary>
+    /// Tests that a FlameNode with zero or negative line number returns a validation error.
+    /// </summary>
     [Fact]
     public void Validate_ZeroOrNegativeLine_ReturnsError()
     {
@@ -156,6 +183,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Contains("Line, if specified, must be a positive integer.", result);
     }
 
+    /// <summary>
+    /// Tests that a FlameNode with an empty file string is considered valid.
+    /// </summary>
     [Fact]
     public void Validate_EmptyFile_IsValid()
     {
@@ -174,6 +204,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Empty(result);
     }
 
+    /// <summary>
+    /// Tests that calling Validate on a null FlameNode throws an ArgumentNullException.
+    /// </summary>
     [Fact]
     public void Validate_NullNode_ThrowsArgumentNullException()
     {
@@ -184,6 +217,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Throws<ArgumentNullException>(() => node!.Validate());
     }
 
+    /// <summary>
+    /// Tests that IsValid returns true for a valid FlameNode.
+    /// </summary>
     [Fact]
     public void IsValid_ValidNode_ReturnsTrue()
     {
@@ -201,6 +237,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.True(result);
     }
 
+    /// <summary>
+    /// Tests that IsValid returns false for an invalid FlameNode.
+    /// </summary>
     [Fact]
     public void IsValid_InvalidNode_ReturnsFalse()
     {
@@ -218,6 +257,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.False(result);
     }
 
+    /// <summary>
+    /// Tests that IsValid returns false when called on a null FlameNode.
+    /// </summary>
     [Fact]
     public void IsValid_NullNode_ReturnsFalse()
     {
@@ -231,6 +273,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.False(result);
     }
 
+    /// <summary>
+    /// Tests that EnsureValid does not throw an exception for a valid FlameNode.
+    /// </summary>
     [Fact]
     public void EnsureValid_ValidNode_DoesNotThrow()
     {
@@ -246,6 +291,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Null(exception);
     }
 
+    /// <summary>
+    /// Tests that EnsureValid throws an ArgumentNullException when called on a null FlameNode.
+    /// </summary>
     [Fact]
     public void EnsureValid_NullNode_ThrowsArgumentNullException()
     {
@@ -256,6 +304,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Throws<ArgumentNullException>(() => node!.EnsureValid());
     }
 
+    /// <summary>
+    /// Tests that EnsureValid throws an ArgumentException when called on an invalid FlameNode.
+    /// </summary>
     [Fact]
     public void EnsureValid_InvalidNode_ThrowsArgumentException()
     {
@@ -271,6 +322,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Contains("The FlameNode is not valid.", exception.Message);
     }
 
+    /// <summary>
+    /// Tests that Validate returns all errors when a FlameNode has multiple validation problems.
+    /// </summary>
     [Fact]
     public void Validate_MultipleProblems_ReturnsAllErrors()
     {
@@ -293,6 +347,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Contains("Children collection contains a null element.", result);
     }
 
+    /// <summary>
+    /// Tests that a FlameNode with an empty children collection is considered valid.
+    /// </summary>
     [Fact]
     public void Validate_EmptyChildrenCollection_IsValid()
     {
@@ -311,6 +368,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Empty(result);
     }
 
+    /// <summary>
+    /// Tests that a FlameNode with a positive line number is considered valid.
+    /// </summary>
     [Fact]
     public void Validate_PositiveLine_IsValid()
     {
@@ -329,6 +389,9 @@ public class FlameNodeValidationTests : IFlameNodeValidationTests
         Assert.Empty(result);
     }
 
+    /// <summary>
+    /// Tests that a FlameNode with valid file and line values is considered valid.
+    /// </summary>
     [Fact]
     public void Validate_ValidNodeWithFileAndLine_IsValid()
     {
