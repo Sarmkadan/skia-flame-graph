@@ -532,6 +532,49 @@ Or run just this suite from the CLI:
 dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.TreemapRendererJsonExtensionsTests"
 ```
 
+## TreemapRendererTests
+
+xUnit test suite covering the `TreemapRenderer` class, which renders flame graph data as treemaps using SkiaSharp. These tests verify constructor behavior, rendering with various inputs (null, empty, single node, trees), depth guard protection, custom height parameters, PNG output functionality, and option-dependent output variations.
+
+Example usage when exercising the suite programmatically:
+
+```csharp
+using SkiaFlameGraph.Tests;
+
+// Instantiate the test suite and verify TreemapRenderer behaviour
+var tests = new TreemapRendererTests();
+
+// Constructor behavior
+tests.Constructor_WithNullOptions_UsesDefaultOptions();
+tests.Constructor_WithValidOptions_UsesProvidedOptions();
+
+// Rendering with various inputs
+tests.Render_WithNullRoot_ThrowsArgumentNullException();
+tests.Render_WithEmptyRoot_ReturnsValidImage();
+tests.Render_WithSingleNode_ReturnsImageWithCorrectDimensions();
+tests.Render_WithTreeWithChildren_ReturnsValidImage();
+tests.Render_WithDeepTree_DepthGuardPreventsStackOverflow();
+tests.Render_WithZeroWidthNode_DoesNotThrow();
+tests.Render_WithCustomHeightParameter_ReturnsImageWithCustomHeight();
+
+// PNG output functionality
+tests.RenderToPng_WithNullRoot_ThrowsArgumentNullException();
+tests.RenderToPng_WithNullPath_ThrowsArgumentNullException();
+tests.RenderToPng_WithEmptyPath_ThrowsArgumentException();
+tests.RenderToPng_WithValidInput_CreatesPngFile();
+tests.RenderToPng_WithCustomHeight_CreatesPngWithCorrectDimensions();
+
+// Additional rendering tests
+tests.Render_WithLargeTree_ReturnsValidImage();
+tests.Render_WithDifferentOptions_ProducesDifferentOutput();
+```
+
+Or run just this suite from the CLI:
+
+```bash
+dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.TreemapRendererTests"
+```
+
 ## SpeedscopeFileTests
 xUnit test suite covering the `SpeedscopeFile` class, which represents the root object model for the speedscope file format. These tests verify correct deserialization from JSON, property getters and setters for Schema, Name, and Exporter, initialization of Shared and Profiles collections, and frame property behaviors including nullability of File, Line, and Col fields.
 
