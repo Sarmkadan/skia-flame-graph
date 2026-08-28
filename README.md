@@ -531,3 +531,39 @@ Or run just this suite from the CLI:
 ```bash
 dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.TreemapRendererJsonExtensionsTests"
 ```
+
+## SpeedscopeFileTests
+xUnit test suite covering the `SpeedscopeFile` class, which represents the root object model for the speedscope file format. These tests verify correct deserialization from JSON, property getters and setters for Schema, Name, and Exporter, initialization of Shared and Profiles collections, and frame property behaviors including nullability of File, Line, and Col fields.
+
+Example usage when exercising the suite programmatically:
+
+```csharp
+using SkiaFlameGraph.Tests;
+var tests = new SpeedscopeFileTests();
+tests.Deserialize_WithValidJson_ReturnsPopulatedFile();
+tests.Deserialize_WithMinimalJson_ReturnsValidFile();
+tests.Schema_GetAndSet_ReturnsExpectedValue();
+tests.Schema_SetToNull_ReturnsNull();
+tests.Name_GetAndSet_ReturnsExpectedValue();
+tests.Name_SetToNull_ReturnsNull();
+tests.Exporter_GetAndSet_ReturnsExpectedValue();
+tests.Exporter_SetToNull_ReturnsNull();
+tests.Shared_Get_ReturnsInitializedInstance();
+tests.Shared_Set_ReplacesInstance();
+tests.Profiles_Get_ReturnsInitializedList();
+tests.Profiles_AddItems_ListContainsItems();
+tests.Profiles_Clear_ListIsEmpty();
+tests.Shared_Frames_Get_ReturnsInitializedList();
+tests.Shared_Frames_AddItems_ListContainsItems();
+tests.Frame_Name_Get_ReturnsEmptyStringByDefault();
+tests.Frame_Name_Set_ReturnsExpectedValue();
+tests.Frame_File_CanBeNull();
+tests.Frame_Line_CanBeNull();
+tests.Frame_Col_CanBeNull();
+```
+
+Or run just this suite from the CLI:
+
+```bash
+dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.SpeedscopeFileTests"
+```
