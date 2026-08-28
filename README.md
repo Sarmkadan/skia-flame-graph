@@ -532,6 +532,42 @@ Or run just this suite from the CLI:
 dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.TreemapRendererJsonExtensionsTests"
 ```
 
+## FlameGraphRendererJsonExtensionsTests
+xUnit test suite covering the JSON serialization and deserialization extensions for `FlameGraphRenderer`. These tests verify argument null handling, compact vs pretty JSON output, and proper exception throwing for invalid or empty JSON input.
+
+Example usage when exercising the suite programmatically:
+
+```csharp
+using SkiaFlameGraph.Tests;
+using SkiaFlameGraph.Core.Rendering;
+using System.Text.Json;
+
+// Create a renderer instance
+var renderer = new FlameGraphRenderer();
+
+// Serialize to compact JSON (no indentation)
+string compactJson = renderer.ToJson(indented: false);
+// Serialize to pretty-printed JSON (with indentation)
+string prettyJson = renderer.ToJson(indented: true);
+
+// Deserialize from JSON
+FlameGraphRenderer deserialized = FlameGraphRendererJsonExtensions.FromJson(prettyJson);
+
+// Safe parsing that returns success/failure
+bool success = FlameGraphRendererJsonExtensions.TryFromJson(compactJson, out FlameGraphRenderer parsedRenderer);
+if (success && parsedRenderer != null)
+{
+    // Use the parsed renderer
+    string roundTrip = parsedRenderer.ToJson();
+}
+```
+
+Or run just this suite from the CLI:
+
+```bash
+dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.FlameGraphRendererJsonExtensionsTests"
+```
+
 ## TreemapRendererTests
 
 xUnit test suite covering the `TreemapRenderer` class, which renders flame graph data as treemaps using SkiaSharp. These tests verify constructor behavior, rendering with various inputs (null, empty, single node, trees), depth guard protection, custom height parameters, PNG output functionality, and option-dependent output variations.
