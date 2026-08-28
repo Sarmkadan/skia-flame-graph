@@ -610,3 +610,34 @@ Or run just this suite from the CLI:
 ```bash
 dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.SpeedscopeFileTests"
 ```
+
+## SpeedscopeFileJsonExtensionsTests
+xUnit test suite covering the JSON serialization and deserialization extensions for `SpeedscopeFile`. These tests verify that `ToJson` produces valid JSON strings with proper formatting and camelCase property names, that `FromJson` correctly deserializes valid JSON and handles edge cases like null or invalid input, and that `TryFromJson` provides a safe parsing alternative that returns success/failure status without throwing exceptions.
+
+Example usage when exercising the suite programmatically:
+
+```csharp
+using SkiaFlameGraph.Tests;
+var tests = new SpeedscopeFileJsonExtensionsTests();
+tests.ToJson_WithValidSpeedscopeFile_ReturnsJsonString();
+tests.ToJson_WithIndentedTrue_ReturnsFormattedJson();
+tests.ToJson_WithNullValue_ThrowsArgumentNullException();
+tests.FromJson_WithValidJson_ReturnsSpeedscopeFile();
+tests.FromJson_WithNullJson_ThrowsArgumentNullException();
+tests.FromJson_WithInvalidJson_ThrowsJsonException();
+tests.FromJson_WithEmptyJson_ReturnsSpeedscopeFileWithDefaults();
+tests.TryFromJson_WithValidJson_ReturnsTrueAndDeserializes();
+tests.TryFromJson_WithInvalidJson_ReturnsFalseAndNull();
+tests.TryFromJson_WithNullJson_ThrowsArgumentNullException();
+tests.RoundtripSerialization_ProducesEquivalentObject();
+tests.RoundtripSerialization_WithTryFromJson_ProducesEquivalentObject();
+tests.ToJson_ProducesCamelCasePropertyNames();
+tests.FromJson_WithMinimalValidJson_ReturnsSpeedscopeFile();
+tests.TryFromJson_WithEmptyObject_ReturnsTrueWithEmptyFile();
+```
+
+Or run just this suite from the CLI:
+
+```bash
+dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.SpeedscopeFileJsonExtensionsTests"
+```
