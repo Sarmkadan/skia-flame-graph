@@ -539,3 +539,27 @@ Or run just this suite from the CLI:
 ```bash
 dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.RenderOptionsValidationTests"
 ```
+
+## RenderOptionsTests
+
+xUnit test suite covering the basic behavior and property settings of the `RenderOptions` class. These tests verify that default values are correct, that properties like dimensions, colors, and toggles can be set as expected, and that setting negative values does not throw exceptions (instead they are typically clamped or ignored).
+
+Example usage when exercising the suite programmatically:
+
+```csharp
+using SkiaFlameGraph.Tests;
+var tests = new RenderOptionsTests();
+
+tests.DefaultValues_ShouldMatchExpected();
+tests.CanSetWidthAndRowHeight();
+tests.CanSetMinWidthsAndPadding();
+tests.CanSetColors();
+tests.CanToggleInvertedAndHighlightPattern();
+tests.SettingNegativeValues_ShouldNotThrow();
+```
+
+Or run just this suite from the CLI:
+
+```bash
+dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.RenderOptionsTests"
+```
