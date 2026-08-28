@@ -512,3 +512,30 @@ Or run just this suite from the CLI:
 ```bash
 dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.ChromeTraceParserTests"
 ```
+
+## RenderOptionsValidationTests
+
+xUnit test suite covering the validation logic of `RenderOptions`. These tests verify the `Validate`, `IsValid`, and `EnsureValid` entry points against fully valid configurations, boundary values, individually invalid properties, and combinations of invalid properties. They ensure that validation correctly reports errors for invalid values (such as non-positive dimensions or negative sizes) and accepts valid configurations.
+
+Example usage when exercising the suite programmatically:
+
+```csharp
+using SkiaFlameGraph.Tests;
+
+// Instantiate the test suite
+var tests = new RenderOptionsValidationTests();
+
+// Example validation tests
+tests.Validate_NullOptions_ThrowsArgumentNullException();
+tests.Validate_WidthOne_ReturnsNoErrors();
+tests.Validate_AllValid_ReturnsNoErrors();
+tests.Validate_MultipleErrors_ReturnsAllErrors();
+tests.IsValid_Valid_ReturnsTrue();
+tests.IsValid_Invalid_ReturnsFalse();
+```
+
+Or run just this suite from the CLI:
+
+```bash
+dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.RenderOptionsValidationTests"
+```
