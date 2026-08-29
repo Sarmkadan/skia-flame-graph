@@ -175,16 +175,12 @@ if (mainFrame != null)
 Represents the root object model for a speedscope file format, which is the standard JSON format produced by `dotnet-trace convert --format speedscope`. This class contains all the metadata and profile data needed to render flame graphs and treemaps.
 
 
-
 The `SpeedscopeFile` class includes:
 - **Schema**: Optional JSON schema reference
 - **Shared**: Shared frame data across all profiles
 - **Profiles**: List of profile data (evented or sampled)
 - **Name**: Optional name for the trace
 - **Exporter**: Optional exporter information
-
-
-
 
 
 Example usage when working with the raw model directly:
@@ -526,6 +522,7 @@ dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.ChromeTraceParserT
 ```
 
 ## TreemapRendererJsonExtensionsTests
+
 xUnit test suite covering the JSON serialization and deserialization extensions for `TreemapRenderer`. These tests verify argument null handling, compact JSON output, and proper exception throwing for invalid or empty JSON input.
 
 Example usage when exercising the suite programmatically:
@@ -548,6 +545,7 @@ dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.TreemapRendererJso
 ```
 
 ## FlameGraphRendererJsonExtensionsTests
+
 xUnit test suite covering the JSON serialization and deserialization extensions for `FlameGraphRenderer`. These tests verify argument null handling, compact vs pretty JSON output, and proper exception throwing for invalid or empty JSON input.
 
 Example usage when exercising the suite programmatically:
@@ -627,6 +625,7 @@ dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.TreemapRendererTes
 ```
 
 ## SpeedscopeFileTests
+
 xUnit test suite covering the `SpeedscopeFile` class, which represents the root object model for the speedscope file format. These tests verify correct deserialization from JSON, property getters and setters for Schema, Name, and Exporter, initialization of Shared and Profiles collections, and frame property behaviors including nullability of File, Line, and Col fields.
 
 Example usage when exercising the suite programmatically:
@@ -663,6 +662,7 @@ dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.SpeedscopeFileTest
 ```
 
 ## SpeedscopeFileJsonExtensionsTests
+
 xUnit test suite covering the JSON serialization and deserialization extensions for `SpeedscopeFile`. These tests verify that `ToJson` produces valid JSON strings with proper formatting and camelCase property names, that `FromJson` correctly deserializes valid JSON and handles edge cases like null or invalid input, and that `TryFromJson` provides a safe parsing alternative that returns success/failure status without throwing exceptions.
 
 Example usage when exercising the suite programmatically:
@@ -691,4 +691,34 @@ Or run just this suite from the CLI:
 
 ```bash
 dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.SpeedscopeFileJsonExtensionsTests"
+```
+
+## CollapsedStacksParserTests
+
+xUnit test suite covering the `CollapsedStacksParser` class, which parses collapsed-stack text lines into a flame node tree. These tests verify normal input builds correct tree, empty input returns empty root, malformed lines are skipped, duplicate stacks are merged, and whitespace handling ignores extra spaces.
+
+Example usage when exercising the suite programmatically:
+
+```csharp
+using SkiaFlameGraph.Tests;
+
+// Instantiate the test suite and verify CollapsedStacksParser behaviour
+var tests = new CollapsedStacksParserTests();
+
+// Normal input builds correct tree
+tests.Parse_NormalInput_BuildsCorrectTree();
+// Empty input returns empty root
+tests.Parse_EmptyInput_ReturnsEmptyRoot();
+// Malformed lines are skipped
+tests.Parse_MalformedLines_AreSkipped();
+// Duplicate stacks merged correctly
+tests.Parse_DuplicateStacks_MergedCorrectly();
+// Whitespace handling ignores extra spaces
+tests.Parse_WhitespaceHandling_IgnoresExtraSpaces();
+```
+
+Or run just this suite from the CLI:
+
+```bash
+dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.CollapsedStacksParserTests"
 ```
