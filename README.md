@@ -419,33 +419,48 @@ var nodeValue = mainNode.Value;
 Console.WriteLine($"Node value: {nodeValue:F2}ms");
 ```
 
-## FramePaletteTests
+## FlameGraphSvgExporterTests
 
-xUnit test suite covering `FramePalette`, the deterministic frame-name to `SKColor` mapper used by both renderers. These tests pin down the palette's core guarantees: the same frame name always resolves to the same colour, different names resolve to different colours, and every returned colour falls within a valid range. They also cover the optional highlight-pattern behaviour, where a frame whose name matches the pattern gets a distinct colour while non-matching frames keep the standard one.
+xUnit test suite covering the `FlameGraphSvgExporter` class, which converts flame graph data to SVG format. These tests verify argument null handling, proper XML structure including declaration and doctype, correct visual elements (rect and text elements), special character escaping, and proper handling of edge cases like empty/negative values and deep trees.
 
 Example usage when exercising the suite programmatically:
 
 ```csharp
 using SkiaFlameGraph.Tests;
 
-// Instantiate the test suite and verify the colour-mapping guarantees
-var tests = new FramePaletteTests();
+// Instantiate the test suite and verify SVG exporter behaviour
+var tests = new FlameGraphSvgExporterTests();
 
-// Deterministic mapping
-tests.ForFrame_SameName_ReturnsSameColor();
-tests.ForFrame_DifferentNames_ReturnsDifferentColors();
-tests.ForFrame_ReturnsValidColorRange();
+// Argument validation
+tests.RenderToSvg_WithNullRoot_ThrowsArgumentNullException();
+tests.RenderToSvg_WithEmptyPath_ThrowsArgumentException();
+tests.RenderToSvg_WithNullOptions_ThrowsArgumentNullException();
 
-// Highlight-pattern behaviour
-tests.ForFrame_WithHighlightPattern_Match_ReturnsValidColor();
-tests.ForFrame_WithHighlightPattern_NoMatch_ReturnsSameAsStandard();
-tests.ForFrame_WithHighlightPattern_Match_ReturnsDifferentColorThanStandard();
+// Basic SVG structure
+tests.RenderToSvg_EmptyTree_ProducesValidSvgFile();
+tests.RenderToSvg_SingleFrame_ContainsRectElement();
+tests.RenderToSvg_SingleFrame_ContainsXmlDeclarationAndDoctype();
+tests.RenderToSvg_SingleFrame_ContainsStyleSection();
+
+// Visual elements and styling
+tests.RenderToSvg_SpecialCharactersInFrameName_AreXmlEscaped();
+tests.RenderToSvg_MultipleFrames_ContainsMultipleRectElements();
+tests.RenderToSvg_FrameWithLabel_ContainsTextElement();
+tests.RenderToSvg_FrameTooNarrow_LabelNotRendered();
+tests.RenderToSvg_DeepTree_CalculatesCorrectHeight();
+tests.RenderToSvg_FrameWithZeroValue_NotRendered();
+tests.RenderToSvg_FrameWithNegativeValue_NotRendered();
+
+// Output verification
+tests.RenderToSvg_OutputsFileWithCorrectContent();
+tests.RenderToSvg_ComplexTree_ContainsCorrectStructure();
+tests.RenderToSvg_EmptyFrameName_HandledGracefully();
 ```
 
 Or run just this suite from the CLI:
 
 ```bash
-dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.FramePaletteTests"
+dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.FlameGraphSvgExporterTests"
 ```
 
 ## FlameNodeTests
