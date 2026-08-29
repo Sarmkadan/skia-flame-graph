@@ -722,3 +722,43 @@ Or run just this suite from the CLI:
 ```bash
 dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.CollapsedStacksParserTests"
 ```
+
+## FlameGraphRendererTests
+
+xUnit test suite covering the `FlameGraphRenderer` class, which renders flame graph data using SkiaSharp. These tests verify constructor behavior, rendering with various inputs (null, empty, single node, trees), option handling (inverted, highlight pattern, custom background, custom dimensions), and PNG output functionality.
+
+Example usage when exercising the suite programmatically:
+
+```csharp
+using SkiaFlameGraph.Tests;
+
+// Instantiate the test suite and verify FlameGraphRenderer behaviour
+var tests = new FlameGraphRendererTests();
+
+// Constructor behavior
+tests.Constructor_WithNullOptions_UsesDefaultOptions();
+tests.Constructor_WithValidOptions_UsesProvidedOptions();
+tests.Constructor_WithInvalidOptions_ThrowsValidationException();
+
+// Rendering with various inputs
+tests.Render_WithEmptyRoot_ThrowsArgumentException();
+tests.Render_WithSingleNode_CalculatesCorrectHeight();
+tests.Render_WithDeepTree_CalculatesCorrectHeight();
+
+// PNG output functionality
+tests.RenderToPng_WithNullRoot_ThrowsArgumentNullException();
+tests.RenderToPng_WithNullPath_ThrowsArgumentNullException();
+tests.RenderToPng_WithEmptyPath_ThrowsArgumentException();
+
+// Option-dependent rendering
+tests.Render_WithInvertedOption_CalculatesCorrectHeight();
+tests.Render_WithHighlightPattern_CreatesRendererWithHighlightPattern();
+tests.Render_WithCustomBackgroundColor_CreatesRendererWithCustomColor();
+tests.Render_WithCustomDimensions_CreatesRendererWithCustomWidth();
+```
+
+Or run just this suite from the CLI:
+
+```bash
+dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.FlameGraphRendererTests"
+```
