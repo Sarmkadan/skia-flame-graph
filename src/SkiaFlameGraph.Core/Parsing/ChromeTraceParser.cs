@@ -30,6 +30,7 @@ public static class ChromeTraceParser
     /// </summary>
     /// <param name="json">The JSON string containing Chrome trace events.</param>
     /// <returns>Array of trace events.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="json"/> is null or empty.</exception>
     public static ChromeTraceEvent[] Deserialize(string json)
     {
         ArgumentException.ThrowIfNullOrEmpty(json);
@@ -45,8 +46,14 @@ public static class ChromeTraceParser
     /// </summary>
     /// <param name="path">Path to the Chrome trace JSON file.</param>
     /// <returns>A FlameNode tree with "root" as the root node containing all threads.</returns>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="path"/> is null or empty.</exception>
+    /// <exception cref="FileNotFoundException">Thrown when the file specified by <paramref name="path"/> does not exist.</exception>
     public static FlameNode ParseFile(string path)
     {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+        if (!File.Exists(path))
+            throw new FileNotFoundException("Chrome trace JSON file was not found.", path);
+
         using var stream = File.OpenRead(path);
         var events = JsonSerializer.Deserialize<ChromeTraceEvent[]>(stream, Options)
             ?? throw new FormatException("Chrome trace document deserialized to null");
@@ -60,8 +67,11 @@ public static class ChromeTraceParser
     /// </summary>
     /// <param name="events">Array of Chrome trace events.</param>
     /// <returns>A FlameNode tree with "root" as the root node containing all threads.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="events"/> is null.</exception>
     public static FlameNode BuildTree(ChromeTraceEvent[] events)
     {
+        ArgumentNullException.ThrowIfNull(events);
+
         // Group events by thread ID
         var eventsByThread = events
             .Where(e => e.Tid.HasValue)
