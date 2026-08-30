@@ -151,4 +151,100 @@ public class CollapsedStacksParserTests : ICollapsedStacksParserTests
         Assert.Equal(4, y.Value);
         Assert.Equal(2, z.Value);
     }
+
+    [Fact]
+    public void Parse_DeepStack_PreservesFullChainAndLeafValue()
+    {
+        var root = CollapsedStacksParser.Parse(new[] { "a;b;c 5" });
+
+        Assert.Equal(5, root.Value);
+        var a = Assert.Single(root.Children);
+        Assert.Equal("a", a.Name);
+        var b = Assert.Single(a.Children);
+        Assert.Equal("b", b.Name);
+        var c = Assert.Single(b.Children);
+        Assert.Equal("c", c.Name);
+        Assert.Equal(5, c.Value);
+    }
+
+    [Fact]
+    public void Parse_RepeatedIdenticalStacks_MergesAndSumsValues()
+    {
+        var root = CollapsedStacksParser.Parse(new[]
+        {
+            "a;b 2",
+            "a;b 3"
+        });
+
+        Assert.Equal(5, root.Value);
+        var a = Assert.Single(root.Children);
+        Assert.Equal(5, a.Value);
+        var b = Assert.Single(a.Children);
+        Assert.Equal("b", b.Name);
+        Assert.Equal(5, b.Value);
+    }
+
+    [Fact]
+    public void Parse_StacksSharingPrefix_UsesOneParentWithTwoChildren()
+    {
+        var root = CollapsedStacksParser.Parse(new[]
+        {
+            "a;b 1",
+            "a;c 2"
+        });
+
+        Assert.Equal(3, root.Value);
+        var a = Assert.Single(root.Children);
+        Assert.Equal("a", a.Name);
+        Assert.Equal(2, a.Children.Count);
+        Assert.Equal(1, Assert.Single(a.Children, child => child.Name == "b").Value);
+        Assert.Equal(2, Assert.Single(a.Children, child => child.Name == "c").Value);
+    }
+
+    [Fact]
+    public void Parse_InvariantCultureDecimalCount_PreservesFractionalValue()
+    {
+        var root = CollapsedStacksParser.Parse(new[] { "a;b 1.5" });
+
+        Assert.Equal(1.5, root.Value);
+        var a = Assert.Single(root.Children);
+        var b = Assert.Single(a.Children);
+        Assert.Equal(1.5, b.Value);
+    }
+
+    [Fact]
+    public void Parse_BlankAndMalformedLines_SkipsThemWithoutThrowing()
+    {
+        var lines = new[]
+        {
+            "",
+            "   ",
+            "no-count",
+            "not-a-number nope",
+            "zero 0",
+            "negative -1",
+            "valid 4"
+        };
+
+        var exception = Record.Exception(() => CollapsedStacksParser.Parse(lines));
+
+        Assert.Null(exception);
+        var root = CollapsedStacksParser.Parse(lines);
+        Assert.Equal(4, root.Value);
+        var valid = Assert.Single(root.Children);
+        Assert.Equal("valid", valid.Name);
+        Assert.Equal(4, valid.Value);
+    }
+
+    [Fact]
+    public void Parse_FrameNames_TrimsSurroundingWhitespace()
+    {
+        var root = CollapsedStacksParser.Parse(new[] { "  a  ;  b   2" });
+
+        var a = Assert.Single(root.Children);
+        Assert.Equal("a", a.Name);
+        var b = Assert.Single(a.Children);
+        Assert.Equal("b", b.Name);
+        Assert.Equal(2, b.Value);
+    }
 }
