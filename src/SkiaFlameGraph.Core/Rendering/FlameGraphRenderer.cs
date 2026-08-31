@@ -18,7 +18,7 @@ public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRende
     private const float StrokeWidth = 1f;
     private const string Ellipsis = "…";
 
-    private readonly Dictionary<string, string> _labelCache = new(StringComparer.Ordinal);
+    private readonly Dictionary<(string Text, int Width), string> _labelCache = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FlameGraphRenderer"/> class.
@@ -53,6 +53,7 @@ public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRende
     public override SKImage Render(FlameNode root)
     {
         ArgumentNullException.ThrowIfNull(root);
+        _labelCache.Clear();
 
         var depth = root.MaxDepth();
         var rows = depth + 1;
@@ -89,11 +90,7 @@ public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRende
         if (width < _options.MinBoxWidth)
             return;
 
-        float y = _options.Inverted
-            ? _options.Padding + node.Depth * _options.RowHeight
-            : _options.Padding + (rows - 1 - node.Depth) * _options.RowHeight;
-
-        var rect = new SKRect(x, y, x + width, y + _options.RowHeight - 1);
+        var rect = GetRowRect(node.Depth, x, width, rows);
 
         // The synthetic root gets a flat bar; real frames get palette colours.
         var fillColor = node.Depth == 0
@@ -113,11 +110,7 @@ public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRende
             // Render a single aggregated sliver representing all culled children
             if (_options.ShouldRenderFrame(width))
             {
-                float yElided = _options.Inverted
-                    ? _options.Padding + node.Depth * _options.RowHeight
-                    : _options.Padding + (rows - 1 - node.Depth) * _options.RowHeight;
-
-                var rectElided = new SKRect(x, yElided, x + width, yElided + _options.RowHeight - 1);
+                var rectElided = GetRowRect(node.Depth, x, width, rows);
                 var elidedFillColor = FramePalette.ForFrame(ElidedFrameLabel, _options.HighlightPattern);
                 using var elidedFill = GetPaintForColor(elidedFillColor);
                 canvas.DrawRect(rectElided, elidedFill);
@@ -142,6 +135,15 @@ public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRende
         }
     }
 
+    private SKRect GetRowRect(int depth, float x, float width, int rows)
+    {
+        var y = _options.Inverted
+            ? _options.Padding + depth * _options.RowHeight
+            : _options.Padding + (rows - 1 - depth) * _options.RowHeight;
+
+        return new SKRect(x, y, x + width, y + _options.RowHeight - 1);
+    }
+
     private void DrawLabel(SKCanvas canvas, string text, SKRect rect, SKFont font, SKPaint paint)
     {
         var padded = rect.Width - LabelHorizontalPadding;
@@ -156,19 +158,46 @@ public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRende
         canvas.Restore();
     }
 
-    private static string Ellipsize(string text, SKFont font, float maxWidth)
+    private string Ellipsize(string text, SKFont font, float maxWidth)
     {
-        if (maxWidth <= 0)
-            return string.Empty;
-        if (font.MeasureText(text) <= maxWidth)
-            return text;
+        var cacheKey = (text, (int)maxWidth);
+        if (_labelCache.TryGetValue(cacheKey, out var cached))
+            return cached;
 
-        for (var len = text.Length - 1; len > 0; len--)
+        string result;
+        if (maxWidth <= 0)
         {
-            var candidate = text[..len] + Ellipsis;
-            if (font.MeasureText(candidate) <= maxWidth)
-                return candidate;
+            result = string.Empty;
         }
-        return string.Empty;
+        else if (font.MeasureText(text) <= maxWidth)
+        {
+            result = text;
+        }
+        else
+        {
+            var low = 1;
+            var high = text.Length - 1;
+            var bestLength = 0;
+
+            while (low <= high)
+            {
+                var middle = low + (high - low) / 2;
+                var candidate = text[..middle] + Ellipsis;
+                if (font.MeasureText(candidate) <= maxWidth)
+                {
+                    bestLength = middle;
+                    low = middle + 1;
+                }
+                else
+                {
+                    high = middle - 1;
+                }
+            }
+
+            result = bestLength > 0 ? text[..bestLength] + Ellipsis : string.Empty;
+        }
+
+        _labelCache[cacheKey] = result;
+        return result;
     }
 }
