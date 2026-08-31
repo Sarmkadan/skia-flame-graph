@@ -1,7 +1,6 @@
 using System;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 using SkiaFlameGraph.Core.Models;
 
@@ -14,6 +13,38 @@ namespace SkiaFlameGraph.Core.Rendering;
 public sealed class CollapsedStacksExporter
 {
     /// <summary>
+    /// Exports the flame graph tree to collapsed-stacks format and writes to a <see cref="TextWriter"/>.
+    /// </summary>
+    /// <param name="root">The root node of the flame graph tree.</param>
+    /// <param name="writer">The <see cref="TextWriter"/> to write the output to.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="root"/> or <paramref name="writer"/> is <c>null</c>.</exception>
+    public static void ExportToWriter(FlameNode root, TextWriter writer)
+    {
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(writer);
+
+        WriteNode(root, new List<string>(), writer);
+    }
+
+    /// <summary>
+    /// Exports the flame graph tree to collapsed-stacks format and writes the result to a file.
+    /// </summary>
+    /// <param name="root">The root node of the flame graph tree.</param>
+    /// <param name="path">The target file path.</param>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="root"/> or <paramref name="path"/> is <c>null</c>.</exception>
+    /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is empty.</exception>
+    public static void ExportToFile(FlameNode root, string path)
+    {
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(path);
+        if (string.IsNullOrWhiteSpace(path))
+            throw new ArgumentException("File path must not be empty.", nameof(path));
+
+        using var writer = new StreamWriter(path, append: false, Encoding.UTF8);
+        ExportToWriter(root, writer);
+    }
+
+    /// <summary>
     /// Exports the flame graph tree to collapsed‑stacks format and writes to a <see cref="TextWriter"/>.
     /// </summary>
     /// <param name="root">The root node of the flame graph tree.</param>
@@ -21,10 +52,7 @@ public sealed class CollapsedStacksExporter
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="root"/> or <paramref name="writer"/> is <c>null</c>.</exception>
     public void Export(FlameNode root, TextWriter writer)
     {
-        ArgumentNullException.ThrowIfNull(root);
-        ArgumentNullException.ThrowIfNull(writer);
-
-        WriteNode(root, new Stack<string>(), writer);
+        ExportToWriter(root, writer);
     }
 
     /// <summary>
@@ -38,7 +66,7 @@ public sealed class CollapsedStacksExporter
         ArgumentNullException.ThrowIfNull(root);
 
         using var writer = new StringWriter();
-        Export(root, writer);
+        ExportToWriter(root, writer);
         return writer.ToString();
     }
 
@@ -77,44 +105,35 @@ public sealed class CollapsedStacksExporter
         Directory.CreateDirectory(dir);
 
         using var writer = new StreamWriter(targetFull, append: false, Encoding.UTF8);
-        Export(root, writer);
+        ExportToWriter(root, writer);
     }
 
-    private static void WriteNode(FlameNode node, Stack<string> stack, TextWriter writer)
+    private static void WriteNode(FlameNode node, List<string> stack, TextWriter writer)
     {
-        // Preserve original logic: skip nodes with no self value.
-        if (node == null || node.SelfValue <= 0)
-            return;
+        stack.Add(SanitizeFrameName(node.Name));
 
-        // Push current frame onto stack (sanitized).
-        stack.Push(SanitizeFrameName(node.Name));
+        var selfValue = node.SelfValue;
+        if (selfValue > 0)
+            WriteStackLine(stack, selfValue, writer);
 
-        // Recurse into children first, if any.
-        if (node.Children != null && node.Children.Count > 0)
-        {
-            foreach (var child in node.Children)
-                WriteNode(child, stack, writer);
-        }
-        else
-        {
-            // Leaf node – write the collapsed‑stack line.
-            WriteStackLine(stack, node.SelfValue, writer);
-        }
+        foreach (var child in node.Children)
+            WriteNode(child, stack, writer);
 
-        // Pop current frame from stack.
-        stack.Pop();
+        stack.RemoveAt(stack.Count - 1);
     }
 
-    private static void WriteStackLine(Stack<string> stack, double selfValue, TextWriter writer)
+    private static void WriteStackLine(List<string> stack, double selfValue, TextWriter writer)
     {
-        // Build the stack string from root to leaf.
-        var frames = stack.Reverse();
-        var stackString = string.Join(";", frames);
+        for (var i = 0; i < stack.Count; i++)
+        {
+            if (i > 0)
+                writer.Write(';');
 
-        // Use invariant culture to guarantee '.' as decimal separator.
-        var valueString = selfValue.ToString(CultureInfo.InvariantCulture);
+            writer.Write(stack[i]);
+        }
 
-        writer.WriteLine($"{stackString} {valueString}");
+        writer.Write(' ');
+        writer.WriteLine(selfValue.ToString(CultureInfo.InvariantCulture));
     }
 
     /// <summary>
