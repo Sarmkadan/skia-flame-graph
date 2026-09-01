@@ -17,13 +17,15 @@ public static class CollapsedStacksParser
     /// <returns>A FlameNode tree with "root" as the root node.</returns>
     public static FlameNode ParseFile(string path, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         if (!File.Exists(path))
         {
             throw new FileNotFoundException("Collapsed stacks file not found.", path);
         }
 
         var lines = File.ReadAllLines(path);
-        return Parse(lines);
+        return Parse(lines, cancellationToken);
     }
 
     /// <summary>
@@ -38,6 +40,8 @@ public static class CollapsedStacksParser
 
         foreach (var line in lines)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (string.IsNullOrWhiteSpace(line))
             {
                 continue; // Skip blank lines
@@ -114,7 +118,7 @@ public static class CollapsedStacksParser
         var countPart = line.AsSpan(lastSpaceIndex + 1);
 
         // Parse the count value
-        if (!double.TryParse(countPart, NumberStyles.Float, CultureInfo.CurrentCulture, out var count))
+        if (!double.TryParse(countPart, NumberStyles.Float, CultureInfo.InvariantCulture, out var count))
         {
             return null; // Invalid count
         }
@@ -157,7 +161,8 @@ public static class CollapsedStacksParser
                 // Create parent node and add current as child
                 string internedFrame = framePool.TryGetValue(frame, out var existingFrame) ? existingFrame : framePool[frame] = frame;
                 var parentNode = new FlameNode(internedFrame);
-                parentNode.AddChild(current.Name, current.File, current.Line).Value += current.Value;
+                current.Parent = parentNode;
+                parentNode.Children.Add(current);
                 current = parentNode;
             }
         }
