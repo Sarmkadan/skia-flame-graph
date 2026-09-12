@@ -21,6 +21,13 @@ public sealed class ChromeTraceParserBuilder
     private Dictionary<string, object>? _args;
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="ChromeTraceParserBuilder"/> class.
+    /// </summary>
+    public ChromeTraceParserBuilder()
+    {
+    }
+
+    /// <summary>
     /// Sets the event phase/type (e.g., "X" for complete, "B" for begin, "E" for end).
     /// </summary>
     /// <param name="ph">The event phase.</param>
