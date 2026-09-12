@@ -5,8 +5,8 @@ using System;
 namespace SkiaFlameGraph.Core.Rendering;
 
 /// <summary>
-/// Renders a call tree as a flame graph: every frame is a box whose width is 8
-/// proportional to its total time, stacked by call depth.
+/// Renders a call tree as a flame graph, with each frame represented by a box whose
+/// width is proportional to its total time and whose position reflects its call depth.
 /// </summary>
 public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRenderer
 {
