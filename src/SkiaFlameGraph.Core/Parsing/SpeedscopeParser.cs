@@ -16,10 +16,29 @@ public static partial class SpeedscopeParser
     {
         private readonly List<string> _warnings = new();
 
+        /// <summary>
+        /// Gets the number of profiles parsed.
+        /// </summary>
         public int ProfilesParsed { get; internal set; }
+
+        /// <summary>
+        /// Gets the number of events processed.
+        /// </summary>
         public int EventsProcessed { get; internal set; }
+
+        /// <summary>
+        /// Gets the number of unbalanced close events that were skipped.
+        /// </summary>
         public int UnbalancedCloseEventsSkipped { get; internal set; }
+
+        /// <summary>
+        /// Gets the number of frame references that were outside the valid range.
+        /// </summary>
         public int FramesReferencedOutOfRange { get; internal set; }
+
+        /// <summary>
+        /// Gets the warnings produced while parsing.
+        /// </summary>
         public IReadOnlyList<string> Warnings => _warnings;
 
         internal void Warn(string message, Action<string>? log)
