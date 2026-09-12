@@ -11,9 +11,11 @@ public static class FlameNodeExtensions
     /// <param name="node">The root node to search from.</param>
     /// <param name="name">The exact name to match.</param>
     /// <returns>The first matching descendant, or null if not found.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="node"/> is null.</exception>
     /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is null or empty.</exception>
     public static FlameNode? FindByName(this FlameNode? node, string name)
     {
+        ArgumentNullException.ThrowIfNull(node);
         ArgumentException.ThrowIfNullOrEmpty(name);
 
         return node is null
