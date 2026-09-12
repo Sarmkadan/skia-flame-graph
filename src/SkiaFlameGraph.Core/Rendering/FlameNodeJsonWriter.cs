@@ -23,7 +23,7 @@ public static class FlameNodeJsonWriter
     /// <exception cref="ArgumentNullException">If <paramref name="root"/> is <c>null</c>.</exception>
     public static string ToJson(FlameNode root, bool indented = false)
     {
-        if (root == null) throw new ArgumentNullException(nameof(root));
+        ArgumentNullException.ThrowIfNull(root);
 
         var options = new JsonWriterOptions { Indented = indented };
         using var stream = new MemoryStream();
