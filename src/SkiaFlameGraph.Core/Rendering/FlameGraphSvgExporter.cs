@@ -18,7 +18,8 @@ public class FlameGraphSvgExporter
     /// <param name="options">The options that control SVG rendering.</param>
     public FlameGraphSvgExporter(RenderOptions options)
     {
-        _options = options ?? throw new ArgumentNullException(nameof(options));
+        ArgumentNullException.ThrowIfNull(options);
+        _options = options;
     }
 
     /// <summary>
@@ -28,8 +29,7 @@ public class FlameGraphSvgExporter
     /// <param name="path">The path of the SVG file to write.</param>
     public void RenderToSvg(FlameNode root, string path)
     {
-        if (root == null)
-            throw new ArgumentNullException(nameof(root));
+        ArgumentNullException.ThrowIfNull(root);
         if (string.IsNullOrWhiteSpace(path))
             throw new ArgumentException("Path cannot be null or empty", nameof(path));
 
