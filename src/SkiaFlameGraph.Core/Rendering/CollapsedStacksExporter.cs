@@ -59,6 +59,9 @@ public sealed class CollapsedStacksExporter
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="root"/> or <paramref name="writer"/> is <c>null</c>.</exception>
     public void Export(FlameNode root, TextWriter writer)
     {
+        ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(writer);
+
         ExportToWriter(root, writer);
     }
 
