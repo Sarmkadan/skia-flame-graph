@@ -13,6 +13,13 @@ namespace SkiaFlameGraph.Core.Rendering;
 public sealed class CollapsedStacksExporter
 {
     /// <summary>
+    /// Initializes a new instance of the <see cref="CollapsedStacksExporter"/> class.
+    /// </summary>
+    public CollapsedStacksExporter()
+    {
+    }
+
+    /// <summary>
     /// Exports the flame graph tree to collapsed-stacks format and writes to a <see cref="TextWriter"/>.
     /// </summary>
     /// <param name="root">The root node of the flame graph tree.</param>
