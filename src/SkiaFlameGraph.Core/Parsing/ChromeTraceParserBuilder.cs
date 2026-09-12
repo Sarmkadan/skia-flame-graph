@@ -35,7 +35,7 @@ public sealed class ChromeTraceParserBuilder
     /// <exception cref="ArgumentNullException">If <paramref name="ph"/> is null.</exception>
     public ChromeTraceParserBuilder WithPh(string ph)
     {
-        if (ph == null) throw new ArgumentNullException(nameof(ph));
+        ArgumentNullException.ThrowIfNull(ph);
         _ph = ph;
         return this;
     }
@@ -48,7 +48,7 @@ public sealed class ChromeTraceParserBuilder
     /// <exception cref="ArgumentNullException">If <paramref name="name"/> is null.</exception>
     public ChromeTraceParserBuilder WithName(string name)
     {
-        if (name == null) throw new ArgumentNullException(nameof(name));
+        ArgumentNullException.ThrowIfNull(name);
         _name = name;
         return this;
     }
@@ -105,7 +105,7 @@ public sealed class ChromeTraceParserBuilder
     /// <exception cref="ArgumentNullException">If <paramref name="file"/> is null.</exception>
     public ChromeTraceParserBuilder WithFile(string file)
     {
-        if (file == null) throw new ArgumentNullException(nameof(file));
+        ArgumentNullException.ThrowIfNull(file);
         _file = file;
         return this;
     }
@@ -129,7 +129,7 @@ public sealed class ChromeTraceParserBuilder
     /// <exception cref="ArgumentNullException">If <paramref name="category"/> is null.</exception>
     public ChromeTraceParserBuilder WithCategory(string category)
     {
-        if (category == null) throw new ArgumentNullException(nameof(category));
+        ArgumentNullException.ThrowIfNull(category);
         _category = category;
         return this;
     }
@@ -142,7 +142,7 @@ public sealed class ChromeTraceParserBuilder
     /// <exception cref="ArgumentNullException">If <paramref name="args"/> is null.</exception>
     public ChromeTraceParserBuilder WithArgs(Dictionary<string, object>? args)
     {
-        if (args == null) throw new ArgumentNullException(nameof(args));
+        ArgumentNullException.ThrowIfNull(args);
         _args = args;
         return this;
     }
