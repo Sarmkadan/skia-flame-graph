@@ -14,6 +14,7 @@ public static class CollapsedStacksParser
     /// Parses a collapsed stacks file into a flame graph tree.
     /// </summary>
     /// <param name="path">Path to the collapsed stacks file.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A FlameNode tree with "root" as the root node.</returns>
     public static FlameNode ParseFile(string path, CancellationToken cancellationToken = default)
     {
@@ -32,6 +33,7 @@ public static class CollapsedStacksParser
     /// Parses collapsed stacks from an enumerable of lines.
     /// </summary>
     /// <param name="lines">Lines of text in Brendan Gregg collapsed stack format.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     /// <returns>A FlameNode tree with "root" as the root node.</returns>
     public static FlameNode Parse(IEnumerable<string> lines, CancellationToken cancellationToken = default)
     {
