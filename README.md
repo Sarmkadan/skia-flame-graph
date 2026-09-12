@@ -762,3 +762,39 @@ Or run just this suite from the CLI:
 ```bash
 dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.FlameGraphRendererTests"
 ```
+
+## FlameDiff
+
+`FlameDiff` compares a baseline flame tree with a current flame tree and returns a
+new `FlameNode` tree whose values represent the change between the profiles. A
+positive value means the current profile spent more time or weight in that frame;
+a negative value means it spent less. Child frames are matched by name.
+
+The public API consists of one static method:
+
+```csharp
+public static FlameNode Diff(FlameNode baseline, FlameNode current)
+```
+
+Both arguments are required; passing `null` throws `ArgumentNullException`. The
+input trees are not modified.
+
+Example usage:
+
+```csharp
+using SkiaFlameGraph.Core;
+using SkiaFlameGraph.Core.Models;
+
+var baseline = new FlameNode("root") { Value = 100 };
+baseline.AddChild("Parse").Value = 40;
+
+var current = new FlameNode("root") { Value = 125 };
+current.AddChild("Parse").Value = 55;
+current.AddChild("Render").Value = 20;
+
+var delta = FlameDiff.Diff(baseline, current);
+
+Console.WriteLine(delta.Value);                       // 25
+Console.WriteLine(delta.Children[0].Value);           // 15 (Parse)
+Console.WriteLine(delta.Children[1].Value);           // 20 (Render)
+```
