@@ -10,6 +10,8 @@ public static partial class SpeedscopeParser
 	/// </summary>
 	public static (FlameNode root, IReadOnlyList<string> warnings) BuildTreeWithWarnings(SpeedscopeFile file, int profileIndex = 0)
 	{
+		ArgumentNullException.ThrowIfNull(file);
+
 		if (profileIndex < 0 || profileIndex >= file.Profiles.Count)
 			throw new ArgumentOutOfRangeException(nameof(profileIndex));
 
