@@ -9,8 +9,19 @@ namespace SkiaFlameGraph.Core.Rendering;
 /// </summary>
 public abstract class BaseFlameNodeRenderer : IFlameNodeRenderer
 {
+    /// <summary>
+    /// The render options used by this renderer.
+    /// </summary>
     protected readonly RenderOptions _options;
+
+    /// <summary>
+    /// The cache of paints keyed by color.
+    /// </summary>
     protected readonly Dictionary<SKColor, SKPaint> _paintCache = new();
+
+    /// <summary>
+    /// Indicates whether this renderer has been disposed.
+    /// </summary>
     protected bool _disposed;
 
     /// <summary>
