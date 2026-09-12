@@ -64,6 +64,11 @@ public sealed class DifferentialFlameGraphRenderer : BaseFlameNodeRenderer
         data.SaveTo(fs);
     }
 
+    /// <summary>
+    /// Renders the specified differential flame graph as an image.
+    /// </summary>
+    /// <param name="root">The root node of the differential flame graph to render.</param>
+    /// <returns>An image containing the rendered differential flame graph.</returns>
     public override SKImage Render(FlameNode root)
     {
         var depth = root.MaxDepth();
