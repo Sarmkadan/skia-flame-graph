@@ -46,8 +46,10 @@ public sealed class SpeedscopeFileBuilder
     /// </summary>
     /// <param name="schema">The schema URI or identifier.</param>
     /// <returns>This builder instance.</returns>
+    /// <exception cref="ArgumentNullException">If <paramref name="schema"/> is <see langword="null"/>.</exception>
     public SpeedscopeFileBuilder WithSchema(string? schema)
     {
+        ArgumentNullException.ThrowIfNull(schema);
         _schema = schema;
         return this;
     }
@@ -83,8 +85,10 @@ public sealed class SpeedscopeFileBuilder
     /// </summary>
     /// <param name="name">The display name.</param>
     /// <returns>This builder instance.</returns>
+    /// <exception cref="ArgumentNullException">If <paramref name="name"/> is <see langword="null"/>.</exception>
     public SpeedscopeFileBuilder WithName(string? name)
     {
+        ArgumentNullException.ThrowIfNull(name);
         _name = name;
         return this;
     }
@@ -94,8 +98,10 @@ public sealed class SpeedscopeFileBuilder
     /// </summary>
     /// <param name="exporter">The exporter identifier.</param>
     /// <returns>This builder instance.</returns>
+    /// <exception cref="ArgumentNullException">If <paramref name="exporter"/> is <see langword="null"/>.</exception>
     public SpeedscopeFileBuilder WithExporter(string? exporter)
     {
+        ArgumentNullException.ThrowIfNull(exporter);
         _exporter = exporter;
         return this;
     }
