@@ -13,6 +13,13 @@ public class FlameNodeBuilder
     private int _depth;
     private FlameNode? _parent;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FlameNodeBuilder"/> class.
+    /// </summary>
+    public FlameNodeBuilder()
+    {
+    }
+
     /// <summary>Sets the node name (required).</summary>
     /// <param name="name">The frame name.</param>
     /// <returns>This builder, for chaining.</returns>
