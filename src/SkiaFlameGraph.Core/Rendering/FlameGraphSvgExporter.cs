@@ -12,11 +12,20 @@ public class FlameGraphSvgExporter
 {
     private readonly RenderOptions _options;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FlameGraphSvgExporter"/> class.
+    /// </summary>
+    /// <param name="options">The options that control SVG rendering.</param>
     public FlameGraphSvgExporter(RenderOptions options)
     {
         _options = options ?? throw new ArgumentNullException(nameof(options));
     }
 
+    /// <summary>
+    /// Renders the flame graph rooted at <paramref name="root"/> to an SVG file.
+    /// </summary>
+    /// <param name="root">The root node of the flame graph to render.</param>
+    /// <param name="path">The path of the SVG file to write.</param>
     public void RenderToSvg(FlameNode root, string path)
     {
         if (root == null)
