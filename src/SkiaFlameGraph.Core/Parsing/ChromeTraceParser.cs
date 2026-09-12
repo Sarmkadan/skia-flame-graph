@@ -150,43 +150,64 @@ public static class ChromeTraceParser
 /// </summary>
 public sealed class ChromeTraceEvent
 {
-    /// <summary>Event type/phase (X=Complete, B=Begin, E=End, etc.)</summary>
+    /// <summary>
+    /// Gets or sets the event phase, such as <c>X</c> for complete, <c>B</c> for begin,
+    /// or <c>E</c> for end.
+    /// </summary>
     [JsonPropertyName("ph")]
     public string? Ph { get; set; }
 
-    /// <summary>Event name/function being profiled</summary>
+    /// <summary>
+    /// Gets or sets the name of the event or function being profiled.
+    /// </summary>
     [JsonPropertyName("name")]
     public string? Name { get; set; }
 
-    /// <summary>Timestamp in microseconds</summary>
+    /// <summary>
+    /// Gets or sets the timestamp in microseconds.
+    /// </summary>
     [JsonPropertyName("ts")]
     public double Ts { get; set; }
 
-    /// <summary>Duration in microseconds (for complete events)</summary>
+    /// <summary>
+    /// Gets or sets the duration in microseconds for a complete event.
+    /// </summary>
     [JsonPropertyName("dur")]
     public double? Dur { get; set; }
 
-    /// <summary>Thread ID</summary>
+    /// <summary>
+    /// Gets or sets the thread identifier.
+    /// </summary>
     [JsonPropertyName("tid")]
     public int? Tid { get; set; }
 
-    /// <summary>Process ID</summary>
+    /// <summary>
+    /// Gets or sets the process identifier.
+    /// </summary>
     [JsonPropertyName("pid")]
     public int? Pid { get; set; }
 
-    /// <summary>Optional: Source file</summary>
+    /// <summary>
+    /// Gets or sets the source file associated with the event.
+    /// </summary>
     [JsonPropertyName("file")]
     public string? File { get; set; }
 
-    /// <summary>Optional: Line number</summary>
+    /// <summary>
+    /// Gets or sets the source line number associated with the event.
+    /// </summary>
     [JsonPropertyName("line")]
     public int? Line { get; set; }
 
-    /// <summary>Optional: Category</summary>
+    /// <summary>
+    /// Gets or sets the event category.
+    /// </summary>
     [JsonPropertyName("cat")]
     public string? Category { get; set; }
 
-    /// <summary>Optional: Arguments/attributes</summary>
+    /// <summary>
+    /// Gets or sets the event arguments and attributes.
+    /// </summary>
     [JsonPropertyName("args")]
     public Dictionary<string, object>? Args { get; set; }
 }
