@@ -18,6 +18,7 @@ public static class CollapsedStacksParser
     /// <returns>A FlameNode tree with "root" as the root node.</returns>
     public static FlameNode ParseFile(string path, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(path);
         cancellationToken.ThrowIfCancellationRequested();
 
         if (!File.Exists(path))
@@ -37,6 +38,8 @@ public static class CollapsedStacksParser
     /// <returns>A FlameNode tree with "root" as the root node.</returns>
     public static FlameNode Parse(IEnumerable<string> lines, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(lines);
+
         var root = new FlameNode("root");
         var framePool = new Dictionary<string, string>(StringComparer.Ordinal);
 
