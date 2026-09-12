@@ -33,6 +33,7 @@ public static class ChromeTraceParser
     /// <exception cref="ArgumentException">Thrown when <paramref name="json"/> is null or empty.</exception>
     public static ChromeTraceEvent[] Deserialize(string json)
     {
+        ArgumentNullException.ThrowIfNull(json);
         ArgumentException.ThrowIfNullOrEmpty(json);
         var events = JsonSerializer.Deserialize<ChromeTraceEvent[]>(json, Options)
             ?? throw new FormatException("Chrome trace document deserialized to null");
@@ -50,6 +51,7 @@ public static class ChromeTraceParser
     /// <exception cref="FileNotFoundException">Thrown when the file specified by <paramref name="path"/> does not exist.</exception>
     public static FlameNode ParseFile(string path)
     {
+        ArgumentNullException.ThrowIfNull(path);
         ArgumentException.ThrowIfNullOrEmpty(path);
         if (!File.Exists(path))
             throw new FileNotFoundException("Chrome trace JSON file was not found.", path);
