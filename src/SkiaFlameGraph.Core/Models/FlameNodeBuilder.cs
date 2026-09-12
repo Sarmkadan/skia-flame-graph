@@ -34,10 +34,13 @@ public class FlameNodeBuilder
     }
 
     /// <summary>Sets the source file for the frame.</summary>
-    /// <param name="file">The source file, or null.</param>
+    /// <param name="file">The source file.</param>
     /// <returns>This builder, for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="file"/> is null.</exception>
     public FlameNodeBuilder WithFile(string? file)
     {
+        ArgumentNullException.ThrowIfNull(file);
+
         _file = file;
         return this;
     }
@@ -70,10 +73,13 @@ public class FlameNodeBuilder
     }
 
     /// <summary>Sets the parent node.</summary>
-    /// <param name="parent">The parent node, or null.</param>
+    /// <param name="parent">The parent node.</param>
     /// <returns>This builder, for chaining.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="parent"/> is null.</exception>
     public FlameNodeBuilder WithParent(FlameNode? parent)
     {
+        ArgumentNullException.ThrowIfNull(parent);
+
         _parent = parent;
         return this;
     }
