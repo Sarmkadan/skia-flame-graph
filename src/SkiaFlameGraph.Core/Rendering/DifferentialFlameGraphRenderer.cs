@@ -71,6 +71,8 @@ public sealed class DifferentialFlameGraphRenderer : BaseFlameNodeRenderer
     /// <returns>An image containing the rendered differential flame graph.</returns>
     public override SKImage Render(FlameNode root)
     {
+        ArgumentNullException.ThrowIfNull(root);
+
         var depth = root.MaxDepth();
         var rows = depth + 1;
         var height = (int)MathF.Ceiling(rows * _options.RowHeight + _options.Padding * 2);
