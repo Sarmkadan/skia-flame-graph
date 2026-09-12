@@ -112,6 +112,8 @@ public static class FlameNodeMergeExtensions
 
     private static FlameNode CloneSubtree(FlameNode source)
     {
+        ArgumentNullException.ThrowIfNull(source);
+
         var copy = new FlameNode(source.Name)
         {
             File = source.File,
@@ -132,6 +134,8 @@ public static class FlameNodeMergeExtensions
 
     private static FlameNode NegateSubtree(FlameNode source)
     {
+        ArgumentNullException.ThrowIfNull(source);
+
         var copy = new FlameNode(source.Name)
         {
             File = source.File,
