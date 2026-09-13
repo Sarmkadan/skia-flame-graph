@@ -17,8 +17,7 @@ public sealed class HotFunctionsReport : IHotFunctionsReport
     /// <param name="root">The root node of the flame graph tree.</param>
     public HotFunctionsReport(FlameNode root)
     {
-        if (root == null)
-            throw new ArgumentNullException(nameof(root));
+        ArgumentNullException.ThrowIfNull(root);
 
         AggregateSelfTimes(root);
         foreach (var func in _functions)
@@ -120,6 +119,8 @@ public sealed class HotFunctionsReport : IHotFunctionsReport
         /// <param name="name">The function name.</param>
         public HotFunction(string name)
         {
+            ArgumentNullException.ThrowIfNull(name);
+
             Name = name;
         }
 
