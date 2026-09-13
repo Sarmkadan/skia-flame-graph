@@ -29,6 +29,7 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
     public override void RenderToPng(FlameNode root, string path)
     {
         ArgumentNullException.ThrowIfNull(root);
+        ArgumentNullException.ThrowIfNull(path);
         ArgumentException.ThrowIfNullOrEmpty(path);
         base.RenderToPng(root, path);
     }
