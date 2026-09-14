@@ -139,6 +139,22 @@ public properties to change canvas size, spacing, colours, and minimum sizing
 thresholds before rendering. All values are in pixels except colours which use
 SkiaSharp's `SKColor`.
 
+### Options
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `Width` | `int` | `1600` | Width of the rendered flame graph, in pixels. |
+| `RowHeight` | `float` | `22f` | Height of a single frame row, in pixels. |
+| `MinLabelWidth` | `float` | `28f` | Frames narrower than this are drawn but not labelled. |
+| `MinBoxWidth` | `float` | `0.4f` | Frames narrower than this are skipped entirely. |
+| `MinSubtreeWidthPx` | `float` | `0.5f` | Subtrees whose scaled width falls below this threshold are culled entirely during layout. Set to 0 to disable subtree culling. |
+| `Padding` | `float` | `16f` | Padding around the rendered flame graph, in pixels. |
+| `FontSize` | `float` | `12f` | Font size used for frame labels, in pixels. |
+| `Background` | `SKColor` | `new(0x1e, 0x1e, 0x24)` | Background color of the rendered flame graph (dark gray/blue). |
+| `TextColor` | `SKColor` | `new(0xf0, 0xf0, 0xf0)` | Color used for frame label text (light gray). |
+| `Inverted` | `bool` | `false` | Draw deepest frames at the top (icicle) instead of bottom (flame). |
+| `HighlightPattern` | `string?` | `null` | Regex pattern for frame names to highlight. Frames matching this pattern will be drawn with a distinct highlight color. If null or empty, no frames are highlighted. |
+
 Example usage:
 
 ```csharp
