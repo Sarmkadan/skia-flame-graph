@@ -10,6 +10,12 @@ namespace SkiaFlameGraph.Core.Rendering;
 /// </summary>
 public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
 {
+    private const float DefaultHeightRatio = 0.62f;
+    private const int MinCellSize = 2;
+    private const int MaxTreemapDepth = 12;
+    private const int MinLabelWidth = 34;
+    private const int LabelMinHeightExtra = 2;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="TreemapRenderer"/> class.
     /// </summary>
@@ -57,7 +63,7 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
     public override SKImage Render(FlameNode root, int? height)
     {
         ArgumentNullException.ThrowIfNull(root);
-        var h = height ?? (int)(_options.Width * 0.62f);
+        var h = height ?? (int)(_options.Width * DefaultHeightRatio);
         var info = new SKImageInfo(_options.Width, h, SKColorType.Rgba8888, SKAlphaType.Premul);
         using var surface = SKSurface.Create(info);
         var canvas = surface.Canvas;
@@ -97,10 +103,10 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
         SKCanvas canvas, FlameNode node, SKRect rect,
         SKPaint stroke, SKFont font, SKPaint textPaint, int depth)
     {
-        if (rect.Width < 2 || rect.Height < 2)
+        if (rect.Width < MinCellSize || rect.Height < MinCellSize)
             return;
 
-        if (node.Children.Count == 0 || depth >= 12)
+        if (node.Children.Count == 0 || depth >= MaxTreemapDepth)
         {
             var fillColor = FramePalette.ForFrame(node.Name);
             using var fill = GetPaintForColor(fillColor);
@@ -287,7 +293,7 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
     /// <param name="paint">Paint used for the label text.</param>
     private void DrawLabel(SKCanvas canvas, string text, SKRect rect, SKFont font, SKPaint paint)
     {
-        if (rect.Width < 34 || rect.Height < _options.FontSize + 2)
+        if (rect.Width < MinLabelWidth || rect.Height < _options.FontSize + LabelMinHeightExtra)
             return;
         canvas.Save();
         canvas.ClipRect(rect);
