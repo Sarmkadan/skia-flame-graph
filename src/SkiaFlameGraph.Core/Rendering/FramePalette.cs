@@ -12,7 +12,10 @@ namespace SkiaFlameGraph.Core.Rendering;
 public static class FramePalette
 {
     /// <summary>Highlight colour for frames matching the highlight pattern.</summary>
-    public static SKColor HighlightColor { get; } = new(0xff, 0x6b, 0x35); // Vibrant orange
+    private const byte HighlightColorRed = 0xff;
+    private const byte HighlightColorGreen = 0x6b;
+    private const byte HighlightColorBlue = 0x35;
+    public static SKColor HighlightColor { get; } = new(HighlightColorRed, HighlightColorGreen, HighlightColorBlue); // Vibrant orange
 
     /// <summary>
     /// Returns a deterministic colour for the given frame name.
