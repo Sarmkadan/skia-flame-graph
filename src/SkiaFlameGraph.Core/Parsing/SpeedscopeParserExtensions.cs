@@ -14,6 +14,7 @@ public static class SpeedscopeParserExtensions
 	/// </summary>
 	public static (FlameNode root, IReadOnlyList<string> warnings) BuildTreeWithWarnings(this SpeedscopeFile file, int profileIndex = 0)
 	{
+		ArgumentNullException.ThrowIfNull(file);
 		return SpeedscopeParser.BuildTreeWithWarnings(file, profileIndex);
 	}
 }
