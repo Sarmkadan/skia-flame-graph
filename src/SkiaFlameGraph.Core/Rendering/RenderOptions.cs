@@ -21,7 +21,7 @@ public sealed class RenderOptions : IRenderOptions
 
     /// <summary>
     /// Subtrees whose scaled width falls below this threshold are culled entirely during layout.
-    /// This prevents drawing thousands of sub-pixel nodes that would render as &lt;1px boxes.
+    /// This prevents drawing thousands of sub-pixel nodes that would render as <1px boxes.
     /// Set to 0 to disable subtree culling and render all nodes individually.
     /// </summary>
     /// <remarks>
@@ -54,5 +54,5 @@ public sealed class RenderOptions : IRenderOptions
 
     /// <summary>Returns a string that represents the current rendering options.</summary>
     public override string ToString() =>
-        $"RenderOptions {{ Width = {Width}, RowHeight = {RowHeight}, MinLabelWidth = {MinLabelWidth}, MinBoxWidth = {MinBoxWidth}, Padding = {Padding}, FontSize = {FontSize} }}";
+        $"RenderOptions {{ Width = {Width}, RowHeight = {RowHeight}, MinLabelWidth = {MinLabelWidth}, MinBoxWidth = {MinBoxWidth}, MinSubtreeWidthPx = {MinSubtreeWidthPx}, Padding = {Padding}, FontSize = {FontSize}, Background = {Background}, TextColor = {TextColor}, Inverted = {Inverted}, HighlightPattern = {HighlightPattern} }}";
 }
