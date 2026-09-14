@@ -361,6 +361,24 @@ foreach (var child in root.Children)
 }
 ```
 
+## FlameNodeBuilder
+
+Provides a fluent builder for constructing `FlameNode` instances with only the properties you need.
+
+Example usage:
+
+```csharp
+using SkiaFlameGraph.Core.Models;
+
+var node = new FlameNodeBuilder()
+    .WithName("ProcessRequest")
+    .WithFile("ApiController.cs")
+    .WithLine(45)
+    .WithValue(800.0)
+    .WithDepth(1)
+    .Build();
+```
+
 ## FlameNodeExtensions
 
 Provides utility methods for querying and analyzing the flame graph node tree structure. These methods allow you to search for specific nodes, calculate metrics, traverse the tree, and extract information about the call stack hierarchy.
