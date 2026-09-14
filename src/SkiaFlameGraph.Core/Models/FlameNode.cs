@@ -59,8 +59,8 @@ public sealed class FlameNode : IFlameNode, IEquatable<FlameNode>
     }
 
     /// <summary>Returns a string that describes this node.</summary>
-    /// <returns>A string containing the node's source and hierarchy information.</returns>
-    public override string ToString() => $"FlameNode {{ File = {File}, Line = {Line}, Value = {Value}, Depth = {Depth}, Parent = {Parent?.Name ?? "null"} }}";
+    /// <returns>A string containing the node's name and value.</returns>
+    public override string ToString() => $"FlameNode(Name={Name}, Value={Value})";
 
     /// <summary>Returns a hash code for this node.</summary>
     /// <returns>A hash code based on the node's identifying values.</returns>
