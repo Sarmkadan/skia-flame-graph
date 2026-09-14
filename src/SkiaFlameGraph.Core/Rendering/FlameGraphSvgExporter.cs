@@ -12,6 +12,22 @@ public class FlameGraphSvgExporter
 {
     private readonly RenderOptions _options;
 
+    // SVG constants
+    private const string SvgNamespace = "http://www.w3.org/2000/svg";
+    private const string FrameStrokeColor = "#333";
+    private const float FrameStrokeWidth = 0.5f;
+    private const float FrameHoverStrokeWidth = 1f;
+    private const string FrameHoverStrokeColor = "#000";
+    private const string LabelFontFamily = "Arial, sans-serif";
+    private const float LabelFontSize = 11f;
+    private const string LabelFillColor = "#fff";
+    private const string LabelTextShadow = "0 0 2px #000";
+    private const float MinFrameWidth = 0.4f;
+    private const int LabelMinWidthForDisplay = 28;
+    private const int LabelMinHeightForDisplay = 12;
+    private const int LabelPadding = 3;
+    private const int LabelTruncationOffset = 6;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="FlameGraphSvgExporter"/> class.
     /// </summary>
@@ -48,11 +64,11 @@ public class FlameGraphSvgExporter
         var width = _options.Width;
         var height = CalculateTotalHeight(root);
 
-        sb.AppendLine($"<svg width=\"{width}\" height=\"{height}\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\">");
+        sb.AppendLine($"<svg width=\"{width}\" height=\"{height}\" version=\"1.1\" xmlns=\"{SvgNamespace}\">");
         sb.AppendLine("  <style type=\"text/css\"><![CDATA[");
-        sb.AppendLine("    .frame { stroke: #333; stroke-width: 0.5; }");
-        sb.AppendLine("    .frame:hover { stroke-width: 1; stroke: #000; }");
-        sb.AppendLine("    .frame-label { font-family: Arial, sans-serif; font-size: 11px; fill: #fff; text-shadow: 0 0 2px #000; }");
+        sb.AppendLine($"    .frame {{ stroke: {FrameStrokeColor}; stroke-width: {FrameStrokeWidth}; }}");
+        sb.AppendLine($"    .frame:hover {{ stroke-width: {FrameHoverStrokeWidth}; stroke: {FrameHoverStrokeColor}; }}");
+        sb.AppendLine($"    .frame-label {{ font-family: {LabelFontFamily}; font-size: {LabelFontSize}px; fill: {LabelFillColor}; text-shadow: {LabelTextShadow}; }}");
         sb.AppendLine("  ]]></style>");
 
         // Draw frames recursively
@@ -99,8 +115,8 @@ public class FlameGraphSvgExporter
         var nodeWidth = (float)(node.Value / totalValue * width);
 
         // Ensure minimum width for visibility
-        if (nodeWidth < 0.4f)
-            nodeWidth = 0.4f;
+        if (nodeWidth < MinFrameWidth)
+            nodeWidth = MinFrameWidth;
 
         // Calculate height per depth level
         var rowHeight = _options.RowHeight;
@@ -117,11 +133,11 @@ public class FlameGraphSvgExporter
         sb.AppendLine($"  <rect x=\"{rectX:F1}\" y=\"{rectY:F1}\" width=\"{rectWidth:F1}\" height=\"{rectHeight:F1}\" fill=\"#{color.Red:X2}{color.Green:X2}{color.Blue:X2}\" class=\"frame\" data-name=\"{EscapeXml(node.Name)}\" data-value=\"{node.Value}\"/>");
 
         // Draw label if there's enough space
-        if (nodeWidth > 28 && rowHeight > 12)
+        if (nodeWidth > LabelMinWidthForDisplay && rowHeight > LabelMinHeightForDisplay)
         {
-            var labelX = rectX + 3;
-            var labelY = rectY + (rowHeight / 2) + 3;
-            var labelText = TruncateLabel(node.Name, (int)(nodeWidth - 6));
+            var labelX = rectX + LabelPadding;
+            var labelY = rectY + (rowHeight / 2) + LabelPadding;
+            var labelText = TruncateLabel(node.Name, (int)(nodeWidth - LabelTruncationOffset));
 
             sb.AppendLine($"  <text x=\"{labelX:F1}\" y=\"{labelY:F1}\" class=\"frame-label\">" + EscapeXml(labelText) + "</text>");
         }
