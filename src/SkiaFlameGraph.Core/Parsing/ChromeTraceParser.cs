@@ -25,6 +25,14 @@ public static class ChromeTraceParser
         PropertyNameCaseInsensitive = true,
     };
 
+    private const string TraceDeserializedNullError = "Chrome trace document deserialized to null";
+    private const string TraceContainsNoEventsError = "Chrome trace document contains no events";
+    private const string TraceFileNotFoundError = "Chrome trace JSON file was not found.";
+    private const string PhaseComplete = "X";
+    private const string PhaseBegin = "B";
+    private const string PhaseEnd = "E";
+    private const string UnknownName = "unknown";
+
     /// <summary>
     /// Deserialize Chrome trace JSON from a string.
     /// </summary>
@@ -36,9 +44,9 @@ public static class ChromeTraceParser
         ArgumentNullException.ThrowIfNull(json);
         ArgumentException.ThrowIfNullOrEmpty(json);
         var events = JsonSerializer.Deserialize<ChromeTraceEvent[]>(json, Options)
-            ?? throw new FormatException("Chrome trace document deserialized to null");
+            ?? throw new FormatException(TraceDeserializedNullError);
         if (events.Length == 0)
-            throw new FormatException("Chrome trace document contains no events");
+            throw new FormatException(TraceContainsNoEventsError);
         return events;
     }
 
@@ -54,13 +62,13 @@ public static class ChromeTraceParser
         ArgumentNullException.ThrowIfNull(path);
         ArgumentException.ThrowIfNullOrEmpty(path);
         if (!File.Exists(path))
-            throw new FileNotFoundException("Chrome trace JSON file was not found.", path);
+            throw new FileNotFoundException(TraceFileNotFoundError, path);
 
         using var stream = File.OpenRead(path);
         var events = JsonSerializer.Deserialize<ChromeTraceEvent[]>(stream, Options)
-            ?? throw new FormatException("Chrome trace document deserialized to null");
+            ?? throw new FormatException(TraceDeserializedNullError);
         if (events.Length == 0)
-            throw new FormatException("Chrome trace document contains no events");
+            throw new FormatException(TraceContainsNoEventsError);
         return BuildTree(events);
     }
 
@@ -112,30 +120,30 @@ public static class ChromeTraceParser
 
         foreach (var ev in events)
         {
-            if (ev.Ph != "X" && ev.Ph != "B" && ev.Ph != "E")
+            if (ev.Ph != PhaseComplete && ev.Ph != PhaseBegin && ev.Ph != PhaseEnd)
             {
                 // Skip non-complete/begin/end events
                 continue;
             }
 
-            if (ev.Ph == "X" || ev.Ph == "B")
+            if (ev.Ph == PhaseComplete || ev.Ph == PhaseBegin)
             {
                 // Begin event or Complete event - push new frame onto stack
                 // Use the node returned by AddChild to ensure we're working with the same instance
-                var frameNode = stack.Peek().AddChild(ev.Name ?? "unknown", ev.File, ev.Line);
+                var frameNode = stack.Peek().AddChild(ev.Name ?? UnknownName, ev.File, ev.Line);
                 stack.Push(frameNode);
             }
 
-            if (ev.Ph == "X" || ev.Ph == "E")
+            if (ev.Ph == PhaseComplete || ev.Ph == PhaseEnd)
             {
                 // Complete event or End event - pop frame from stack
                 // For complete events, attribute the duration to the frame
-                if (ev.Ph == "X" && ev.Dur.HasValue && stack.Count > 1)
+                if (ev.Ph == PhaseComplete && ev.Dur.HasValue && stack.Count > 1)
                 {
                     var frameNode = stack.Pop();
                     frameNode.Value = ev.Dur.Value;
                 }
-                else if (ev.Ph == "E" && stack.Count > 1)
+                else if (ev.Ph == PhaseEnd && stack.Count > 1)
                 {
                     stack.Pop();
                 }
