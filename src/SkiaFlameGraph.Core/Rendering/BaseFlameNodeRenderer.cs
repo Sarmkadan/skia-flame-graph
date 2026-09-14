@@ -10,6 +10,11 @@ namespace SkiaFlameGraph.Core.Rendering;
 public abstract class BaseFlameNodeRenderer : IFlameNodeRenderer
 {
     /// <summary>
+    /// The default PNG quality for encoding (0-100).
+    /// </summary>
+    private const int DefaultPngQuality = 100;
+
+    /// <summary>
     /// The render options used by this renderer.
     /// </summary>
     protected readonly RenderOptions _options;
@@ -51,7 +56,7 @@ public abstract class BaseFlameNodeRenderer : IFlameNodeRenderer
         ArgumentNullException.ThrowIfNull(path);
 
         using var image = Render(root);
-        using var data = image.Encode(SKEncodedImageFormat.Png, 100);
+        using var data = image.Encode(SKEncodedImageFormat.Png, DefaultPngQuality);
         using var fs = File.OpenWrite(path);
         data.SaveTo(fs);
     }
