@@ -75,6 +75,39 @@ new TreemapRenderer(options).RenderToPng(root, "treemap.png");
 `Render(...)` returns an `SKImage` if you want to composite it yourself instead
 of writing straight to disk.
 
+## FlameGraphRenderer
+
+The `FlameGraphRenderer` class is responsible for rendering a call tree as a flame graph using SkiaSharp.
+It is located in `src/SkiaFlameGraph.Core/Rendering/FlameGraphRenderer.cs`.
+
+Example usage:
+
+```csharp
+using SkiaFlameGraph.Core.Parsing;
+using SkiaFlameGraph.Core.Rendering;
+
+// Parse the speedscope file to get the root node of the call tree
+var root = SpeedscopeParser.ParseFile("app.speedscope.json");
+
+// Configure rendering options (optional)
+var options = new RenderOptions { Width = 1920, Inverted = false };
+
+// Create the renderer and render to PNG
+new FlameGraphRenderer(options).RenderToPng(root, "flame.png");
+
+// Alternatively, render to an SKImage for further processing
+using var image = new FlameGraphRenderer(options).Render(root);
+// Now you can use the image (e.g., save it in a different format, composite, etc.)
+```
+
+The renderer produces a flame graph where:
+- The x-axis represents the total time (or weight) in the profile.
+- The y-axis represents the call stack depth (root at the bottom unless `Inverted` is set to true).
+- Each box corresponds to a function frame, with width proportional to the time spent in that function and its children.
+- The color of each box is deterministic based on the function name (using FNV-1a hash) so the same function gets the same color across runs.
+
+For more details on configuration, see the [RenderOptions](#renderoptions) section.
+
 ### Rendering notes
 
 - Frame colours are deterministic - derived from an FNV-1a hash of the frame
