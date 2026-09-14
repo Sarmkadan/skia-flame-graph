@@ -1,5 +1,8 @@
 namespace SkiaFlameGraph.Core.Models;
 
+/// <summary>
+/// Provides additional validation methods for <see cref="FlameNode"/>.
+/// </summary>
 public static partial class FlameNodeValidation
 {
 	/// <summary>
