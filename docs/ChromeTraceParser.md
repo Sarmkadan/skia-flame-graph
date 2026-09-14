@@ -1,114 +1,245 @@
-# ChromeTraceParser
+# Chrome Trace Parser Documentation
 
-The `ChromeTraceParser` class provides functionality to deserialize Chrome trace event data (as produced by Chrome's tracing infrastructure, e.g., `chrome://tracing`) and to construct a flame graph tree from those events. It supports both direct deserialization of JSON strings and file-based parsing, with the ability to build a hierarchical `FlameNode` structure suitable for flame graph rendering.
+## Overview
 
-## API
+The `ChromeTraceParser` class parses Chrome trace-event format JSON files and converts them into a flame graph data structure represented by a tree of `FlameNode` objects. This parser is used to visualize performance profiling data from Chrome's tracing system (`chrome://tracing`).
 
-### Static Methods
+## Chrome Trace Event Format
 
-#### `public static ChromeTraceEvent[] Deserialize(string json)`
+The parser expects Chrome trace events in the following JSON format (as defined by the [Chrome Trace Event Format](https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview)):
 
-Deserializes a JSON string containing an array of Chrome trace events into an array of `ChromeTraceEvent` objects.
-
-- **Parameters**  
-  `json` – A string containing valid JSON representing a Chrome trace event array (typically the `traceEvents` array from a Chrome trace file).
-
-- **Returns**  
-  An array of `ChromeTraceEvent` instances. Returns an empty array if the input JSON is an empty array.
-
-- **Throws**  
-  - `System.ArgumentNullException` if `json` is `null`.  
-  - `System.Text.Json.JsonException` if the JSON is malformed or does not match the expected structure.
-
-#### `public static FlameNode ParseFile(string path)`
-
-Reads a Chrome trace file from disk, deserializes its events, and builds a flame graph tree from them.
-
-- **Parameters**  
-  `path` – The file path to a Chrome trace JSON file.
-
-- **Returns**  
-  A `FlameNode` representing the root of the flame graph tree constructed from all events in the file.
-
-- **Throws**  
-  - `System.ArgumentNullException` if `path` is `null`.  
-  - `System.IO.FileNotFoundException` if the file does not exist.  
-  - `System.Text.Json.JsonException` if the file content is not valid JSON or does not conform to the expected trace event schema.
-
-#### `public static FlameNode BuildTree(ChromeTraceEvent[] events)`
-
-Constructs a flame graph tree from an array of `ChromeTraceEvent` objects.
-
-- **Parameters**  
-  `events` – An array of `ChromeTraceEvent` instances, typically obtained from `Deserialize`.
-
-- **Returns**  
-  A `FlameNode` that is the root of the flame graph tree. Events are aggregated by call stack (using `Ph`, `Name`, `Ts`, `Dur`, `Tid`, `Pid`, etc.) to form parent-child relationships.
-
-- **Throws**  
-  - `System.ArgumentNullException` if `events` is `null`.
-
-### Instance Properties
-
-Each `ChromeTraceEvent` instance exposes the following properties, which correspond to fields in the Chrome trace event format.
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `Ph` | `string?` | The phase of the event (e.g., `"B"` for begin, `"E"` for end, `"X"` for complete). |
-| `Name` | `string?` | The name of the event (e.g., function or operation name). |
-| `Ts` | `double` | The timestamp of the event in microseconds. |
-| `Dur` | `double?` | The duration of the event in microseconds (typically present for complete events). |
-| `Tid` | `int?` | The thread ID on which the event occurred. |
-| `Pid` | `int?` | The process ID in which the event occurred. |
-| `File` | `string?` | The source file name associated with the event (if available). |
-| `Line` | `int?` | The source line number associated with the event (if available). |
-| `Category` | `string?` | The category of the event (e.g., `"blink"`, `"v8"`). |
-| `Args` | `Dictionary<string, object>?` | Additional arguments attached to the event, as a dictionary of key-value pairs. |
-
-All properties are read-only after deserialization.
-
-## Usage
-
-### Example 1: Parse a trace file and build a flame graph
-
-```csharp
-using SkiaFlameGraph;
-
-string traceFilePath = "trace.json";
-FlameNode root = ChromeTraceParser.ParseFile(traceFilePath);
-
-// The root node can now be used for rendering or further analysis.
-Console.WriteLine($"Flame graph root: {root.Name}, total samples: {root.TotalSamples}");
-```
-
-### Example 2: Deserialize from a JSON string and manually build the tree
-
-```csharp
-using SkiaFlameGraph;
-using System.Text.Json;
-
-string json = File.ReadAllText("trace.json");
-ChromeTraceEvent[] events = ChromeTraceParser.Deserialize(json);
-
-// Filter events if needed, then build the tree.
-FlameNode root = ChromeTraceParser.BuildTree(events);
-
-// Access event properties for debugging.
-foreach (var evt in events.Take(5))
+```json
 {
-    Console.WriteLine($"Event: {evt.Name} (phase: {evt.Ph}, ts: {evt.Ts})");
+  "name": "function_name",
+  "ph": "X",
+  "ts": 123456,
+  "dur": 789,
+  "tid": 1,
+  "pid": 1,
+  "file": "source.cpp",
+  "line": 42,
+  "cat": "benchmark",
+  "args": { "arg1": "value" }
 }
 ```
 
-## Notes
+### Key Fields
 
-- **Edge Cases**  
-  - Events with missing or `null` phase (`Ph`) are skipped during tree construction.  
-  - Incomplete event pairs (e.g., a begin event without a matching end) may produce unexpected tree shapes; the parser attempts to handle them gracefully by ignoring orphaned events.  
-  - Empty event arrays result in a `FlameNode` with no children and zero samples.  
-  - The `Args` dictionary may contain nested objects; values are deserialized as `System.Text.Json.JsonElement` instances and can be cast to the expected type.
+- **`name`** (string): The name of the event or function being profiled
+- **`ph`** (string): The phase of the event:
+  - `X`: Complete event (has both timestamp and duration)
+  - `B`: Begin event (start only)
+  - `E`: End event (end only)
+  - Other phases (like `b`, `e`, `n`, `s`, `t`) are supported but skipped
+- **`ts`** (number): Timestamp in microseconds
+- **`dur`** (number): Duration in microseconds (for complete events)
+- **`tid`** (number): Thread ID
+- **`pid`** (number): Process ID
+- **`file`** (string): Source file (optional)
+- **`line`** (number): Source line number (optional)
+- **`cat`** (string): Category (optional)
+- **`args`** (object): Additional arguments (optional)
 
-- **Thread Safety**  
-  - The static methods `Deserialize`, `ParseFile`, and `BuildTree` are thread-safe and can be called concurrently from multiple threads.  
-  - Instances of `ChromeTraceEvent` are immutable after construction and can be safely shared across threads.  
-  - The `FlameNode` returned by `BuildTree` or `ParseFile` is mutable; concurrent modification of the tree is not thread-safe and should be synchronized externally.
+## Public API
+
+### `Deserialize(string json)`
+
+Deserializes a Chrome trace JSON string into an array of `ChromeTraceEvent` objects.
+
+```csharp
+public static ChromeTraceEvent[] Deserialize(string json)
+```
+
+**Parameters:**
+- `json`: The JSON string containing Chrome trace events (typically the `traceEvents` array from a Chrome trace file)
+
+**Returns:**
+- Array of `ChromeTraceEvent` objects
+
+**Exceptions:**
+- `ArgumentNullException`: If `json` is null
+- `ArgumentException`: If `json` is null or empty
+- `FormatException`: If the JSON deserializes to null or contains no events
+
+### `ParseFile(string path)`
+
+Parses a Chrome trace JSON file from disk into a `FlameNode` tree.
+
+```csharp
+public static FlameNode ParseFile(string path)
+```
+
+**Parameters:**
+- `path`: Path to the Chrome trace JSON file
+
+**Returns:**
+- A `FlameNode` tree with "root" as the root node containing all threads
+
+**Exceptions:**
+- `ArgumentNullException`: If `path` is null
+- `ArgumentException`: If `path` is null or empty
+- `FileNotFoundException`: If the file does not exist
+- `FormatException`: If the JSON deserializes to null or contains no events
+
+### `BuildTree(ChromeTraceEvent[] events)`
+
+Builds a flame graph tree from an array of Chrome trace events.
+
+```csharp
+public static FlameNode BuildTree(ChromeTraceEvent[] events)
+```
+
+**Parameters:**
+- `events`: Array of Chrome trace events (typically obtained from `Deserialize`)
+
+**Returns:**
+- A `FlameNode` tree with "root" as the root node containing all threads
+
+**Exceptions:**
+- `ArgumentNullException`: If `events` is null
+
+## Parsing Algorithm
+
+The parser converts Chrome trace events into a hierarchical flame graph through several steps:
+
+### 1. Event Deserialization
+
+JSON is deserialized into `ChromeTraceEvent[]` using `System.Text.Json` with case-insensitive property matching.
+
+### 2. Thread Grouping
+
+Events are grouped by thread ID (`tid`) to process each thread separately:
+
+```csharp
+var eventsByThread = events
+    .Where(e => e.Tid.HasValue)
+    .GroupBy(e => e.Tid!.Value)
+    .ToDictionary(g => g.Key, g => g.ToList());
+```
+
+Events without a valid thread ID are ignored.
+
+### 3. Per-Thread Tree Construction
+
+For each thread's events:
+1. **Sort by timestamp**: Events are sorted by `ts` (timestamp) in ascending order
+2. **Stack-based tree building**: 
+   - A stack tracks the current call path, starting with a root node
+   - For each event:
+     - **Begin/Complete events (`B` or `X`)**: 
+       - Create a new node for the function name
+       - Add it as a child of the current stack top
+       - Push the new node onto the stack
+     - **End/Complete events (`E` or `X`)**:
+       - Pop the current node from the stack
+       - For complete events with duration (`X` + `dur`), assign the duration to the node's `Value`
+
+### 4. FlameNode Assembly
+
+- A root node named "root" is created
+- For each thread with events:
+  - A thread node is created named "thread {threadId}"
+  - The thread's call tree is attached as children
+  - The thread node's `Value` accumulates the total time of its children
+
+## FlameNode Structure
+
+The resulting tree consists of `FlameNode` objects with:
+
+- **`Name`**: Function name (or "unknown" if missing)
+- **`Value`**: Time value in microseconds:
+  - For complete events: the duration (`dur`)
+  - For thread nodes: sum of children values
+  - For root: sum of all thread values
+- **`Children`**: Child nodes representing called functions
+- **`File`/`Line`**: Source location (when available in the trace event)
+
+## Error Handling
+
+The parser validates inputs and throws meaningful exceptions:
+
+- **Null/empty inputs**: `ArgumentNullException` or `ArgumentException`
+- **Missing files**: `FileNotFoundException` with descriptive message
+- **Invalid JSON**: `FormatException` for null deserialization or empty event arrays
+- **Malformed events**: Handled gracefully (missing fields use defaults/nulls)
+
+## Usage Examples
+
+### Basic File Parsing
+
+```csharp
+using SkiaFlameGraph.Core.Parsing;
+
+// Parse a Chrome trace file
+FlameNode root = ChromeTraceParser.ParseFile("trace.json");
+
+// Access thread data
+foreach (var threadNode in root.Children)
+{
+    Console.WriteLine($"Thread {threadNode.Name}: {threadNode.Value}μs");
+    // Process thread's flame graph...
+}
+```
+
+### Manual Deserialization and Building
+
+```csharp
+using SkiaFlameGraph.Core.Parsing;
+using System.IO;
+using System.Text.Json;
+
+// Read and deserialize manually
+string json = File.ReadAllText("trace.json");
+ChromeTraceEvent[] events = ChromeTraceParser.Deserialize(json);
+
+// Build the tree
+FlameNode root = ChromeTraceParser.BuildTree(events);
+
+// The root contains thread children
+FlameNode? mainThread = root.Children.FirstOrDefault(n => n.Name == "thread 1");
+if (mainThread != null)
+{
+    // Analyze main thread performance
+}
+```
+
+### Filtering Events Before Building
+
+```csharp
+// Get all events
+ChromeTraceEvent[] events = ChromeTraceParser.Deserialize(json);
+
+// Filter to specific thread or category
+var filtered = events.Where(e => e.Tid == 1 && e.Category == "benchmark").ToArray();
+
+// Build tree from filtered events
+FlameNode root = ChromeTraceParser.BuildTree(filtered);
+```
+
+## Implementation Notes
+
+### Thread Safety
+
+- Static methods (`Deserialize`, `ParseFile`, `BuildTree`) are thread-safe
+- `ChromeTraceEvent` instances are immutable after creation
+- Returned `FlameNode` trees are mutable; external synchronization needed for concurrent modification
+
+### Performance
+
+- Time complexity: O(n log n) due to sorting (where n = number of events)
+- Space complexity: O(n) for storing events and the resulting tree
+- Memory efficient: processes one thread at a time after grouping
+
+### Edge Cases Handled
+
+- Missing thread IDs: Events ignored
+- Missing function names: Default to "unknown"
+- Unrecognized phases: Skipped (continue processing)
+- Mismatched begin/end events: Stack operations guarded by count checks
+- Empty trace files: Results in root node with no children
+- Null durations: Only complete events with valid durations assign values
+
+## See Also
+
+- `FlameNode`: The data structure representing flame graph nodes
+- Chrome Trace Event Format: https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
