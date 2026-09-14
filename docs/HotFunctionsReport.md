@@ -1,71 +1,58 @@
-# HotFunctionsReport
+# Hot Functions Report
 
-Represents a collection of performance-critical functions identified during profiling, typically used to generate textual flame graph reports. This type aggregates hot function data for analysis and export purposes.
+The `HotFunctionsReport` class (in `src/SkiaFlameGraph.Core/Reporting/HotFunctionsReport.cs`) 
+identifies hot functions by aggregating the self-time (time spent in a function excluding its children) 
+for each unique function name across the entire flame graph tree.
 
-## API
+## How it works
 
-### HotFunctionsReport()
+1. The report is constructed by traversing the flame graph tree (starting at the root node).
+2. For each node, if the node's self-value (self-time) is greater than zero, it is added to the aggregation for that function name.
+3. The aggregation sums the self-time and total-time (self-time plus children's time) for each function.
+4. After traversal, the functions are sorted by self-time in descending order.
+5. Each function's percentage is calculated as (function self-time / total self-time of all functions) * 100.
 
-Initializes a new instance of the HotFunctionsReport class. Constructs an empty report with no associated hot functions.
+## Output format
 
-### ToText()
+The report can be rendered as a text table via the `ToText(int topN = 10)` method.
 
-Converts the report contents into a formatted text representation suitable for output or logging.
+The table includes:
 
-**Returns:**  
-`string` - A multi-line string containing the report data in a structured format.
+   - Rank
+   - Function name (truncated to 29 characters)
+   - Self time (time spent in the function itself)
+   - Total time (time spent in the function and its children)
+   - Percentage of total self-time
 
-### HotFunction
+Example output:
 
-Gets the individual hot function entries contained within this report.
+```
+Hot Functions Report
+===================
 
-**Returns:**  
-`HotFunction` - The hot function data structure (exact type definition not provided).
+#   Name                          Self      Total     %
+--  ----------------------------- --------- --------- --------
+ 1  my_function                   120.50    150.00    60.25%
+ 2  another_function              80.00     90.00     40.00%
+... (5 more functions)
 
-### Name
-
-Gets the name identifier of the hot function.
-
-**Returns:**  
-`string` - The function name as recorded during profiling.
-
-### Self
-
-Gets the self-time metric for the hot function, representing time spent exclusively in this function excluding child calls.
-
-**Returns:**  
-`double` - The self-time value in seconds or milliseconds (unit context-dependent).
-
-### Total
-
-Gets the total-time metric for the hot function, representing cumulative time including all child function calls.
-
-**Returns:**  
-`double` - The total-time value in seconds or milliseconds (unit context-dependent).
-
-## Usage
-
-```csharp
-// Create and populate a hot functions report
-var report = new HotFunctionsReport();
-report.Name = "MainLoop";
-report.Self = 0.45;
-report.Total = 1.23;
-
-// Export to text format
-Console.WriteLine(report.ToText());
+Total: 200.50 units across 7 functions
 ```
 
-```csharp
-// Process multiple hot functions from a report
-foreach (var function in report.HotFunction)
-{
-    Console.WriteLine($"{function.Name}: Self={function.Self}, Total={function.Total}");
-}
-```
+If `topN` is specified (positive), only the top N functions are shown, with a note indicating how many more are omitted.
+If `topN` is zero or negative, all functions are shown.
 
-## Notes
+## Implementation details
 
-- Thread-safety: Instances of HotFunctionsReport are not thread-safe. Concurrent modifications to properties or the HotFunction collection may result in inconsistent state or exceptions.
-- Edge cases: Calling ToText() on an uninitialized or partially constructed report may produce incomplete or malformed output. Ensure all required properties are set before export.
-- The HotFunction property likely represents a collection or nested structure; exact behavior depends on its underlying type definition.
+The class implements `IHotFunctionsReport` and provides:
+   - `Functions`: read-only list of hot functions sorted by self-time (descending)
+   - `TotalSelfTime`: the sum of self-time across all functions
+
+Each hot function is represented by a `HotFunction` object with:
+   - `Name`: the function name
+   - `Self`: self-time (updated during aggregation)
+   - `Total`: total-time (updated during aggregation)
+   - `Percent`: calculated percentage (read-only, depends on the report's total self-time)
+
+Note: The `HotFunction.Percent` property uses the report's total self-time (set during construction) 
+        to calculate the percentage.
