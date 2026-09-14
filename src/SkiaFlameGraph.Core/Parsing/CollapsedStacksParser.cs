@@ -10,6 +10,8 @@ namespace SkiaFlameGraph.Core.Parsing;
 /// </summary>
 public static class CollapsedStacksParser
 {
+    private const char FrameSeparator = ';';
+    private const char CountSeparator = ' ';
     /// <summary>
     /// Parses a collapsed stacks file into a flame graph tree.
     /// </summary>
@@ -113,7 +115,7 @@ public static class CollapsedStacksParser
     private static FlameNode? ParseLine(string line, Dictionary<string, string> framePool)
     {
         // Split on the last space to separate frames from the count
-        var lastSpaceIndex = line.LastIndexOf(' ');
+        var lastSpaceIndex = line.LastIndexOf(CountSeparator);
         if (lastSpaceIndex <= 0)
         {
             return null; // No count value
@@ -134,7 +136,7 @@ public static class CollapsedStacksParser
         }
 
         // Split frames by semicolon
-        var frameStrings = framesPart.ToString().Split(';');
+        var frameStrings = framesPart.ToString().Split(FrameSeparator);
         if (frameStrings.Length == 0)
         {
             return null; // No frames
