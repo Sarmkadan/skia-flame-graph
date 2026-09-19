@@ -1,6 +1,7 @@
 using SkiaFlameGraph.Core.Models;
 using SkiaSharp;
 using System;
+using System.IO;
 
 namespace SkiaFlameGraph.Core.Rendering;
 
@@ -66,7 +67,22 @@ public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRende
         var canvas = surface.Canvas;
         canvas.Clear(_options.Background);
 
-        using var font = new SKFont(SKTypeface.Default, _options.FontSize);
+        SKTypeface? typeface = null;
+        if (!string.IsNullOrWhiteSpace(_options.FontFile) && File.Exists(_options.FontFile))
+        {
+            typeface = SKTypeface.FromFile(_options.FontFile);
+        }
+        else if (!string.IsNullOrWhiteSpace(_options.FontFamily))
+        {
+            typeface = SKTypeface.FromFamilyName(_options.FontFamily);
+        }
+
+        if (typeface == null)
+        {
+            typeface = SKTypeface.Default;
+        }
+
+        using var font = new SKFont(typeface, _options.FontSize);
         using var stroke = new SKPaint
         {
             IsAntialias = true,

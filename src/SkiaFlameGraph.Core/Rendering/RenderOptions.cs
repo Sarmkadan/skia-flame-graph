@@ -1,4 +1,5 @@
 using SkiaSharp;
+using System.IO;
 
 namespace SkiaFlameGraph.Core.Rendering;
 
@@ -37,6 +38,12 @@ public sealed class RenderOptions : IRenderOptions
     /// <summary>Gets or sets the font size used for frame labels, in pixels.</summary>
     public float FontSize { get; set; } = 12f;
 
+    /// <summary>Gets or sets the font family used for frame labels. If null, the default system font is used.</summary>
+    public string? FontFamily { get; set; }
+
+    /// <summary>Gets or sets the path to a font file used for frame labels. If null, FontFamily is used.</summary>
+    public string? FontFile { get; set; }
+
     /// <summary>Gets or sets the background color of the rendered flame graph.</summary>
     public SKColor Background { get; set; } = new(0x1e, 0x1e, 0x24);
 
@@ -54,5 +61,5 @@ public sealed class RenderOptions : IRenderOptions
 
     /// <summary>Returns a string that represents the current rendering options.</summary>
     public override string ToString() =>
-        $"RenderOptions {{ Width = {Width}, RowHeight = {RowHeight}, MinLabelWidth = {MinLabelWidth}, MinBoxWidth = {MinBoxWidth}, MinSubtreeWidthPx = {MinSubtreeWidthPx}, Padding = {Padding}, FontSize = {FontSize}, Background = {Background}, TextColor = {TextColor}, Inverted = {Inverted}, HighlightPattern = {HighlightPattern} }}";
+        $"RenderOptions {{ Width = {Width}, RowHeight = {RowHeight}, MinLabelWidth = {MinLabelWidth}, MinBoxWidth = {MinBoxWidth}, MinSubtreeWidthPx = {MinSubtreeWidthPx}, Padding = {Padding}, FontSize = {FontSize}, FontFamily = {FontFamily}, FontFile = {FontFile}, Background = {Background}, TextColor = {TextColor}, Inverted = {Inverted}, HighlightPattern = {HighlightPattern} }}";
 }
