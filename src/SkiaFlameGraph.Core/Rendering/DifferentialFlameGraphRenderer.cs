@@ -72,6 +72,7 @@ public sealed class DifferentialFlameGraphRenderer : BaseFlameNodeRenderer
     public override SKImage Render(FlameNode root)
     {
         ArgumentNullException.ThrowIfNull(root);
+        VerifySkiaSharpEnvironment();
 
         var depth = root.MaxDepth();
         var rows = depth + 1;
@@ -139,7 +140,7 @@ public sealed class DifferentialFlameGraphRenderer : BaseFlameNodeRenderer
 
         // Use differential color palette based on delta value
         var fillColor = GetDifferentialColor(node.Value, maxAbsValue);
-        using var fill = GetPaintForColor(fillColor);
+        var fill = GetPaintForColor(fillColor);
         canvas.DrawRect(rect, fill);
         canvas.DrawRect(rect, stroke);
 
@@ -162,7 +163,7 @@ public sealed class DifferentialFlameGraphRenderer : BaseFlameNodeRenderer
 
                 var rectElided = new SKRect(x, yElided, x + width, yElided + _options.RowHeight - 1);
                 var elidedFillColor = FramePalette.ForFrame("[...]", _options.HighlightPattern);
-                using var elidedFill = GetPaintForColor(elidedFillColor);
+                var elidedFill = GetPaintForColor(elidedFillColor);
                 canvas.DrawRect(rectElided, elidedFill);
                 canvas.DrawRect(rectElided, stroke);
             }
@@ -290,5 +291,28 @@ public sealed class DifferentialFlameGraphRenderer : BaseFlameNodeRenderer
             }
         }
         return string.Empty;
+    }
+
+    /// <summary>
+    /// Verifies that SkiaSharp is properly initialized by attempting to create a 1x1 surface.
+    /// Throws an informative exception if initialization fails.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when SkiaSharp fails to initialize.</exception>
+    private void VerifySkiaSharpEnvironment()
+    {
+        try
+        {
+            var info = new SKImageInfo(1, 1);
+            using var surface = SKSurface.Create(info);
+            if (surface == null)
+            {
+                throw new InvalidOperationException("SkiaSharp failed to create a surface. Please install SkiaSharp.NativeAssets.Linux and ensure fontconfig is installed.");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Wrap any exception in a more informative error about SkiaSharp initialization
+            throw new InvalidOperationException("SkiaSharp failed to initialize. Please install SkiaSharp.NativeAssets.Linux and ensure fontconfig is installed.", ex);
+        }
     }
 }
