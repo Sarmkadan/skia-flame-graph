@@ -48,6 +48,7 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
     public override SKImage Render(FlameNode root)
     {
         ArgumentNullException.ThrowIfNull(root);
+        VerifySkiaSharpEnvironment();
         return Render(root, null);
     }
 
@@ -63,6 +64,7 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
     public override SKImage Render(FlameNode root, int? height)
     {
         ArgumentNullException.ThrowIfNull(root);
+        VerifySkiaSharpEnvironment();
         var h = height ?? (int)(_options.Width * DefaultHeightRatio);
         var info = new SKImageInfo(_options.Width, h, SKColorType.Rgba8888, SKAlphaType.Premul);
         using var surface = SKSurface.Create(info);
@@ -109,7 +111,7 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
         if (node.Children.Count == 0 || depth >= MaxTreemapDepth)
         {
             var fillColor = FramePalette.ForFrame(node.Name);
-            using var fill = GetPaintForColor(fillColor);
+            var fill = GetPaintForColor(fillColor);
             canvas.DrawRect(rect, fill);
             canvas.DrawRect(rect, stroke);
             DrawLabel(canvas, node.Name, rect, font, textPaint);
@@ -299,5 +301,28 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
         canvas.ClipRect(rect);
         canvas.DrawText(text, rect.Left + 3, rect.Top + _options.FontSize, SKTextAlign.Left, font, paint);
         canvas.Restore();
+    }
+
+    /// <summary>
+    /// Verifies that SkiaSharp is properly initialized by attempting to create a 1x1 surface.
+    /// Throws an informative exception if initialization fails.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">Thrown when SkiaSharp fails to initialize.</exception>
+    private void VerifySkiaSharpEnvironment()
+    {
+        try
+        {
+            var info = new SKImageInfo(1, 1);
+            using var surface = SKSurface.Create(info);
+            if (surface == null)
+            {
+                throw new InvalidOperationException("SkiaSharp failed to create a surface. Please install SkiaSharp.NativeAssets.Linux and ensure fontconfig is installed.");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Wrap any exception in a more informative error about SkiaSharp initialization
+            throw new InvalidOperationException("SkiaSharp failed to initialize. Please install SkiaSharp.NativeAssets.Linux and ensure fontconfig is installed.", ex);
+        }
     }
 }
