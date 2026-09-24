@@ -46,10 +46,18 @@ public sealed class HotFunctionsReport : IHotFunctionsReport
         var selfTime = node.SelfValue;
         if (selfTime > 0)
         {
-            var function = _functions.FirstOrDefault(f => f.Name == node.Name);
+            // Group by frame identity (name, file, line) to distinguish same-named functions in different contexts
+            var function = _functions.FirstOrDefault(f =>
+                f.Name == node.Name &&
+                f.File == node.File &&
+                f.Line == node.Line);
             if (function == null)
             {
-                function = new HotFunction(node.Name);
+                function = new HotFunction(node.Name)
+                {
+                    File = node.File,
+                    Line = node.Line
+                };
                 _functions.Add(function);
             }
 
@@ -126,6 +134,12 @@ public sealed class HotFunctionsReport : IHotFunctionsReport
 
         /// <summary>Gets the function name.</summary>
         public string Name { get; }
+
+        /// <summary>Source file for the frame, when the profiler recorded one.</summary>
+        public string? File { get; set; }
+
+        /// <summary>Source line for the frame, when available.</summary>
+        public int? Line { get; set; }
 
         /// <summary>Gets or sets the self-time (time spent in this function excluding children).</summary>
         public double Self { get; set; }
