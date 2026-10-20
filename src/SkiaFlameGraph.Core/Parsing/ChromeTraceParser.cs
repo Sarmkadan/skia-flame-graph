@@ -16,7 +16,7 @@ namespace SkiaFlameGraph.Core.Parsing;
 /// - Other phases are supported but not commonly used in profiling
 ///
 /// This parser builds a FlameNode tree by tracking nested call stacks based on
-    /// timestamp and duration containment.
+/// timestamp and duration containment.
 /// </summary>
 public static class ChromeTraceParser
 {
