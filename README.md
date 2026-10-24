@@ -259,6 +259,57 @@ var options = new RenderOptions
 };
 ```
 
+## Customizing colors
+
+Frame colours come from `FramePalette`. Every frame gets a deterministic warm
+hue derived from a hash of its name, so the same function keeps its colour
+between renders. The colour settings you can change are `Background`,
+`TextColor` and `HighlightPattern` on `RenderOptions`. There is no alternative
+built-in palette and no per-frame colour callback, so frames cannot be coloured
+by namespace directly.
+
+The program below goes from loading a trace to PNG output. The same code is in
+`samples/CustomColors`, which renders it against the bundled trace.
+
+```csharp
+using SkiaFlameGraph.Core.Parsing;
+using SkiaFlameGraph.Core.Rendering;
+using SkiaSharp;
+
+// 1. Load the profile
+var root = SpeedscopeParser.ParseFile("app.speedscope.json");
+
+// 2. Default palette: each frame gets FramePalette.ForFrame(name)
+new FlameGraphRenderer(new RenderOptions { Width = 1920 })
+    .RenderToPng(root, "colors-default.png");
+
+// 3. Dark theme: background and label colours; frame colours are unchanged
+var dark = new RenderOptions
+{
+    Width = 1920,
+    Background = new SKColor(0x10, 0x10, 0x14),
+    TextColor = new SKColor(0xf5, 0xf5, 0xf5)
+};
+new FlameGraphRenderer(dark).RenderToPng(root, "colors-dark.png");
+
+// 4. Highlight: matching frames are drawn in FramePalette.HighlightColor (#FF6B35)
+var highlight = new RenderOptions
+{
+    Width = 1920,
+    HighlightPattern = @"^(OrdersController|OrderService|PricingEngine)\."
+};
+new FlameGraphRenderer(highlight).RenderToPng(root, "colors-highlight.png");
+```
+
+Notes:
+
+- `HighlightPattern` is matched with `Regex.IsMatch`, so anchor it with `^` to
+  match name prefixes such as `^MyApp\.`.
+- `FramePalette.HighlightColor` is read-only and orange, which is close to the
+  default palette. Highlighted frames stand out less than you might expect.
+- Giving `System.*` frames grey and `MyApp.*` frames orange needs a per-frame
+  colour hook in `RenderOptions`, which does not exist yet.
+
 ## SpeedscopeFileExtensions
 
 Provides a set of practical extension methods for analyzing, transforming, and querying speedscope profile data. These methods offer utilities for calculating metrics, retrieving frames, checking profile types, and identifying performance hotspots within your traces.
