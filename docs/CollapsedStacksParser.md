@@ -111,7 +111,7 @@ The parser is resilient to malformed input:
 - **Null lines enumerable**: `ArgumentNullException` for `Parse`
 - **Blank lines**: Skipped
 - **Lines without count**: Skipped (no space found)
-- **Invalid count** (non-numeric, ≤0): Skipped
+- **Invalid count** (non-numeric, NaN/Infinity, ≤0): Skipped
 - **Lines with no frames**: Skipped
 - **Exceptions during line parsing**: Individual malformed lines are skipped, processing continues
 
