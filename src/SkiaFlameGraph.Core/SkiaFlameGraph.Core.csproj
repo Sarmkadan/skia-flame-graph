@@ -6,6 +6,34 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <!-- NuGet package metadata -->
+  <PropertyGroup>
+    <PackageId>SkiaFlameGraph.Core</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Sarmkadan</Authors>
+    <Company>Sarmkadan</Company>
+    <Description>Renders flame graphs, treemaps and differential flame graphs from profiler output (speedscope, Chrome trace, collapsed stacks) to PNG/SVG using SkiaSharp. No browser required.</Description>
+    <PackageTags>flamegraph;profiling;skiasharp;visualization</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/Sarmkadan/skia-flame-graph</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Sarmkadan/skia-flame-graph.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <Deterministic>true</Deterministic>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true' Or '$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="SkiaSharp" Version="4.150.1" />
   </ItemGroup>
