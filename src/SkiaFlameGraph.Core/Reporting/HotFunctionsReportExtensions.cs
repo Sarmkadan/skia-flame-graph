@@ -40,7 +40,7 @@ public static class HotFunctionsReportExtensions
 
         return string.IsNullOrWhiteSpace(json)
             ? null
-            : JsonSerializer.Deserialize<HotFunctionsReport>(json, HotFunctionsReportJsonExtensionsConstants.JsonOptions);
+            : JsonSerializer.Deserialize<HotFunctionsReport>(json, JsonDefaults.Options);
     }
 
     /// <summary>
@@ -62,7 +62,7 @@ public static class HotFunctionsReportExtensions
 
         try
         {
-            report = JsonSerializer.Deserialize<HotFunctionsReport>(json, HotFunctionsReportJsonExtensionsConstants.JsonOptions);
+            report = JsonSerializer.Deserialize<HotFunctionsReport>(json, JsonDefaults.Options);
             return true;
         }
         catch (JsonException)

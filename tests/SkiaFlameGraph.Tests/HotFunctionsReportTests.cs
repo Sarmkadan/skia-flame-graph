@@ -38,24 +38,20 @@ public sealed class HotFunctionsReportTests
         // Stack: root -> A(10) -> B(5) -> A(2)
         var root = new FlameNode("root");
         var a1 = root.AddChild("A", file: "mod1.dll");
-        a1.SelfValue = 10;
         a1.Value = 15;
         
         var b = a1.AddChild("B", file: "mod1.dll");
-        b.SelfValue = 5;
         b.Value = 5;
         
         var a2 = b.AddChild("A", file: "mod1.dll");
-        a2.SelfValue = 2;
         a2.Value = 2;
 
         // Act
         var report = new HotFunctionsReport(root);
         
         // Assert
-        Assert.Single(report.Functions);
-        var func = report.Functions[0];
-        Assert.Equal("A", func.Name);
+        Assert.Equal(2, report.Functions.Count);
+        var func = report.Functions.Single(f => f.Name == "A");
         Assert.Equal(12.0, func.Self);
         Assert.Equal(17.0, func.Total);
     }
@@ -70,11 +66,9 @@ public sealed class HotFunctionsReportTests
         // Arrange
         var root = new FlameNode("root");
         var a1 = root.AddChild("Process", file: "app.exe", line: 10);
-        a1.SelfValue = 10;
         a1.Value = 10;
         
         var a2 = root.AddChild("Process", file: "lib.dll", line: 20);
-        a2.SelfValue = 20;
         a2.Value = 20;
 
         // Act
@@ -82,9 +76,8 @@ public sealed class HotFunctionsReportTests
         
         // Assert
         Assert.Equal(2, report.Functions.Count);
-        var funcs = report.Functions.ToDictionary(f => f.Name);
-        Assert.Contains(funcs, kvp => kvp.Value.File == "app.exe" && kvp.Value.Self == 10);
-        Assert.Contains(funcs, kvp => kvp.Value.File == "lib.dll" && kvp.Value.Self == 20);
+        Assert.Contains(report.Functions, f => f.File == "app.exe" && f.Self == 10);
+        Assert.Contains(report.Functions, f => f.File == "lib.dll" && f.Self == 20);
     }
 
     /// <summary>
@@ -96,15 +89,12 @@ public sealed class HotFunctionsReportTests
         // Arrange
         var root = new FlameNode("root");
         var a = root.AddChild("Alpha");
-        a.SelfValue = 10;
         a.Value = 10;
         
         var b = root.AddChild("Beta");
-        b.SelfValue = 10;
         b.Value = 10;
         
         var c = root.AddChild("Gamma");
-        c.SelfValue = 5;
         c.Value = 5;
 
         // Act
@@ -122,30 +112,27 @@ public sealed class HotFunctionsReportTests
     }
 
     /// <summary>
-    /// Verifies that the report handles unusual tree structures deterministically
-    /// (e.g., self-time exceeding total-time, or deeply nested identical frames).
+    /// Verifies that a child whose total exceeds its parent's total clamps the parent's
+    /// self-time to zero, so the parent is excluded from the report deterministically.
     /// </summary>
     [Fact]
-    public void Ctor_UnusualTreeStructure_HandlesDeterministically()
+    public void Ctor_ChildExceedsParentTotal_ClampsParentSelfToZero()
     {
         // Arrange
         var root = new FlameNode("root");
         var a = root.AddChild("A");
-        a.SelfValue = 15; // Self exceeds total in this branch
-        a.Value = 10;
-        
+        a.Value = 5;
+
         var b = a.AddChild("B");
-        b.SelfValue = 5;
-        b.Value = 5;
+        b.Value = 10;
 
         // Act
         var report = new HotFunctionsReport(root);
-        
+
         // Assert
-        Assert.Equal(2, report.Functions.Count);
-        Assert.Equal(15.0, report.Functions[0].Self);
+        Assert.Single(report.Functions);
+        Assert.Equal("B", report.Functions[0].Name);
+        Assert.Equal(10.0, report.Functions[0].Self);
         Assert.Equal(10.0, report.Functions[0].Total);
-        Assert.Equal(5.0, report.Functions[1].Self);
-        Assert.Equal(5.0, report.Functions[1].Total);
     }
 }
