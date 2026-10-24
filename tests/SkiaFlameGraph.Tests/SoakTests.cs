@@ -7,7 +7,9 @@ namespace SkiaFlameGraph.Tests;
 
 /// <summary>
 /// Soak tests for rendering stability and memory usage.
+/// Shares the "ProcessMemory" collection so process-wide memory measurements are not skewed by parallel tests.
 /// </summary>
+[Collection("ProcessMemory")]
 public class SoakTests
 {
     /// <summary>
