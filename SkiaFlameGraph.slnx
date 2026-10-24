@@ -7,5 +7,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/SkiaFlameGraph.Tests/SkiaFlameGraph.Tests.csproj" />
+    <Project Path="tests/SkiaFlameGraph.IntegrationTests/SkiaFlameGraph.IntegrationTests.csproj" />
   </Folder>
 </Solution>

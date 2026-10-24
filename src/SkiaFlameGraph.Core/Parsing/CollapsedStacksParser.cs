@@ -11,7 +11,7 @@ namespace SkiaFlameGraph.Core.Parsing;
 public static class CollapsedStacksParser
 {
     private const char FrameSeparator = ';';
-    private const char CountSeparator = ' ';
+    private static readonly char[] CountSeparators = { ' ', '\t' };
     /// <summary>
     /// Parses a collapsed stacks file into a flame graph tree.
     /// </summary>
@@ -43,7 +43,6 @@ public static class CollapsedStacksParser
         ArgumentNullException.ThrowIfNull(lines);
 
         var root = new FlameNode("root");
-        var framePool = new Dictionary<string, string>(StringComparer.Ordinal);
 
         foreach (var line in lines)
         {
@@ -56,11 +55,9 @@ public static class CollapsedStacksParser
 
             try
             {
-                var node = ParseLine(line, framePool);
-                if (node != null)
+                if (TryParseLine(line, out var frames, out var count))
                 {
-                    root.Value += node.Value;
-                    MergeIntoTree(root, node);
+                    AddStack(root, frames, count);
                 }
             }
             catch
@@ -73,107 +70,54 @@ public static class CollapsedStacksParser
         return root;
     }
 
-    private static void MergeIntoTree(FlameNode parent, FlameNode source)
+    /// <summary>
+    /// Adds a stack to the tree, creating or reusing one node per frame and adding
+    /// the count to every node on the path so each node's value is its subtree total.
+    /// </summary>
+    private static void AddStack(FlameNode root, List<string> frames, double count)
     {
-        // Recursively merge the source tree into the parent tree
-        // This handles the case where the same stack appears multiple times
-        foreach (var child in source.Children)
+        root.Value += count;
+
+        var current = root;
+        foreach (var frame in frames)
         {
-            var existing = parent.Children.FirstOrDefault(c =>
-                c.Name == child.Name &&
-                c.File == child.File &&
-                c.Line == child.Line);
-
-            if (existing != null)
-            {
-                existing.Value += child.Value;
-                MergeIntoTree(existing, child);
-            }
-            else
-            {
-                // Clone the child to avoid modifying the source tree
-                var newChild = new FlameNode(child.Name)
-                {
-                    File = child.File,
-                    Line = child.Line,
-                    Value = child.Value,
-                    Depth = child.Depth,
-                    Parent = parent
-                };
-
-                foreach (var grandChild in child.Children)
-                {
-                    newChild.Children.Add(grandChild);
-                    grandChild.Parent = newChild;
-                }
-
-                parent.Children.Add(newChild);
-            }
+            current = current.AddChild(frame);
+            current.Value += count;
         }
     }
 
-    private static FlameNode? ParseLine(string line, Dictionary<string, string> framePool)
+    /// <summary>
+    /// Splits a line into its frames (outermost first) and its count.
+    /// </summary>
+    /// <returns><see langword="false"/> when the line has no count, a non-positive count, or no frames.</returns>
+    private static bool TryParseLine(string line, out List<string> frames, out double count)
     {
-        // Split on the last space to separate frames from the count
-        var lastSpaceIndex = line.LastIndexOf(CountSeparator);
-        if (lastSpaceIndex <= 0)
+        frames = new List<string>();
+        count = 0;
+
+        // Split on the last whitespace to separate frames from the count
+        var trimmed = line.TrimEnd();
+        var separatorIndex = trimmed.LastIndexOfAny(CountSeparators);
+        if (separatorIndex <= 0)
         {
-            return null; // No count value
+            return false; // No count value
         }
 
-        var framesPart = line.AsSpan(0, lastSpaceIndex);
-        var countPart = line.AsSpan(lastSpaceIndex + 1);
-
-        // Parse the count value
-        if (!double.TryParse(countPart, NumberStyles.Float, CultureInfo.InvariantCulture, out var count))
+        if (!double.TryParse(trimmed.AsSpan(separatorIndex + 1), NumberStyles.Float, CultureInfo.InvariantCulture, out count) ||
+            count <= 0)
         {
-            return null; // Invalid count
+            return false; // Invalid or zero/negative count
         }
 
-        if (count <= 0)
+        foreach (var part in trimmed.AsSpan(0, separatorIndex).ToString().Split(FrameSeparator))
         {
-            return null; // Zero or negative count
-        }
-
-        // Split frames by semicolon
-        var frameStrings = framesPart.ToString().Split(FrameSeparator);
-        if (frameStrings.Length == 0)
-        {
-            return null; // No frames
-        }
-
-        // Build the tree from bottom to top
-        FlameNode? current = null;
-
-        // Process frames in reverse order (bottom-up)
-        for (int i = frameStrings.Length - 1; i >= 0; i--)
-        {
-            var frame = frameStrings[i].Trim();
-            if (string.IsNullOrEmpty(frame))
+            var frame = part.Trim();
+            if (frame.Length > 0)
             {
-                continue;
-            }
-
-            if (current == null)
-            {
-                // Create leaf node with the count
-                string internedFrame = framePool.TryGetValue(frame, out var existingFrame) ? existingFrame : framePool[frame] = frame;
-                current = new FlameNode(internedFrame)
-                {
-                    Value = count
-                };
-            }
-            else
-            {
-                // Create parent node and add current as child
-                string internedFrame = framePool.TryGetValue(frame, out var existingFrame) ? existingFrame : framePool[frame] = frame;
-                var parentNode = new FlameNode(internedFrame);
-                current.Parent = parentNode;
-                parentNode.Children.Add(current);
-                current = parentNode;
+                frames.Add(frame);
             }
         }
 
-        return current;
+        return frames.Count > 0;
     }
 }
