@@ -89,7 +89,7 @@ public static class CollapsedStacksParser
     /// <summary>
     /// Splits a line into its frames (outermost first) and its count.
     /// </summary>
-    /// <returns><see langword="false"/> when the line has no count, a non-positive count, or no frames.</returns>
+    /// <returns><see langword="false"/> when the line has no count, a non-finite or non-positive count, or no frames.</returns>
     private static bool TryParseLine(string line, out List<string> frames, out double count)
     {
         frames = new List<string>();
@@ -104,9 +104,9 @@ public static class CollapsedStacksParser
         }
 
         if (!double.TryParse(trimmed.AsSpan(separatorIndex + 1), NumberStyles.Float, CultureInfo.InvariantCulture, out count) ||
-            count <= 0)
+            !double.IsFinite(count) || count <= 0)
         {
-            return false; // Invalid or zero/negative count
+            return false; // Invalid, non-finite, or zero/negative count
         }
 
         foreach (var part in trimmed.AsSpan(0, separatorIndex).ToString().Split(FrameSeparator))
