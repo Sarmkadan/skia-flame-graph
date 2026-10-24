@@ -3,6 +3,7 @@ using System;
 
 namespace SkiaFlameGraph.Core.Rendering
 {
+    /// <summary>Configuration shared by the renderers.</summary>
     public interface IRenderOptions
     {
         /// <summary>

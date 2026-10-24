@@ -15,6 +15,7 @@ public static class FramePalette
     private const byte HighlightColorRed = 0xff;
     private const byte HighlightColorGreen = 0x6b;
     private const byte HighlightColorBlue = 0x35;
+    /// <summary>Gets the colour used to highlight matching frames.</summary>
     public static SKColor HighlightColor { get; } = new(HighlightColorRed, HighlightColorGreen, HighlightColorBlue); // Vibrant orange
 
     /// <summary>

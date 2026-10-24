@@ -3,6 +3,7 @@ using SkiaSharp;
 
 namespace SkiaFlameGraph.Core.Rendering;
 
+/// <summary>Renders a flame graph from a call tree.</summary>
 public interface IFlameGraphRenderer
 {
     /// <summary>

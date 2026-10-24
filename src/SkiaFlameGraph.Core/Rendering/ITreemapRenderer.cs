@@ -3,6 +3,7 @@ using SkiaSharp;
 
 namespace SkiaFlameGraph.Core.Rendering
 {
+    /// <summary>Renders a treemap from a call tree.</summary>
     public interface ITreemapRenderer
     {
         /// <summary>

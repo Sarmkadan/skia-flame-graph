@@ -22,7 +22,7 @@ public sealed class RenderOptions : IRenderOptions
 
     /// <summary>
     /// Subtrees whose scaled width falls below this threshold are culled entirely during layout.
-    /// This prevents drawing thousands of sub-pixel nodes that would render as <1px boxes.
+    /// This prevents drawing thousands of sub-pixel nodes that would render as &lt;1px boxes.
     /// Set to 0 to disable subtree culling and render all nodes individually.
     /// </summary>
     /// <remarks>
