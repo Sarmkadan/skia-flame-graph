@@ -36,6 +36,7 @@ public sealed class DifferentialFlameGraphRenderer : BaseFlameNodeRenderer
     {
         ArgumentNullException.ThrowIfNull(baseline);
         ArgumentNullException.ThrowIfNull(current);
+        _options.EnsureValid();
 
         // Compute the delta between baseline and current
         var deltaRoot = FlameDiff.Diff(baseline, current);
@@ -73,6 +74,7 @@ public sealed class DifferentialFlameGraphRenderer : BaseFlameNodeRenderer
     {
         ArgumentNullException.ThrowIfNull(root);
         VerifySkiaSharpEnvironment();
+        _options.EnsureValid();
 
         var depth = root.MaxDepth();
         var rows = depth + 1;

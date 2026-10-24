@@ -103,7 +103,9 @@ bitmap.Encode(SKEncodedImageFormat.Png, 100).SaveTo(File.OpenWrite("icicle.png")
 
 ## Notes
 
-- All dimension properties (`Width`, `RowHeight`, `MinLabelWidth`, `MinBoxWidth`, `Padding`, `FontSize`) should be validated by the caller; the type does not enforce constraints in setters.
+- The setters do not enforce constraints. Call `options.Validate()` to get the list of problems (empty when valid), `IsValid()` for a boolean, or `EnsureValid()` to throw an `ArgumentException` that lists every problem.
+- Rules: `Width` must be in `1..16384`; `RowHeight` and `FontSize` must be positive; `MinLabelWidth`, `MinBoxWidth`, `MinSubtreeWidthPx` and `Padding` must be non-negative; `FontFamily`, when set, must not be empty or whitespace; `HighlightPattern`, when set, must be a valid regex.
+- Renderers call `EnsureValid()` in their constructor and at the start of each render, so options changed after construction are still checked.
 - `SKColor` values are copied by value; mutating the original struct after assignment has no effect on the stored color.
 - This type is immutable in practice once passed to a renderer. Concurrent reads from multiple threads are safe; concurrent writes to the same instance are not thread-safe.
 - `Inverted` affects only the vertical layout direction; coordinate calculations in renderers should respect this flag when mapping stack depth to Y positions.

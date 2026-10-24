@@ -65,6 +65,7 @@ public sealed class TreemapRenderer : BaseFlameNodeRenderer, ITreemapRenderer
     {
         ArgumentNullException.ThrowIfNull(root);
         VerifySkiaSharpEnvironment();
+        _options.EnsureValid();
         var h = height ?? (int)(_options.Width * DefaultHeightRatio);
         var info = new SKImageInfo(_options.Width, h, SKColorType.Rgba8888, SKAlphaType.Premul);
         using var surface = SKSurface.Create(info);
