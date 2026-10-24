@@ -162,6 +162,19 @@ new TreemapRenderer(options).RenderToPng(root, "treemap.png");
 `Render(...)` returns an `SKImage` if you want to composite it yourself instead
 of writing straight to disk.
 
+### Untrusted input
+
+Speedscope documents parsed through `SpeedscopeParser` are checked against
+`ParseLimits` (file size, frame count, events/samples per profile and call-tree
+depth) with the defaults documented in [docs/ParseLimits.md](docs/ParseLimits.md).
+An input that exceeds a limit throws `ParseLimitExceededException`, which derives
+from `FormatException`:
+
+```csharp
+var limits = new ParseLimits { MaxFileBytes = 64 * 1024 * 1024, MaxStackDepth = 512 };
+var root = SpeedscopeParser.ParseFile(uploadPath, limits: limits);
+```
+
 ## FlameGraphRenderer
 
 The `FlameGraphRenderer` class is responsible for rendering a call tree as a flame graph using SkiaSharp.
