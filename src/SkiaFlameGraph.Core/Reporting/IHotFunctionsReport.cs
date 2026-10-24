@@ -2,6 +2,7 @@ using System.Collections.Generic;
 
 namespace SkiaFlameGraph.Core.Reporting;
 
+/// <summary>Builds top-N hot-function reports from a call tree.</summary>
 public interface IHotFunctionsReport
 {
     /// <summary>

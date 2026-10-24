@@ -72,7 +72,7 @@ public class FlameGraphSvgExporterTests
 
         Assert.StartsWith(FlameGraphSvgExporterTestsConstants.XmlDeclaration, content);
         Assert.Contains(FlameGraphSvgExporterTestsConstants.SvgTag, content);
-        Assert.True(content.Contains(FlameGraphSvgExporterTestsConstants.SvgEndTag));
+        Assert.Contains(FlameGraphSvgExporterTestsConstants.SvgEndTag, content);
 
         File.Delete(tempFile);
     }

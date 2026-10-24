@@ -239,6 +239,8 @@ public static partial class SpeedscopeParser
     /// </summary>
     /// <param name="frames">The list of frames.</param>
     /// <param name="index">The zero‑based index of the frame.</param>
+    /// <param name="diagnostics">Collects counts of out-of-range references.</param>
+    /// <param name="log">Optional sink for diagnostic messages.</param>
     /// <returns>The resolved <see cref="Frame"/> or a placeholder for an invalid index.</returns>
     private static Frame FrameAt(
         List<Frame> frames,

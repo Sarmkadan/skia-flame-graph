@@ -61,7 +61,7 @@ public class SpeedscopeFileTests : ISpeedscopeFileTests
         Assert.Equal(10, file.Shared.Frames[0].Line);
         Assert.Equal(5, file.Shared.Frames[0].Col);
         Assert.Equal("MethodA", file.Shared.Frames[1].Name);
-        Assert.Equal(1, file.Profiles.Count);
+        Assert.Single(file.Profiles);
         Assert.Equal("CPU Profile", file.Profiles[0].Name);
         Assert.Equal("evented", file.Profiles[0].Type);
         Assert.Equal("milliseconds", file.Profiles[0].Unit);
@@ -457,7 +457,7 @@ public class SpeedscopeFileTests : ISpeedscopeFileTests
     public void Constructor_AllowsNullSharedProperty()
     {
         // Arrange & Act
-        var file = new SpeedscopeFile { Shared = null };
+        var file = new SpeedscopeFile { Shared = null! };
 
         // Assert
         Assert.Null(file.Shared);
@@ -470,7 +470,7 @@ public class SpeedscopeFileTests : ISpeedscopeFileTests
     public void Constructor_AllowsNullProfilesProperty()
     {
         // Arrange & Act
-        var file = new SpeedscopeFile { Profiles = null };
+        var file = new SpeedscopeFile { Profiles = null! };
 
         // Assert
         Assert.Null(file.Profiles);

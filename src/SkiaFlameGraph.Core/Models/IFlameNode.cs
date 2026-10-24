@@ -1,5 +1,6 @@
 namespace SkiaFlameGraph.Core.Models;
 
+/// <summary>Read-only view of a node in a flame graph call tree.</summary>
 public interface IFlameNode
 {
     /// <summary>Gets the name of the frame represented by this node.</summary>

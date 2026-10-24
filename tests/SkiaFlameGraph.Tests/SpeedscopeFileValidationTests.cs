@@ -101,7 +101,7 @@ public class SpeedscopeFileValidationTests
     {
         var file = new SpeedscopeFile
         {
-            Shared = null,
+            Shared = null!,
             Profiles = new List<Profile> { CreateValidProfile() }
         };
 
@@ -149,8 +149,8 @@ public class SpeedscopeFileValidationTests
     {
         var file = new SpeedscopeFile
         {
-            Shared = null,
-            Profiles = null
+            Shared = null!,
+            Profiles = null!
         };
 
         var ex = Assert.Throws<ArgumentException>(() => file.EnsureValid());
