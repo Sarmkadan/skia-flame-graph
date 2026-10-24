@@ -52,8 +52,8 @@ The `FlameNode` class represents a node in the aggregated call tree used by both
 - **Remarks**: This method ensures that recursive calls with the same frame identity collapse into a single node, preventing a stack of slivers in the flame graph.
 
 ### MaxDepth()
-- **Description**: Returns the maximum depth of the subtree rooted at this node, including this node.
-- **Returns**: An `int` representing the greatest depth found in the subtree.
+- **Description**: Returns the height of the subtree rooted at this node, measured in levels below it. A leaf returns `0`; a node whose children are all leaves returns `1`.
+- **Returns**: An `int` representing the number of levels below this node. Independent of the node's own `Depth`.
 
 ## Equality and Comparison
 The `FlameNode` class implements `IEquatable<FlameNode>` and overrides `Equals` and `GetHashCode`. Two nodes are considered equal if they have the same:

@@ -18,19 +18,15 @@ public class SoakTests
         // Create a simple tree: root -> child1 -> grandchild1, child2
         var root = new FlameNode("root");
         root.Value = 100;
-        var child1 = new FlameNode("child1");
+        // AddChild returns the attached node, so the children are set on the nodes that are in the tree
+        var child1 = root.AddChild("child1");
         child1.Value = 50;
-        var child2 = new FlameNode("child2");
+        var child2 = root.AddChild("child2");
         child2.Value = 30;
-        var grandchild1 = new FlameNode("grandchild1");
+        var grandchild1 = child1.AddChild("grandchild1");
         grandchild1.Value = 20;
-        var grandchild2 = new FlameNode("grandchild2");
+        var grandchild2 = child1.AddChild("grandchild2");
         grandchild2.Value = 10;
-
-        child1.AddChild(grandchild1.Name);
-        child1.AddChild(grandchild2.Name);
-        root.AddChild(child1.Name);
-        root.AddChild(child2.Name);
 
         return root;
     }
@@ -66,10 +62,11 @@ public class SoakTests
         GC.WaitForPendingFinalizers();
         long after = GC.GetTotalMemory(true);
 
-        // Assert: memory increase should be reasonable (less than 5MB)
+        // Assert: memory increase should be reasonable (less than 5MB). Only the upper bound matters for a leak;
+        // a negative delta is possible when the GC reclaims more than was allocated during the warm-up.
         long increase = after - before;
         const long maxIncreaseBytes = 5L * 1024 * 1024; // 5 MB
-        Assert.InRange(increase, 0L, maxIncreaseBytes);
+        Assert.True(increase < maxIncreaseBytes, $"Memory grew by {increase} bytes over 1000 renders, expected less than {maxIncreaseBytes}.");
     }
 
     /// <summary>
@@ -103,10 +100,11 @@ public class SoakTests
         GC.WaitForPendingFinalizers();
         long after = GC.GetTotalMemory(true);
 
-        // Assert: memory increase should be reasonable (less than 5MB)
+        // Assert: memory increase should be reasonable (less than 5MB). Only the upper bound matters for a leak;
+        // a negative delta is possible when the GC reclaims more than was allocated during the warm-up.
         long increase = after - before;
         const long maxIncreaseBytes = 5L * 1024 * 1024; // 5 MB
-        Assert.InRange(increase, 0L, maxIncreaseBytes);
+        Assert.True(increase < maxIncreaseBytes, $"Memory grew by {increase} bytes over 1000 renders, expected less than {maxIncreaseBytes}.");
     }
 
     /// <summary>
@@ -144,9 +142,10 @@ public class SoakTests
         GC.WaitForPendingFinalizers();
         long after = GC.GetTotalMemory(true);
 
-        // Assert: memory increase should be reasonable (less than 5MB)
+        // Assert: memory increase should be reasonable (less than 5MB). Only the upper bound matters for a leak;
+        // a negative delta is possible when the GC reclaims more than was allocated during the warm-up.
         long increase = after - before;
         const long maxIncreaseBytes = 5L * 1024 * 1024; // 5 MB
-        Assert.InRange(increase, 0L, maxIncreaseBytes);
+        Assert.True(increase < maxIncreaseBytes, $"Memory grew by {increase} bytes over 1000 renders, expected less than {maxIncreaseBytes}.");
     }
 }

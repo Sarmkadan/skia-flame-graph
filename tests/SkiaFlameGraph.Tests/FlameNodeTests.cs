@@ -28,17 +28,19 @@ public class FlameNodeTests : IFlameNodeTests
     }
 
     /// <summary>
-    /// Verifies that adding multiple children with the same name results
-    /// in distinct nodes rather than overwriting or merging them.
+    /// Verifies that children sharing a name but differing in file or line are kept as distinct nodes,
+    /// while a child with the same name, file and line as an existing child is merged into it.
     /// </summary>
     [Fact]
     public void AddChild_WithSameName_CreatesDistinctNodes()
     {
         var root = new FlameNode(FlameNodeTestsConstants.RootNodeName);
-        var first = root.AddChild(FlameNodeTestsConstants.DuplicateNodeName);
-        var second = root.AddChild(FlameNodeTestsConstants.DuplicateNodeName);
+        var first = root.AddChild(FlameNodeTestsConstants.DuplicateNodeName, FlameNodeTestsConstants.TestFileName, FlameNodeTestsConstants.TestFileLine);
+        var second = root.AddChild(FlameNodeTestsConstants.DuplicateNodeName, FlameNodeTestsConstants.OtherFileName, FlameNodeTestsConstants.TestFileLine);
+        var merged = root.AddChild(FlameNodeTestsConstants.DuplicateNodeName, FlameNodeTestsConstants.TestFileName, FlameNodeTestsConstants.TestFileLine);
 
         Assert.NotSame(first, second);
+        Assert.Same(first, merged);
         Assert.Equal(FlameNodeTestsConstants.DuplicateChildCount, root.Children.Count);
         Assert.Contains(first, root.Children);
         Assert.Contains(second, root.Children);

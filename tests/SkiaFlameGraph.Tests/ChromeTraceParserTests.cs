@@ -143,9 +143,11 @@ public class ChromeTraceParserTests : IChromeTraceParserTests
         var root = ChromeTraceParser.BuildTree(ChromeTraceParser.Deserialize(unsortedJson));
         Assert.Single(root.Children);
         var threadNode = root.Children[0];
-        Assert.Single(threadNode.Children);
-        var func = threadNode.Children[0];
-        Assert.Equal("early", func.Name);
+
+        // The two events do not overlap in time, so they are siblings, ordered by start time
+        Assert.Equal(2, threadNode.Children.Count);
+        Assert.Equal("early", threadNode.Children[0].Name);
+        Assert.Equal("late", threadNode.Children[1].Name);
     }
 
     /// <summary>

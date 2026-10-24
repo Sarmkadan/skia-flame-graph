@@ -27,6 +27,7 @@ public class FlameGraphSvgExporter
     private const int LabelMinHeightForDisplay = 12;
     private const int LabelPadding = 3;
     private const int LabelTruncationOffset = 6;
+    private const string UnnamedFrameLabel = "unknown";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FlameGraphSvgExporter"/> class.
@@ -122,7 +123,7 @@ public class FlameGraphSvgExporter
         var rowHeight = _options.RowHeight;
 
         // Get color from palette
-        var color = FramePalette.ForFrame(node.Name);
+        var color = FramePalette.ForFrame(string.IsNullOrEmpty(node.Name) ? UnnamedFrameLabel : node.Name);
 
         // Draw rectangle
         var rectX = x; // TODO: Verify frame names and tooltip text are XML-escaped

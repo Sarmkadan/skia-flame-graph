@@ -61,8 +61,8 @@ The following rules are checked during validation:
 - **Error Message:** `FlameNodeValidationConstants.NameCannotBeNullOrWhitespace`
 
 ### 2. Value Validation
-- **Rule:** `Value` must be positive (greater than zero).
-- **Error Message:** `FlameNodeValidationConstants.ValueMustBePositive`
+- **Rule:** `Value` must not be negative. Zero is allowed (a zero-weight frame is valid and renders).
+- **Error Message:** `FlameNodeValidationConstants.ValueCannotBeNegative`
 
 ### 3. Depth Validation
 - **Rule:** `Depth` must be non-negative (greater than or equal to zero).

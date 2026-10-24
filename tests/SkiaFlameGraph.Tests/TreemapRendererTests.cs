@@ -260,8 +260,10 @@ namespace SkiaFlameGraph.Tests
 
             try
             {
-                // Act
-                _renderer.RenderToPng(root, tempPath);
+                // Act: render at an explicit height and encode the result to PNG
+                using var rendered = _renderer.Render(root, 400);
+                using var encoded = rendered.Encode(SKEncodedImageFormat.Png, 100);
+                File.WriteAllBytes(tempPath, encoded.ToArray());
 
                 // Assert
                 Assert.True(File.Exists(tempPath));

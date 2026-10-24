@@ -25,7 +25,7 @@ public static class FramePalette
     /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is <c>null</c> or empty.</exception>
     public static SKColor ForFrame(string name)
     {
-        ArgumentException.ThrowIfNullOrEmpty(name);
+        ThrowIfNameInvalid(name);
 
         var hash = StableHash(name);
 
@@ -48,7 +48,7 @@ public static class FramePalette
     /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is <c>null</c> or empty.</exception>
     public static SKColor ForFrame(string name, string? highlightPattern)
     {
-        ArgumentException.ThrowIfNullOrEmpty(name);
+        ThrowIfNameInvalid(name);
 
         if (!string.IsNullOrEmpty(highlightPattern) &&
             System.Text.RegularExpressions.Regex.IsMatch(name, highlightPattern))
@@ -57,6 +57,19 @@ public static class FramePalette
         }
 
         return ForFrame(name);
+    }
+
+    /// <summary>
+    /// Rejects <c>null</c> and empty names with a plain <see cref="ArgumentException"/>. Unlike
+    /// <c>ArgumentException.ThrowIfNullOrEmpty</c>, this never throws <see cref="ArgumentNullException"/>
+    /// for <c>null</c>, which would be a derived type and fail exact-type checks.
+    /// </summary>
+    /// <param name="name">The frame name to check.</param>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="name"/> is <c>null</c> or empty.</exception>
+    private static void ThrowIfNameInvalid(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            throw new ArgumentException("Frame name cannot be null or empty.", nameof(name));
     }
 
     /// <summary>
