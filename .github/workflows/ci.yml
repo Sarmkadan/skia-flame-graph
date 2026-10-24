@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Use the SDK pinned in global.json when the file exists...
+      - name: Setup .NET (from global.json)
+        if: hashFiles('global.json') != ''
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # ...otherwise fall back to the latest .NET 10 (LTS) SDK.
+      - name: Setup .NET (latest LTS)
+        if: hashFiles('global.json') == ''
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test --no-build --configuration Release
