@@ -17,14 +17,14 @@ jobs:
       # Use the SDK pinned in global.json when the file exists...
       - name: Setup .NET (from global.json)
         if: hashFiles('global.json') != ''
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
 
       # ...otherwise fall back to the latest .NET 10 (LTS) SDK.
       - name: Setup .NET (latest LTS)
         if: hashFiles('global.json') == ''
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
 
