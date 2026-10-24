@@ -27,10 +27,10 @@ public static partial class FlameNodeValidation
             problems.Add(FlameNodeValidationConstants.NameCannotBeNullOrWhitespace);
         }
 
-        // Validate Value (must be positive)
-        if (value.Value <= 0)
+        // Validate Value (should be non‑negative; zero‑weight frames are valid)
+        if (value.Value < 0)
         {
-            problems.Add(FlameNodeValidationConstants.ValueMustBePositive);
+            problems.Add(FlameNodeValidationConstants.ValueCannotBeNegative);
         }
 
         // Validate Depth (should be non‑negative)

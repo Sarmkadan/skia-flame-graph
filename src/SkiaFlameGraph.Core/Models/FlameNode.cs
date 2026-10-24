@@ -126,12 +126,15 @@ public sealed class FlameNode : IFlameNode, IEquatable<FlameNode>
         return node;
     }
 
-    /// <summary>Max depth of the subtree rooted here, including this node.</summary>
+    /// <summary>
+    /// Number of levels below this node in its subtree: 0 for a leaf, 1 for a node whose
+    /// children are leaves, and so on. Relative to this node, so it is independent of <see cref="Depth"/>.
+    /// </summary>
     public int MaxDepth()
     {
-        var max = Depth;
+        var max = 0;
         foreach (var c in Children)
-            max = Math.Max(max, c.MaxDepth());
+            max = Math.Max(max, c.MaxDepth() + 1);
         return max;
     }
 }

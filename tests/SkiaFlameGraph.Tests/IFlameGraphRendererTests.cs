@@ -7,7 +7,7 @@ namespace SkiaFlameGraph.Tests
         void Constructor_WithNullOptions_UsesDefaultOptions();
         void Constructor_WithValidOptions_UsesProvidedOptions();
         void Constructor_WithInvalidOptions_ThrowsValidationException();
-        void Render_WithEmptyRoot_ThrowsArgumentException();
+        void Render_WithNullRoot_ThrowsArgumentNullException();
         void Render_WithSingleNode_CalculatesCorrectHeight();
         void Render_WithDeepTree_CalculatesCorrectHeight();
         void RenderToPng_WithNullRoot_ThrowsArgumentNullException();

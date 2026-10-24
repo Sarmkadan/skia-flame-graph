@@ -90,14 +90,18 @@ public static class ChromeTraceParser
 
         var root = new FlameNode("root");
 
-        // Build a tree for each thread
+        // Build a subtree for each thread; threads with no usable events get no node
         foreach (var threadGroup in eventsByThread)
         {
-            var threadRoot = BuildThreadTree(threadGroup.Value);
-            if (threadRoot.Children.Count > 0)
+            var threadNode = root.AddChild($"thread {threadGroup.Key}", null, null);
+            BuildThreadTree(threadGroup.Value, threadNode);
+            if (threadNode.Children.Count == 0)
             {
-                var threadNode = root.AddChild($"thread {threadGroup.Key}", null, null);
-                threadNode.Value += threadRoot.Value;
+                root.Children.Remove(threadNode);
+            }
+            else
+            {
+                root.Value += threadNode.Value;
             }
         }
 
@@ -105,52 +109,45 @@ public static class ChromeTraceParser
     }
 
     /// <summary>
-    /// Build a flame graph tree for a single thread by processing complete events.
+    /// Builds the call tree for a single thread under <paramref name="threadNode"/> by processing
+    /// complete (<c>X</c>) events and begin/end (<c>B</c>/<c>E</c>) pairs.
     /// </summary>
-    /// <param name="events">Events for a single thread.</param>
-    /// <returns>A FlameNode tree representing the call stack for this thread.</returns>
-    private static FlameNode BuildThreadTree(List<ChromeTraceEvent> events)
+    /// <param name="events">Events for a single thread. Sorted by timestamp in place.</param>
+    /// <param name="threadNode">The node that receives the top-level frames of this thread.</param>
+    private static void BuildThreadTree(List<ChromeTraceEvent> events, FlameNode threadNode)
     {
         // Sort events by timestamp
         events.Sort((a, b) => a.Ts.CompareTo(b.Ts));
 
-        var root = new FlameNode("root");
-        var stack = new Stack<FlameNode>();
-        stack.Push(root);
+        // Open frames, each with the timestamp it began at so an E event can derive its duration
+        var stack = new Stack<(FlameNode Node, double StartTs)>();
+        stack.Push((threadNode, 0));
 
         foreach (var ev in events)
         {
-            if (ev.Ph != PhaseComplete && ev.Ph != PhaseBegin && ev.Ph != PhaseEnd)
+            switch (ev.Ph)
             {
-                // Skip non-complete/begin/end events
-                continue;
-            }
+                case PhaseComplete:
+                    // A complete event is self-contained: attribute its duration and leave the stack untouched
+                    var completeNode = stack.Peek().Node.AddChild(ev.Name ?? UnknownName, ev.File, ev.Line);
+                    completeNode.Value += ev.Dur ?? 0;
+                    break;
 
-            if (ev.Ph == PhaseComplete || ev.Ph == PhaseBegin)
-            {
-                // Begin event or Complete event - push new frame onto stack
-                // Use the node returned by AddChild to ensure we're working with the same instance
-                var frameNode = stack.Peek().AddChild(ev.Name ?? UnknownName, ev.File, ev.Line);
-                stack.Push(frameNode);
-            }
+                case PhaseBegin:
+                    var beginNode = stack.Peek().Node.AddChild(ev.Name ?? UnknownName, ev.File, ev.Line);
+                    stack.Push((beginNode, ev.Ts));
+                    break;
 
-            if (ev.Ph == PhaseComplete || ev.Ph == PhaseEnd)
-            {
-                // Complete event or End event - pop frame from stack
-                // For complete events, attribute the duration to the frame
-                if (ev.Ph == PhaseComplete && ev.Dur.HasValue && stack.Count > 1)
-                {
-                    var frameNode = stack.Pop();
-                    frameNode.Value = ev.Dur.Value;
-                }
-                else if (ev.Ph == PhaseEnd && stack.Count > 1)
-                {
-                    stack.Pop();
-                }
+                case PhaseEnd when stack.Count > 1:
+                    var (endNode, startTs) = stack.Pop();
+                    endNode.Value += ev.Ts - startTs;
+                    break;
+
+                // Other phases and unmatched end events are skipped
             }
         }
 
-        return root;
+        threadNode.Value = threadNode.Children.Sum(c => c.Value);
     }
 }
 

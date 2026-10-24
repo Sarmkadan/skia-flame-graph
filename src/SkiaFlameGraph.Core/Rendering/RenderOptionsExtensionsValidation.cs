@@ -1,6 +1,8 @@
 using SkiaSharp;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace SkiaFlameGraph.Core.Rendering
 {
@@ -20,20 +22,38 @@ namespace SkiaFlameGraph.Core.Rendering
             ArgumentNullException.ThrowIfNull(options);
             var errors = new List<string>();
             if (options.Width <= 0)
-                errors.Add("Width must be greater than 0.");
+                errors.Add(Format(RenderOptionsValidationConstants.WidthMustBePositive, options.Width));
             if (options.RowHeight <= 0)
-                errors.Add("RowHeight must be greater than 0.");
+                errors.Add(Format(RenderOptionsValidationConstants.RowHeightMustBePositive, options.RowHeight));
             if (options.MinLabelWidth < 0)
-                errors.Add("MinLabelWidth must be greater than or equal to 0.");
+                errors.Add(Format(RenderOptionsValidationConstants.MinLabelWidthMustBeNonNegative, options.MinLabelWidth));
             if (options.MinBoxWidth < 0)
-                errors.Add("MinBoxWidth must be greater than or equal to 0.");
+                errors.Add(Format(RenderOptionsValidationConstants.MinBoxWidthMustBeNonNegative, options.MinBoxWidth));
             if (options.MinSubtreeWidthPx < 0)
-                errors.Add("MinSubtreeWidthPx must be greater than or equal to 0.");
+                errors.Add(Format(RenderOptionsValidationConstants.MinSubtreeWidthPxMustBeNonNegative, options.MinSubtreeWidthPx));
             if (options.Padding < 0)
-                errors.Add("Padding must be greater than or equal to 0.");
+                errors.Add(Format(RenderOptionsValidationConstants.PaddingMustBeNonNegative, options.Padding));
             if (options.FontSize <= 0)
-                errors.Add("FontSize must be greater than 0.");
+                errors.Add(Format(RenderOptionsValidationConstants.FontSizeMustBePositive, options.FontSize));
+            if (!string.IsNullOrEmpty(options.HighlightPattern) && !IsValidRegex(options.HighlightPattern))
+                errors.Add(Format(RenderOptionsValidationConstants.HighlightPatternMustBeValidRegex, options.HighlightPattern));
             return errors.AsReadOnly();
+        }
+
+        private static string Format(string template, object value) =>
+            string.Format(CultureInfo.InvariantCulture, template, value);
+
+        private static bool IsValidRegex(string pattern)
+        {
+            try
+            {
+                _ = new Regex(pattern);
+                return true;
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -56,7 +76,7 @@ namespace SkiaFlameGraph.Core.Rendering
             var errors = Validate(options);
             if (errors.Count > 0)
             {
-                throw new ArgumentException(string.Join(" ", errors), nameof(options));
+                throw new ArgumentException(RenderOptionsValidationConstants.RenderOptionsIsInvalid + string.Join(" ", errors), nameof(options));
             }
         }
     }

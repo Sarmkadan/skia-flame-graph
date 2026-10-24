@@ -11,6 +11,7 @@ internal static class FlameNodeTestsConstants
     public const string LeafNodeName = "leaf";
     public const string GrandchildNodeName = "grandchild";
     public const string TestFileName = "Test.cs";
+    public const string OtherFileName = "Other.cs";
 
     public const int LeafMaxDepth = 0;
     public const int ChildMaxDepth = 1;

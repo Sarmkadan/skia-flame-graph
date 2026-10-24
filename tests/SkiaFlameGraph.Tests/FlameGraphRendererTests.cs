@@ -77,17 +77,13 @@ namespace SkiaFlameGraph.Tests
         }
 
         /// <summary>
-        /// Verifies that calling Render with a root node that has no children (empty) throws an ArgumentNullException.
+        /// Verifies that calling Render with a null root throws an ArgumentNullException naming the "root" parameter.
         /// </summary>
         [Fact]
-        public void Render_WithEmptyRoot_ThrowsArgumentException()
+        public void Render_WithNullRoot_ThrowsArgumentNullException()
         {
-            // Arrange
-            var root = new FlameNode("root");
-            root.Value = 100;
-
             // Act & Assert
-            var exception = Assert.Throws<ArgumentNullException>(() => _renderer.Render(root));
+            var exception = Assert.Throws<ArgumentNullException>(() => _renderer.Render(null!));
             Assert.Equal("root", exception.ParamName);
         }
 

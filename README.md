@@ -528,7 +528,7 @@ dotnet test --filter "FullyQualifiedName~SkiaFlameGraph.Tests.FlameGraphSvgExpor
 
 ## FlameNodeTests
 
-xUnit test suite covering `FlameNode`, the aggregated call-tree node used by both the flame graph and treemap renderers. These tests pin down `AddChild` semantics - children land at the correct depth, identically named siblings stay distinct nodes instead of being merged, and source file/line metadata is carried onto the child - as well as `MaxDepth` for both a lone leaf node and a three-level tree.
+xUnit test suite covering `FlameNode`, the aggregated call-tree node used by both the flame graph and treemap renderers. These tests pin down `AddChild` semantics - children land at the correct depth, identically named siblings stay distinct nodes unless they share file and line, in which case they are merged, and source file/line metadata is carried onto the child - as well as `MaxDepth` for both a lone leaf node and a three-level tree.
 
 Example usage when exercising the suite programmatically:
 
@@ -808,7 +808,7 @@ tests.Constructor_WithValidOptions_UsesProvidedOptions();
 tests.Constructor_WithInvalidOptions_ThrowsValidationException();
 
 // Rendering with various inputs
-tests.Render_WithEmptyRoot_ThrowsArgumentException();
+tests.Render_WithNullRoot_ThrowsArgumentNullException();
 tests.Render_WithSingleNode_CalculatesCorrectHeight();
 tests.Render_WithDeepTree_CalculatesCorrectHeight();
 

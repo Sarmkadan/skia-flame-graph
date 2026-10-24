@@ -2,7 +2,7 @@ internal static class FlameNodeValidationConstants
 {
     // Repeated string literals (URLs, header names, config keys, format strings)
     public const string NameCannotBeNullOrWhitespace = "Name cannot be null or whitespace.";
-    public const string ValueMustBePositive = "Value must be positive.";
+    public const string ValueCannotBeNegative = "Value cannot be negative.";
     public const string DepthCannotBeNegative = "Depth cannot be negative.";
     public const string ChildrenCollectionCannotBeNull = "Children collection cannot be null.";
     public const string ChildrenCollectionContainsNullElement = "Children collection contains a null element.";
