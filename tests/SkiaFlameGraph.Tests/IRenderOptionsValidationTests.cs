@@ -29,5 +29,14 @@ namespace SkiaFlameGraph.Tests
         void IsValid_Invalid_ReturnsFalse();
         void EnsureValid_Valid_DoesNotThrow();
         void EnsureValid_Invalid_ThrowsArgumentException();
+        void Validate_WidthMaximum_ReturnsNoErrors();
+        void Validate_WidthAboveMaximum_ReturnsError();
+        void Validate_WidthZero_MessageReportsActualValue();
+        void Validate_FontFamilyNull_ReturnsNoErrors();
+        void Validate_FontFamilySpecified_ReturnsNoErrors();
+        void Validate_FontFamilyEmpty_ReturnsError();
+        void Validate_FontFamilyWhitespace_ReturnsError();
+        void EnsureValid_WidthAboveMaximum_MessageContainsActualValue();
+        void FlameGraphRenderer_WidthAboveMaximum_ThrowsOnConstruction();
     }
 }

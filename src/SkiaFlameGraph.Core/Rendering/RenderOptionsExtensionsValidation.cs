@@ -23,6 +23,8 @@ namespace SkiaFlameGraph.Core.Rendering
             var errors = new List<string>();
             if (options.Width <= 0)
                 errors.Add(Format(RenderOptionsValidationConstants.WidthMustBePositive, options.Width));
+            else if (options.Width > RenderOptionsValidationConstants.MaxWidth)
+                errors.Add(Format(RenderOptionsValidationConstants.WidthMustNotExceedMaxWidth, options.Width));
             if (options.RowHeight <= 0)
                 errors.Add(Format(RenderOptionsValidationConstants.RowHeightMustBePositive, options.RowHeight));
             if (options.MinLabelWidth < 0)
@@ -35,6 +37,8 @@ namespace SkiaFlameGraph.Core.Rendering
                 errors.Add(Format(RenderOptionsValidationConstants.PaddingMustBeNonNegative, options.Padding));
             if (options.FontSize <= 0)
                 errors.Add(Format(RenderOptionsValidationConstants.FontSizeMustBePositive, options.FontSize));
+            if (options.FontFamily is not null && string.IsNullOrWhiteSpace(options.FontFamily))
+                errors.Add(Format(RenderOptionsValidationConstants.FontFamilyMustBeNonEmpty, options.FontFamily));
             if (!string.IsNullOrEmpty(options.HighlightPattern) && !IsValidRegex(options.HighlightPattern))
                 errors.Add(Format(RenderOptionsValidationConstants.HighlightPatternMustBeValidRegex, options.HighlightPattern));
             return errors.AsReadOnly();

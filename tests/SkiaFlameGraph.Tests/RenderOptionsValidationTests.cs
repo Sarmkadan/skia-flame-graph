@@ -331,4 +331,135 @@ public class RenderOptionsValidationTests : IRenderOptionsValidationTests
 
         Assert.Contains("RenderOptions is invalid", ex.Message);
     }
+
+    /// <summary>
+    /// Verifies that a Width equal to the maximum of 16384 is accepted.
+    /// </summary>
+    [Fact]
+    public void Validate_WidthMaximum_ReturnsNoErrors()
+    {
+        var options = CreateValidOptions();
+        options.Width = 16384;
+
+        var errors = options.Validate();
+
+        Assert.Empty(errors);
+    }
+
+    /// <summary>
+    /// Verifies that a Width one above the maximum of 16384 is rejected with the "Width must be at most" validation error
+    /// that includes the actual value.
+    /// </summary>
+    [Fact]
+    public void Validate_WidthAboveMaximum_ReturnsError()
+    {
+        var options = CreateValidOptions();
+        options.Width = 16385;
+
+        var errors = options.Validate();
+
+        Assert.Single(errors);
+        Assert.Equal("Width must be at most 16384, but was 16385.", errors[0]);
+    }
+
+    /// <summary>
+    /// Verifies that a Width of zero is rejected and that the message reports the actual value.
+    /// </summary>
+    [Fact]
+    public void Validate_WidthZero_MessageReportsActualValue()
+    {
+        var options = CreateValidOptions();
+        options.Width = 0;
+
+        var errors = options.Validate();
+
+        Assert.Single(errors);
+        Assert.Equal("Width must be positive, but was 0.", errors[0]);
+    }
+
+    /// <summary>
+    /// Verifies that a null FontFamily is treated as "use the default font" and produces no validation errors.
+    /// </summary>
+    [Fact]
+    public void Validate_FontFamilyNull_ReturnsNoErrors()
+    {
+        var options = CreateValidOptions();
+        options.FontFamily = null;
+
+        var errors = options.Validate();
+
+        Assert.Empty(errors);
+    }
+
+    /// <summary>
+    /// Verifies that a non-empty FontFamily produces no validation errors.
+    /// </summary>
+    [Fact]
+    public void Validate_FontFamilySpecified_ReturnsNoErrors()
+    {
+        var options = CreateValidOptions();
+        options.FontFamily = "Arial";
+
+        var errors = options.Validate();
+
+        Assert.Empty(errors);
+    }
+
+    /// <summary>
+    /// Verifies that an empty string FontFamily is rejected with the "FontFamily must be non-empty" validation error.
+    /// </summary>
+    [Fact]
+    public void Validate_FontFamilyEmpty_ReturnsError()
+    {
+        var options = CreateValidOptions();
+        options.FontFamily = string.Empty;
+
+        var errors = options.Validate();
+
+        Assert.Single(errors);
+        Assert.Equal("FontFamily must be non-empty when specified, but was ''.", errors[0]);
+    }
+
+    /// <summary>
+    /// Verifies that a whitespace-only FontFamily is rejected with the "FontFamily must be non-empty" validation error.
+    /// </summary>
+    [Fact]
+    public void Validate_FontFamilyWhitespace_ReturnsError()
+    {
+        var options = CreateValidOptions();
+        options.FontFamily = "   ";
+
+        var errors = options.Validate();
+
+        Assert.Single(errors);
+        Assert.Contains("FontFamily must be non-empty", errors[0]);
+    }
+
+    /// <summary>
+    /// Verifies that EnsureValid throws an <see cref="ArgumentException"/> whose message includes the rejected Width value.
+    /// </summary>
+    [Fact]
+    public void EnsureValid_WidthAboveMaximum_MessageContainsActualValue()
+    {
+        var options = CreateValidOptions();
+        options.Width = 16385;
+
+        var ex = Assert.Throws<ArgumentException>(() => options.EnsureValid());
+
+        Assert.Contains("Width must be at most 16384, but was 16385.", ex.Message);
+    }
+
+    /// <summary>
+    /// Verifies that constructing a renderer with a Width above the maximum fails fast with an <see cref="ArgumentException"/>.
+    /// </summary>
+    [Fact]
+    public void FlameGraphRenderer_WidthAboveMaximum_ThrowsOnConstruction()
+    {
+        var options = CreateValidOptions();
+        options.Width = 16385;
+
+        var ex = Assert.Throws<ArgumentException>(() => new FlameGraphRenderer(options));
+
+        Assert.Contains("Width must be at most 16384, but was 16385.", ex.Message);
+    }
 }

@@ -56,6 +56,7 @@ public sealed class FlameGraphRenderer : BaseFlameNodeRenderer, IFlameGraphRende
     {
         ArgumentNullException.ThrowIfNull(root);
         VerifySkiaSharpEnvironment();
+        _options.EnsureValid();
         _labelCache.Clear();
 
         var depth = root.MaxDepth();
