@@ -26,8 +26,95 @@ SkiaFlameGraph.sln
 │   └── Rendering/                 FlameGraphRenderer, TreemapRenderer, palette
 ├── samples/SkiaFlameGraph.Sample  console app that renders a trace to PNG
 │   └── sample-trace.speedscope.json
+├── samples/GettingStarted         minimal collapsed stacks -> 1920x1080 PNG
 └── tests/SkiaFlameGraph.Tests     xUnit tests for the parser
 ```
+
+## Getting Started
+
+Render a [collapsed stacks](#input-format-collapsed-stacks) file to a 1920x1080
+PNG in a new console app.
+
+```bash
+dotnet new console -o FlameDemo
+cd FlameDemo
+
+# SkiaSharp is the graphics dependency (valid on any OS)
+dotnet add package SkiaSharp --version 4.150.1
+
+# headless Linux only: bundles the native library so no X stack is needed
+dotnet add package SkiaSharp.NativeAssets.Linux.NoDependencies --version 4.150.1
+
+# SkiaFlameGraph.Core is not published to NuGet, so reference it from a clone
+dotnet add reference ../skia-flame-graph/src/SkiaFlameGraph.Core/SkiaFlameGraph.Core.csproj
+```
+
+Replace `Program.cs` with:
+
+```csharp
+using SkiaFlameGraph.Core.Parsing;
+using SkiaFlameGraph.Core.Rendering;
+using SkiaSharp;
+
+// Usage: dotnet run -- <input.collapsed.txt> <output.png>
+const int Width = 1920;
+const int Height = 1080;
+
+var inputPath = args.Length > 0 ? args[0] : "stacks.txt";
+var outputPath = args.Length > 1 ? args[1] : "flame.png";
+
+// 1. Load collapsed stacks ("frame1;frame2;frame3 123" per line) into a call tree.
+var root = CollapsedStacksParser.ParseFile(inputPath);
+
+// 2. Pick a row height so the full stack depth fits inside 1080 px.
+var options = new RenderOptions { Width = Width };
+var rows = root.MaxDepth() + 1;
+options.RowHeight = (Height - 2 * options.Padding) / rows;
+
+// 3. Render to an SKImage, then draw it onto a 1920x1080 SKBitmap.
+using var renderer = new FlameGraphRenderer(options);
+using var image = renderer.Render(root);
+using var bitmap = new SKBitmap(Width, Height);
+using (var canvas = new SKCanvas(bitmap))
+{
+    canvas.Clear(options.Background);
+    canvas.DrawImage(image, 0, 0, new SKSamplingOptions());
+}
+
+// 4. Encode as PNG and save to disk.
+using var png = bitmap.Encode(SKEncodedImageFormat.Png, 100);
+using var stream = File.Create(outputPath);
+png.SaveTo(stream);
+
+Console.WriteLine($"Wrote {Path.GetFullPath(outputPath)}");
+```
+
+Run it against a collapsed stacks file:
+
+```bash
+dotnet run -- stacks.txt flame.png
+```
+
+The same code lives in `samples/GettingStarted`, so you can run it from this
+repo with `dotnet run --project samples/GettingStarted -- stacks.txt flame.png`.
+
+### Input format (collapsed stacks)
+
+Each line is one unique call stack followed by a sample count, separated by a
+space or tab. Frames are separated by `;` and listed outermost (caller) first.
+Blank lines, lines without a count, and lines with a zero or negative count are
+skipped. Repeated stacks are merged. A sample file looks like this:
+
+```text
+main;ProcessRequest;ParseJson 42
+main;ProcessRequest;RenderView;DrawHeader 17
+main;Startup;LoadConfig 5
+```
+
+Tools that emit this format include Brendan Gregg's `stackcollapse` scripts.
+
+Text labels need a system font. If they come out blank in a minimal container,
+install a font package as described in [Native dependencies](#native-dependencies).
 
 ## Getting a trace
 
