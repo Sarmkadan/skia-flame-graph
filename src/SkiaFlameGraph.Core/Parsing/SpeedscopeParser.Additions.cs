@@ -8,25 +8,42 @@ public static partial class SpeedscopeParser
 	/// Aggregate one profile into a call tree, detecting and reporting unbalanced events.
 	/// Returns a tuple containing the root node and a list of warning messages.
 	/// </summary>
-	public static (FlameNode root, IReadOnlyList<string> warnings) BuildTreeWithWarnings(SpeedscopeFile file, int profileIndex = 0)
+	/// <param name="file">The speedscope file containing the profiles.</param>
+	/// <param name="profileIndex">The zero-based index of the profile to aggregate.</param>
+	/// <param name="limits">Resource limits to enforce, or <c>null</c> to use <see cref="ParseLimits.Default"/>.</param>
+	/// <returns>The root node and the warnings produced while building it.</returns>
+	/// <exception cref="ArgumentNullException">Thrown when <paramref name="file"/> is null.</exception>
+	/// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="profileIndex"/> is outside the valid range, or a limit is zero or negative.</exception>
+	/// <exception cref="FormatException">Thrown when the profile type is unsupported.</exception>
+	/// <exception cref="ParseLimitExceededException">Thrown when the document exceeds a <see cref="ParseLimits"/> limit.</exception>
+	public static (FlameNode root, IReadOnlyList<string> warnings) BuildTreeWithWarnings(
+		SpeedscopeFile file,
+		int profileIndex = 0,
+		ParseLimits? limits = null)
 	{
 		ArgumentNullException.ThrowIfNull(file);
 
 		if (profileIndex < 0 || profileIndex >= file.Profiles.Count)
 			throw new ArgumentOutOfRangeException(nameof(profileIndex));
 
+		var effective = ResolveLimits(limits);
+		EnforceDocumentLimits(file, effective);
+
 		var profile = file.Profiles[profileIndex];
 		var frames = file.Shared.Frames;
 
 		return profile.Type switch
 		{
-			"evented" => BuildFromEventsWithWarnings(profile, frames),
-			"sampled" => (BuildFromSamples(profile, frames), Array.Empty<string>()),
+			"evented" => BuildFromEventsWithWarnings(profile, frames, effective),
+			"sampled" => (BuildFromSamples(profile, frames, effective), Array.Empty<string>()),
 			_ => throw new FormatException($"unsupported profile type '{profile.Type}'"),
 		};
 	}
 
-	private static (FlameNode root, IReadOnlyList<string> warnings) BuildFromEventsWithWarnings(Profile profile, List<Frame> frames)
+	private static (FlameNode root, IReadOnlyList<string> warnings) BuildFromEventsWithWarnings(
+		Profile profile,
+		List<Frame> frames,
+		ParseLimits limits)
 	{
 		var root = new FlameNode(profile.Name ?? "root");
 		var stack = new List<(FlameNode node, double openedAt)>();
@@ -45,6 +62,7 @@ public static partial class SpeedscopeParser
 
 			if (ev.Type == "O")
 			{
+				EnforceStackDepth(stack.Count + 1, limits);
 				var frame = FrameAt(frames, ev.Frame);
 				current = current.AddChild(frame.Name, frame.File, frame.Line);
 				stack.Add((current, ev.At));

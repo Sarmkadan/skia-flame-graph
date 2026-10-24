@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using SkiaFlameGraph.Core.Models;
 
@@ -57,20 +58,23 @@ public static partial class SpeedscopeParser
     /// Deserializes a JSON string into a <see cref="SpeedscopeFile"/> instance.
     /// </summary>
     /// <param name="json">The JSON document to deserialize.</param>
+    /// <param name="limits">Resource limits to enforce, or <c>null</c> to use <see cref="ParseLimits.Default"/>.</param>
     /// <returns>The deserialized <see cref="SpeedscopeFile"/>.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="json"/> is null.</exception>
     /// <exception cref="ArgumentException">Thrown when <paramref name="json"/> is an empty string.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when a limit in <paramref name="limits"/> is zero or negative.</exception>
     /// <exception cref="FormatException">Thrown when the document deserializes to null or contains no profiles.</exception>
-    public static SpeedscopeFile Deserialize(string json)
+    /// <exception cref="ParseLimitExceededException">Thrown when the document exceeds a <see cref="ParseLimits"/> limit.</exception>
+    public static SpeedscopeFile Deserialize(string json, ParseLimits? limits = null)
     {
         ArgumentNullException.ThrowIfNull(json);
         ArgumentException.ThrowIfNullOrEmpty(json);
 
-        var file = JsonSerializer.Deserialize<SpeedscopeFile>(json, Options)
-                   ?? throw new FormatException("speedscope document deserialized to null");
-        if (file.Profiles.Count == 0)
-            throw new FormatException("speedscope document contains no profiles");
-        return file;
+        var effective = ResolveLimits(limits);
+        EnforceByteLimit(Encoding.UTF8.GetByteCount(json), effective);
+
+        var file = JsonSerializer.Deserialize<SpeedscopeFile>(json, Options);
+        return CheckDocument(file, effective);
     }
 
     /// <summary>
@@ -78,29 +82,43 @@ public static partial class SpeedscopeParser
     /// </summary>
     /// <param name="path">The path to the speedscope JSON file.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+    /// <param name="limits">Resource limits to enforce, or <c>null</c> to use <see cref="ParseLimits.Default"/>.</param>
     /// <returns>The root <see cref="FlameNode"/> of the aggregated call tree.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="path"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when a limit in <paramref name="limits"/> is zero or negative.</exception>
     /// <exception cref="FormatException">Thrown when the document deserializes to null or contains no profiles.</exception>
-    public static FlameNode ParseFile(string path, CancellationToken cancellationToken = default)
-        => ParseFile(path, out _, cancellationToken, log: null);
+    /// <exception cref="ParseLimitExceededException">Thrown when the document exceeds a <see cref="ParseLimits"/> limit.</exception>
+    public static FlameNode ParseFile(string path, CancellationToken cancellationToken = default, ParseLimits? limits = null)
+        => ParseFile(path, out _, cancellationToken, log: null, limits: limits);
 
     /// <summary>
     /// Parses a speedscope file from disk, returning diagnostics for non-fatal anomalies.
     /// </summary>
+    /// <param name="path">The path to the speedscope JSON file.</param>
+    /// <param name="diagnostics">Receives the diagnostics collected while building the tree.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+    /// <param name="log">Optional sink for diagnostic messages.</param>
+    /// <param name="limits">Resource limits to enforce, or <c>null</c> to use <see cref="ParseLimits.Default"/>.</param>
+    /// <returns>The root <see cref="FlameNode"/> of the aggregated call tree.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="path"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when a limit in <paramref name="limits"/> is zero or negative.</exception>
+    /// <exception cref="FormatException">Thrown when the document deserializes to null or contains no profiles.</exception>
+    /// <exception cref="ParseLimitExceededException">Thrown when the file exceeds a <see cref="ParseLimits"/> limit.</exception>
     public static FlameNode ParseFile(
         string path,
         out ParseDiagnostics diagnostics,
         CancellationToken cancellationToken = default,
-        Action<string>? log = null)
+        Action<string>? log = null,
+        ParseLimits? limits = null)
     {
         ArgumentNullException.ThrowIfNull(path);
 
+        var effective = ResolveLimits(limits);
+        EnforceByteLimit(new FileInfo(path).Length, effective);
+
         using var stream = File.OpenRead(path);
-        var file = JsonSerializer.Deserialize<SpeedscopeFile>(stream, Options)
-                   ?? throw new FormatException("speedscope document deserialized to null");
-        if (file.Profiles.Count == 0)
-            throw new FormatException("speedscope document contains no profiles");
-        return BuildTree(file, out diagnostics, 0, cancellationToken, log);
+        var file = CheckDocument(JsonSerializer.Deserialize<SpeedscopeFile>(stream, Options), effective);
+        return BuildTree(file, out diagnostics, 0, cancellationToken, log, effective);
     }
 
     /// <summary>
@@ -110,25 +128,46 @@ public static partial class SpeedscopeParser
     /// <param name="file">The speedscope file containing the profiles.</param>
     /// <param name="profileIndex">The zero‑based index of the profile to aggregate.</param>
     /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+    /// <param name="limits">Resource limits to enforce, or <c>null</c> to use <see cref="ParseLimits.Default"/>.</param>
     /// <returns>The root <see cref="FlameNode"/> of the aggregated tree.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="file"/> is null.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="profileIndex"/> is outside the valid range.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="profileIndex"/> is outside the valid range, or a limit is zero or negative.</exception>
     /// <exception cref="FormatException">Thrown when the profile type is unsupported.</exception>
-    public static FlameNode BuildTree(SpeedscopeFile file, int profileIndex = 0, CancellationToken cancellationToken = default)
-        => BuildTree(file, out _, profileIndex, cancellationToken, log: null);
+    /// <exception cref="ParseLimitExceededException">Thrown when the document exceeds a <see cref="ParseLimits"/> limit.</exception>
+    public static FlameNode BuildTree(
+        SpeedscopeFile file,
+        int profileIndex = 0,
+        CancellationToken cancellationToken = default,
+        ParseLimits? limits = null)
+        => BuildTree(file, out _, profileIndex, cancellationToken, log: null, limits: limits);
 
     /// <summary>
     /// Aggregates one profile into a call tree and returns diagnostics for non-fatal anomalies.
     /// </summary>
+    /// <param name="file">The speedscope file containing the profiles.</param>
+    /// <param name="diagnostics">Receives the diagnostics collected while building the tree.</param>
+    /// <param name="profileIndex">The zero‑based index of the profile to aggregate.</param>
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete.</param>
+    /// <param name="log">Optional sink for diagnostic messages.</param>
+    /// <param name="limits">Resource limits to enforce, or <c>null</c> to use <see cref="ParseLimits.Default"/>.</param>
+    /// <returns>The root <see cref="FlameNode"/> of the aggregated tree.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="file"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="profileIndex"/> is outside the valid range, or a limit is zero or negative.</exception>
+    /// <exception cref="FormatException">Thrown when the profile type is unsupported.</exception>
+    /// <exception cref="ParseLimitExceededException">Thrown when the document exceeds a <see cref="ParseLimits"/> limit.</exception>
     public static FlameNode BuildTree(
         SpeedscopeFile file,
         out ParseDiagnostics diagnostics,
         int profileIndex = 0,
         CancellationToken cancellationToken = default,
-        Action<string>? log = null)
+        Action<string>? log = null,
+        ParseLimits? limits = null)
     {
         ArgumentNullException.ThrowIfNull(file);
         if (profileIndex < 0 || profileIndex >= file.Profiles.Count) throw new ArgumentException("profileIndex out of range");
+
+        var effective = ResolveLimits(limits);
+        EnforceDocumentLimits(file, effective);
 
         diagnostics = new ParseDiagnostics { ProfilesParsed = 1 };
         var profile = file.Profiles[profileIndex];
@@ -136,8 +175,8 @@ public static partial class SpeedscopeParser
 
         return profile.Type switch
         {
-            "evented" => BuildFromEvents(profile, frames, diagnostics, log),
-            "sampled" => BuildFromSamples(profile, frames, diagnostics, log),
+            "evented" => BuildFromEvents(profile, frames, diagnostics, log, effective),
+            "sampled" => BuildFromSamples(profile, frames, diagnostics, log, effective),
             _ => throw new FormatException($"unsupported profile type '{profile.Type}'"),
         };
     }
@@ -146,7 +185,8 @@ public static partial class SpeedscopeParser
         Profile profile,
         List<Frame> frames,
         ParseDiagnostics diagnostics,
-        Action<string>? log)
+        Action<string>? log,
+        ParseLimits limits)
     {
         var root = new FlameNode(profile.Name ?? "root");
         var stack = new List<(FlameNode node, double openedAt)>();
@@ -167,6 +207,7 @@ public static partial class SpeedscopeParser
 
             if (ev.Type == "O")
             {
+                EnforceStackDepth(stack.Count + 1, limits);
                 var frame = FrameAt(frames, ev.Frame, diagnostics, log);
                 current = current.AddChild(frame.Name, frame.File, frame.Line);
                 stack.Add((current, ev.At));
@@ -191,7 +232,8 @@ public static partial class SpeedscopeParser
         Profile profile,
         List<Frame> frames,
         ParseDiagnostics diagnostics,
-        Action<string>? log)
+        Action<string>? log,
+        ParseLimits limits)
     {
         var root = new FlameNode(profile.Name ?? "root");
         var samples = profile.Samples ?? new List<List<int>>();
@@ -200,6 +242,7 @@ public static partial class SpeedscopeParser
         for (var i = 0; i < samples.Count; i++)
         {
             var stack = samples[i];
+            EnforceStackDepth(stack.Count, limits);
             var weight = weights is not null && i < weights.Count ? weights[i] : 1.0;
 
             var node = root;
@@ -215,8 +258,8 @@ public static partial class SpeedscopeParser
         return root;
     }
 
-    private static FlameNode BuildFromSamples(Profile profile, List<Frame> frames)
-        => BuildFromSamples(profile, frames, new ParseDiagnostics(), log: null);
+    private static FlameNode BuildFromSamples(Profile profile, List<Frame> frames, ParseLimits limits)
+        => BuildFromSamples(profile, frames, new ParseDiagnostics(), log: null, limits);
 
     /// <summary>
     /// Adds <paramref name="value"/> to a node and every ancestor.
