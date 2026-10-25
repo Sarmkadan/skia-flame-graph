@@ -1,8 +1,8 @@
-namespace SkiaFlameGraph.Core;
-
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+
+namespace SkiaFlameGraph.Core;
 
 /// <summary>
 /// Provides default <see cref="JsonSerializerOptions"/> for the application.
