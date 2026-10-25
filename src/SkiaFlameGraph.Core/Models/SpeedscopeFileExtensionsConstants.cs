@@ -6,22 +6,26 @@ namespace SkiaFlameGraph.Core.Models;
 internal static class SpeedscopeFileExtensionsConstants
 {
     /// <summary>
-    /// Default name for unnamed profiles.
+    /// Fallback display name used for a speedscope profile that has no <c>name</c>.
+    /// Mirrors the literal used when profile names are listed from a speedscope file.
     /// </summary>
     public const string UnnamedProfileDefault = "Unnamed Profile";
 
     /// <summary>
-    /// Identifier for open event type in evented profiles.
+    /// Speedscope event type <c>"O"</c> marking a frame being opened (entered) at a given time
+    /// in an evented profile. Increases the stack depth by one.
     /// </summary>
     public const string OpenEventType = "O";
 
     /// <summary>
-    /// Identifier for close event type in evented profiles.
+    /// Speedscope event type <c>"C"</c> marking a frame being closed (exited) at a given time
+    /// in an evented profile. Decreases the stack depth by one.
     /// </summary>
     public const string CloseEventType = "C";
 
     /// <summary>
-    /// Increment value for each sample in sampled profiles.
+    /// Weight added for each sample in a sampled profile. Each sample counts as one unit,
+    /// so the sample count and the accumulated weight are equal.
     /// </summary>
     public const double SampleIncrement = 1.0;
 }
