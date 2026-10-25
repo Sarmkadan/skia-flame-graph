@@ -217,6 +217,50 @@ For more details on configuration, see the [RenderOptions](#renderoptions) secti
   tower of one-pixel slivers.
 - `RenderOptions.Inverted` flips the flame graph into an icicle (root on top).
 
+## TreemapRenderer
+
+`TreemapRenderer` draws the same call tree as a squarified treemap
+(Bruls, Huizing, van Wijk 2000). Each frame's children are packed into its
+rectangle with areas proportional to their time, so it is an alternative to the
+flame graph when you care more about aggregate cost than call ordering. It lives
+in `src/SkiaFlameGraph.Core/Rendering/TreemapRenderer.cs` and implements
+`ITreemapRenderer`.
+
+```csharp
+using SkiaFlameGraph.Core.Parsing;
+using SkiaFlameGraph.Core.Rendering;
+
+var root = SpeedscopeParser.ParseFile("app.speedscope.json");
+
+// Same RenderOptions as the flame graph; Width drives the default height
+var options = new RenderOptions { Width = 1920 };
+
+// Write straight to disk
+new TreemapRenderer(options).RenderToPng(root, "treemap.png");
+
+// Or get an SKImage to composite or re-encode yourself
+using var image = new TreemapRenderer(options).Render(root);
+
+// Or force a specific pixel height instead of the default
+using var tall = new TreemapRenderer(options).Render(root, height: 1200);
+```
+
+Rendering notes:
+
+- When no height is given, the image is 62% of `Width` tall.
+- Children are sorted largest-first before packing, so the biggest cost blocks
+  come first and are easiest to spot.
+- Leaves, and any node deeper than 12 levels, are filled as single cells instead
+  of being subdivided further.
+- Labels are clipped to their cell and skipped when the cell is too small to
+  show text.
+- Colours come from the same deterministic `FramePalette` as the flame graph, so
+  a function has the same colour in both views.
+- `RenderOptions.Padding`, `Background`, `TextColor` and `FontSize` apply as they
+  do for the flame graph. `Inverted` does not change the treemap layout.
+
+See [docs/TreemapRenderer.md](docs/TreemapRenderer.md) for the full member list.
+
 ## Native dependencies
 
 SkiaSharp needs its native library at runtime. The sample references
