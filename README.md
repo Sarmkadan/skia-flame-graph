@@ -511,7 +511,23 @@ Console.WriteLine(report.ToText(10));
 
 ## FlameNode
 
-Represents a node in the aggregated call tree used by both the flame graph and treemap renderers. Each node tracks a frame's name, source location, accumulated time across the subtree, and its position in the call hierarchy. The tree is built by recursively merging identical frames so recursive calls collapse into wider boxes rather than tall stacks.
+`FlameNode` is the format-independent call-tree node that the flame graph, treemap and differential renderers all draw from. The parsers (`SpeedscopeParser`, `ChromeTraceParser`, `CollapsedStacksParser`) build a tree of these under a synthetic root at `Depth == 0`.
+
+| Member | Meaning |
+|---|---|
+| `Name` | Frame name, set in the constructor and read-only. |
+| `File`, `Line` | Source location when the profiler recorded one; `null` otherwise. |
+| `Value` | Total weight of the subtree (self plus all descendants), in the profile's unit. |
+| `SelfValue` | Computed: `Value` minus the sum of the children's `Value`, clamped at 0. |
+| `Depth` | Distance from the synthetic root (root is 0). `AddChild` sets it to the parent's depth + 1. |
+| `Children` | Child frames, in insertion order. |
+| `Parent` | Parent node, or `null` for the root. |
+
+`AddChild(name, file, line)` returns an existing child with the same name, file and line if there is one, so recursive calls collapse into a single wider box instead of a stack of slivers. Otherwise it creates the child, sets its `Depth` and `Parent`, and adds it. `AddChild` does not touch `Value`; the caller assigns weights.
+
+`MaxDepth()` returns the number of levels below a node (0 for a leaf). It is relative to the node, so it does not depend on `Depth`.
+
+Two nodes are equal when `Name`, `File`, `Line`, `Value`, `Depth` and `Parent` all match. `Children` are not compared.
 
 Example usage when constructing a call tree programmatically:
 
@@ -519,45 +535,30 @@ Example usage when constructing a call tree programmatically:
 using SkiaFlameGraph.Core.Models;
 
 // Create a root node for the main thread
-var root = new FlameNode("Main")
-{
-    File = "Program.cs",
-    Line = 10,
-    Value = 1000.0,
-    Depth = 0
-};
+var root = new FlameNode("Main") { File = "Program.cs", Line = 10, Value = 1000.0 };
 
-// Add child frames with timing information
-var processRequest = root.AddChild("ProcessRequest", "ApiController.cs", 45)
-{
-    Value = 800.0
-};
+// Add child frames, then assign their weights
+var processRequest = root.AddChild("ProcessRequest", "ApiController.cs", 45);
+processRequest.Value = 800.0;
 
-var dbQuery = processRequest.AddChild("QueryDatabase", "UserRepository.cs", 120)
-{
-    Value = 600.0
-};
+var dbQuery = processRequest.AddChild("QueryDatabase", "UserRepository.cs", 120);
+dbQuery.Value = 600.0;
 
-var renderView = processRequest.AddChild("RenderView", "HomeController.cs", 50)
-{
-    Value = 200.0
-};
+var renderView = processRequest.AddChild("RenderView", "HomeController.cs", 50);
+renderView.Value = 200.0;
 
 // Add another branch
-var apiCall = root.AddChild("ExternalApiCall", "HttpClient.cs", 200)
-{
-    Value = 150.0
-};
+var apiCall = root.AddChild("ExternalApiCall", "HttpClient.cs", 200);
+apiCall.Value = 150.0;
 
 // Calculate metrics
 Console.WriteLine($"Total tree depth: {root.MaxDepth()}");
-Console.WriteLine($"Node count: {root.Children.Count + 1}");
 Console.WriteLine($"Self value of ProcessRequest: {processRequest.SelfValue:F2}");
 
-// Traverse the tree
+// Traverse the direct children
 foreach (var child in root.Children)
 {
-    Console.WriteLine($"Frame: {child.Name}, Value: {child.Value:F2}ms, Depth: {child.Depth}");
+    Console.WriteLine($"Frame: {child.Name}, Value: {child.Value:F2}, Depth: {child.Depth}");
 }
 ```
 
