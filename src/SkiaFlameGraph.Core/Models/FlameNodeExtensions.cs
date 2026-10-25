@@ -36,12 +36,12 @@ public static class FlameNodeExtensions
     public static IEnumerable<FlameNode> GetNodesAtDepth(this FlameNode node, int depth)
     {
         ArgumentNullException.ThrowIfNull(node);
-        if (depth < 0)
+        if (depth < FlameNodeExtensionsConstants.ZeroDepth)
         {
-            throw new ArgumentOutOfRangeException(nameof(depth), "Depth cannot be negative.");
+            throw new ArgumentOutOfRangeException(nameof(depth), FlameNodeExtensionsConstants.DepthCannotBeNegativeMessage);
         }
 
-        return depth == 0
+        return depth == FlameNodeExtensionsConstants.ZeroDepth
             ? node.Children
             : node.Children.SelectMany(child => GetNodesAtDepth(child, depth - 1));
     }
@@ -59,7 +59,7 @@ public static class FlameNodeExtensions
         ArgumentNullException.ThrowIfNull(node);
         ArgumentNullException.ThrowIfNull(predicate);
 
-        var sum = predicate(node) ? node.Value : 0.0;
+        var sum = predicate(node) ? node.Value : FlameNodeExtensionsConstants.ZeroValue;
         return sum + node.Children.Sum(child => SumValuesWhere(child, predicate));
     }
 
@@ -73,7 +73,7 @@ public static class FlameNodeExtensions
     {
         ArgumentNullException.ThrowIfNull(node);
 
-        if (node.Children.Count == 0)
+        if (node.Children.Count == FlameNodeExtensionsConstants.ZeroCount)
         {
             yield return node;
         }
@@ -105,10 +105,10 @@ public static class FlameNodeExtensions
         var total = totalRoot.Value;
         if (Math.Abs(total) < double.Epsilon)
         {
-            throw new ArgumentException("Total root has zero value, cannot calculate percentage.", nameof(totalRoot));
+            throw new ArgumentException(FlameNodeExtensionsConstants.TotalRootZeroValueMessage, nameof(totalRoot));
         }
 
-        return (node.Value / total) * 100.0;
+        return (node.Value / total) * FlameNodeExtensionsConstants.PercentageMultiplier;
     }
 
     /// <summary>
