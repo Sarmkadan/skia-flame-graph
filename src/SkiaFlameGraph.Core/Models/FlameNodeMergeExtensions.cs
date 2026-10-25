@@ -44,7 +44,8 @@ public static class FlameNodeMergeExtensions
 
         foreach (var bChild in b.Children)
         {
-            if (bChildrenByName.ContainsKey(bChild.Name) && a.Children.Any(c => c.Name == bChild.Name))
+            if (bChildrenByName.ContainsKey(bChild.Name) &&
+                a.Children.Any(c => c.Name == bChild.Name))
             {
                 continue;
             }
@@ -97,7 +98,8 @@ public static class FlameNodeMergeExtensions
 
         foreach (var baselineChild in baseline.Children)
         {
-            if (baselineChildrenByName.ContainsKey(baselineChild.Name) && current.Children.Any(c => c.Name == baselineChild.Name))
+            if (baselineChildrenByName.ContainsKey(baselineChild.Name) &&
+                current.Children.Any(c => c.Name == baselineChild.Name))
             {
                 continue;
             }
