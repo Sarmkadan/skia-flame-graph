@@ -591,6 +591,55 @@ The `Percent` of each `HotFunction` is calculated against the report's `TotalSel
 > `InvalidOperationException`. `TryFromJson()` only catches `JsonException`, so it throws too instead of
 > returning `false`. Use `ToJson()` for export only until this is fixed.
 
+## Collapsed Stacks Exporter
+
+`CollapsedStacksExporter` writes a `FlameNode` tree back out in the [collapsed stacks](#input-format-collapsed-stacks) format, so a tree built from a speedscope or Chrome trace can be saved as text for other tools. Each node with a positive `SelfValue` produces one line: its ancestor names joined with `;`, then a space and the self value formatted with the invariant culture. Nodes with a zero or negative self value produce no line, so their time shows up only through their descendants.
+
+| Member | Meaning |
+|--------|---------|
+| `static void ExportToWriter(FlameNode root, TextWriter writer)` | Writes every stack line to `writer`. |
+| `static void ExportToFile(FlameNode root, string path)` | Writes UTF-8 text to `path`, overwriting any existing file. |
+| `void ExportToFile(FlameNode root, string filePath, string baseDirectory)` | Instance overload. Resolves `filePath` against `baseDirectory`, creates the directory if needed, and throws `ArgumentException` if the resolved path escapes `baseDirectory`. |
+| `void Export(FlameNode root, TextWriter writer)` | Instance wrapper around `ExportToWriter`. |
+| `string ExportToString(FlameNode root)` | Instance method that returns the collapsed stacks text. |
+
+Frame names are sanitized so each line stays parseable: `;`, `\n`, `\r` and space are replaced with `_`. Values are written as plain numbers, so `2.5` stays `2.5`.
+
+Example usage:
+
+```csharp
+using SkiaFlameGraph.Core.Parsing;
+using SkiaFlameGraph.Core.Rendering;
+
+var root = CollapsedStacksParser.ParseFile("stacks.txt");
+
+// Write the tree to a file, overwriting it if it exists
+CollapsedStacksExporter.ExportToFile(root, "stacks.out.txt");
+
+// Or get the text in memory
+string text = new CollapsedStacksExporter().ExportToString(root);
+```
+
+Given this input:
+
+```text
+main;ProcessRequest;ParseJson 42
+main;Startup;My Func 2.5
+```
+
+the exporter writes:
+
+```text
+root;main;ProcessRequest;ParseJson 42
+root;main;Startup;My_Func 2.5
+```
+
+> **Note:** The export is not a lossless round trip yet. The parsers put every stack under a synthetic
+> node named `root`, and the exporter writes that node as the first frame. Each line therefore starts with
+> `root;`, and parsing the output again adds another `root;` to every stack. Names containing spaces also
+> come back with underscores. Remove the leading `root;` from each line if the output must match the
+> original frames.
+
 ## FlameNode
 
 `FlameNode` is the format-independent call-tree node that the flame graph, treemap and differential renderers all draw from. The parsers (`SpeedscopeParser`, `ChromeTraceParser`, `CollapsedStacksParser`) build a tree of these under a synthetic root at `Depth == 0`.
