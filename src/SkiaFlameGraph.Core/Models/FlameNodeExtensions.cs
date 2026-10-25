@@ -3,7 +3,7 @@ namespace SkiaFlameGraph.Core.Models;
 /// <summary>
 /// Extension methods for <see cref="FlameNode"/> that provide common operations on the call tree.
 /// </summary>
-public static class FlameNodeExtensions
+public static partial class FlameNodeExtensions
 {
     /// <summary>
     /// Finds the first descendant with the specified name (case-sensitive).

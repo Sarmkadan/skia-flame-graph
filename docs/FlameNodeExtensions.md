@@ -145,6 +145,22 @@ Returns the node in the subtree with the greatest `Depth`. When several nodes sh
 string deepest = root.GetDeepestNode().Name;  // io
 ```
 
+### MaxSelfValue
+
+```csharp
+public static double MaxSelfValue(this FlameNode node)
+```
+
+Returns the largest `SelfValue` among `node` and all of its descendants. A node with no children returns its own `SelfValue`.
+
+**Throws:** `ArgumentNullException` if `node` is `null`.
+
+**Example:**
+
+```csharp
+double hottest = root.MaxSelfValue();  // weight of the single most expensive frame
+```
+
 ### GetCumulativeValueToRoot
 
 ```csharp
