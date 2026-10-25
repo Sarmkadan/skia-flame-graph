@@ -273,6 +273,35 @@ public static class RenderOptionsExtensions
     }
 
     /// <summary>
+    /// Creates a new <see cref="RenderOptions"/> instance with the specified font family, copying all other properties from the original.
+    /// </summary>
+    /// <param name="options">The original render options.</param>
+    /// <param name="fontFamily">The new font family name. Pass <see langword="null"/> to use the default system font.</param>
+    /// <returns>A new <see cref="RenderOptions"/> instance with the updated font family.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
+    public static RenderOptions WithFontFamily(this RenderOptions options, string? fontFamily)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+
+        return new RenderOptions
+        {
+            Width = options.Width,
+            RowHeight = options.RowHeight,
+            MinLabelWidth = options.MinLabelWidth,
+            MinBoxWidth = options.MinBoxWidth,
+            MinSubtreeWidthPx = options.MinSubtreeWidthPx,
+            Padding = options.Padding,
+            FontSize = options.FontSize,
+            FontFile = options.FontFile,
+            Background = options.Background,
+            TextColor = options.TextColor,
+            Inverted = options.Inverted,
+            HighlightPattern = options.HighlightPattern,
+            FontFamily = fontFamily
+        };
+    }
+
+    /// <summary>
     /// Creates a new <see cref="RenderOptions"/> instance with the specified background color, copying all other properties from the original.
     /// </summary>
     /// <param name="options">The original render options.</param>
