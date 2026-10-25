@@ -533,9 +533,22 @@ float[] padding2D = options.GetPadding();
 float[] padding4D = options.GetPaddingAllSides();
 ```
 
-## HotFunctionsReport
+## Hot Functions Report
 
-Aggregates FlameNode self-time by frame name across the tree and produces a top-N list of the hottest functions. Call `ToText()` to get a formatted text report showing self-time, total time, and percentage for each function.
+`HotFunctionsReport` aggregates FlameNode self-time by frame identity (name, file and line) across the whole tree and produces a list of the hottest functions sorted by self-time, descending. `ToText()` renders that list as a table with self-time, total time and percentage of total self-time for each function.
+
+`HotFunctionsReportExtensions` adds JSON helpers for any `IHotFunctionsReport`: `ToJson()` serializes the report, and `FromJson()` / `TryFromJson()` are the matching readers.
+
+| Member | Meaning |
+|--------|---------|
+| `HotFunctionsReport(FlameNode root)` | Builds the report by walking `root` and summing `SelfValue` (self) and `Value` (total) per function. Throws `ArgumentNullException` for a null root. |
+| `Functions` | `IReadOnlyList<HotFunction>` sorted by `Self`, descending. |
+| `TotalSelfTime` | Sum of self-time across all functions. |
+| `ToText(int topN = 10)` | Text table of the top N functions plus a total line. A non-positive `topN` lists every function. |
+| `HotFunction` | Nested entry with `Name`, `File`, `Line`, `Self`, `Total` and `Percent`. |
+| `ToJson(bool indented = false)` | Serializes the report's `Functions` and `TotalSelfTime` as camelCase JSON. |
+| `FromJson(string json)` | Intended to deserialize a report; returns `null` for empty or whitespace input. See the note below. |
+| `TryFromJson(string json, out IHotFunctionsReport? report)` | Intended to return `false` on invalid JSON; see the note below. |
 
 Example usage:
 
@@ -551,7 +564,32 @@ var report = new HotFunctionsReport(root);
 
 // Output the top 10 functions by self-time
 Console.WriteLine(report.ToText(10));
+
+// Output every function, then serialize the report as indented JSON
+Console.WriteLine(report.ToText(0));
+string json = report.ToJson(indented: true);
 ```
+
+Sample `ToText(2)` output:
+
+```
+Hot Functions Report
+===================
+
+#   Name                          Self      Total     %
+--  ----------------------------- --------- --------- --------
+ 1  a                                 6.00      6.00  60.00%
+ 2  root                              4.00     10.00  40.00%
+
+Total: 10.00 units across 2 functions
+```
+
+The `Percent` of each `HotFunction` is calculated against the report's `TotalSelfTime`.
+
+> **Note:** `FromJson()` and `TryFromJson()` do not currently round-trip. `HotFunctionsReport` has no
+> parameterless or JSON-bindable constructor, so deserializing even valid JSON throws
+> `InvalidOperationException`. `TryFromJson()` only catches `JsonException`, so it throws too instead of
+> returning `false`. Use `ToJson()` for export only until this is fixed.
 
 ## FlameNode
 
