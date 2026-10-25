@@ -26,8 +26,8 @@ public sealed class SpeedscopeFileBuilder
     /// Creates a builder initialized from an existing <see cref="SpeedscopeFile"/>.
     /// </summary>
     /// <param name="template">The template to copy values from.</param>
-    /// <exception cref="ArgumentNullException">If <paramref name="template"/> is <see langword="null"/>.</exception>
     /// <returns>A builder initialized with the template's values.</returns>
+    /// <exception cref="ArgumentNullException">If <paramref name="template"/> is <see langword="null"/>.</exception>
     public static SpeedscopeFileBuilder From(SpeedscopeFile template)
     {
         ArgumentNullException.ThrowIfNull(template);
