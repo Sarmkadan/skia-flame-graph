@@ -131,7 +131,10 @@ public class FlameGraphSvgExporter
         var rectWidth = nodeWidth;
         var rectHeight = rowHeight;
 
-        sb.AppendLine($"  <rect x=\"{rectX:F1}\" y=\"{rectY:F1}\" width=\"{rectWidth:F1}\" height=\"{rectHeight:F1}\" fill=\"#{color.Red:X2}{color.Green:X2}{color.Blue:X2}\" class=\"frame\" data-name=\"{EscapeXml(node.Name)}\" data-value=\"{node.Value}\"/>");
+        sb.AppendLine(
+            $"  <rect x=\"{rectX:F1}\" y=\"{rectY:F1}\" width=\"{rectWidth:F1}\" height=\"{rectHeight:F1}\" " +
+            $"fill=\"#{color.Red:X2}{color.Green:X2}{color.Blue:X2}\" class=\"frame\" " +
+            $"data-name=\"{EscapeXml(node.Name)}\" data-value=\"{node.Value}\"/>");
 
         // Draw label if there's enough space
         if (nodeWidth > LabelMinWidthForDisplay && rowHeight > LabelMinHeightForDisplay)
@@ -140,7 +143,7 @@ public class FlameGraphSvgExporter
             var labelY = rectY + (rowHeight / 2) + LabelPadding;
             var labelText = TruncateLabel(node.Name, (int)(nodeWidth - LabelTruncationOffset));
 
-            sb.AppendLine($"  <text x=\"{labelX:F1}\" y=\"{labelY:F1}\" class=\"frame-label\">" + EscapeXml(labelText) + "</text>");
+            sb.AppendLine($"  <text x=\"{labelX:F1}\" y=\"{labelY:F1}\" class=\"frame-label\">{EscapeXml(labelText)}</text>");
         }
 
         // Recursively draw children
